@@ -4,9 +4,9 @@ from robosuite.models.robots.manipulators.manipulator_model import ManipulatorMo
 from robosuite.utils.mjcf_utils import xml_path_completion
 
 
-class BDArm(ManipulatorModel):
+class Arx5(ManipulatorModel):
     """
-    Spot Arm is a single-arm robot for mouting on the spot robot.
+    Arx5 is a single-arm robot, typically for customizable mounting on quadruped.
 
     Args:
         idn (int or str): Number or some other unique identification string for this robot instance
@@ -15,7 +15,7 @@ class BDArm(ManipulatorModel):
     arms = ["right"]
 
     def __init__(self, idn=0):
-        super().__init__(xml_path_completion("robots/bd_arm/robot.xml"), idn=idn)
+        super().__init__(xml_path_completion("robots/arx5/robot.xml"), idn=idn)
 
         # Set joint damping
         self.set_joint_attribute(attrib="damping", values=np.array((0.1, 0.1, 0.1, 0.1, 0.1, 0.01)))
@@ -26,7 +26,7 @@ class BDArm(ManipulatorModel):
 
     @property
     def default_gripper(self):
-        return {"right": "BDGripper"}
+        return {"right": "UMIGripper"}
 
     @property
     def default_controller_config(self):
@@ -34,7 +34,7 @@ class BDArm(ManipulatorModel):
 
     @property
     def init_qpos(self):
-        return np.array([0.0, -1.2, 1.85, 0.0, 0.862, 0.0])
+        return np.array([0.0, 0.3, 0.7, -0.67, 0.0, 0.12])
 
     @property
     def base_xpos_offset(self):

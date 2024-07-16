@@ -4,15 +4,15 @@ from robosuite.models.grippers.gripper_model import GripperModel
 from robosuite.utils.mjcf_utils import xml_path_completion
 
 
-class BDGripper(GripperModel):
+class UMIGripper(GripperModel):
     """
-    Gripper for the Spot Arm.
+    UMIGripper for the Arx5 arm
     Args:
         idn (int or str): Number or some other unique identification string for this gripper instance
     """
 
     def __init__(self, idn=0):
-        super().__init__(xml_path_completion("grippers/bd_gripper.xml"), idn=idn)
+        super().__init__(xml_path_completion("grippers/umi_gripper.xml"), idn=idn)
 
     def format_action(self, action):
         assert len(action) == self.dof
@@ -29,4 +29,7 @@ class BDGripper(GripperModel):
 
     @property
     def _important_geoms(self):
-        return {"arm_link_fngr": ["arm_link_fngr_0", "arm_link_fngr_1", "left_finger_coll", "right_finger_coll"]}
+        return {
+            "rightfinger": ["right_finger_collision", "right_finger_visual"],
+            "leftfinger": ["left_finger_visual", "left_finger_collision"],
+        }
