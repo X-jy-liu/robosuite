@@ -65,7 +65,7 @@ for _ in range(1000):
     
     # 终止条件
     if np.linalg.norm(error) < 0.01:
-        print(f"Success! Reached position {target_pos} from {initial_pos}")
+        print(f"Success! Reached position {target_pos}")
         time.sleep(2)
         break
 env.close()
