@@ -5,10 +5,9 @@ from robosuite import make
 from robosuite.controllers import controller_factory, load_part_controller_config
 
 # 步骤1：加载OSC_POSE控制器配置
-osc_config = load_part_controller_config(
-    custom_fpath="/home/jingyang/robosuite/robosuite/controllers/config/default/parts/osc_pose.json",
-    default_controller="OSC_POSE"
-)
+# osc_config = load_part_controller_config(
+#     default_controller="OSC_POSE"
+# )
 
 # 步骤2：创建控制器实例
 controller = {'type': 'BASIC', 

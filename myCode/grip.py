@@ -3,12 +3,6 @@ import time
 from robosuite import make
 from robosuite.controllers import controller_factory, load_part_controller_config
 
-# Load OSC_POSE controller configuration
-osc_config = load_part_controller_config(
-    custom_fpath="/home/jingyang/robosuite/robosuite/controllers/config/default/parts/osc_pose.json",
-    default_controller="OSC_POSE"
-)
-
 # Define controller
 controller = {
     'type': 'BASIC',
@@ -77,7 +71,7 @@ def grip(state):
 obs = env.reset()
 initial_ee_pos = obs.get("robot0_eef_pos", None)
 cube_pos = obs.get("cube_pos", None)  # Extract cube position
-
+print(f'Cube Pos: {cube_pos}')
 if cube_pos is None:
     raise ValueError("Cube position not found in observation!")
 
@@ -117,6 +111,6 @@ time.sleep(1)
 # Initialize the gripper
 move_ee(hover_target_drop_pos)
 move_ee(initial_ee_pos)
-
+time.sleep(3)
 # Close environment
 env.close()
