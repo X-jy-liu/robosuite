@@ -1,11 +1,11 @@
+import os
+import cv2  # Optional, you can also use plt.imsave()
 import robosuite as suite
 from robosuite import load_part_controller_config
 from robosuite.controllers.composite import REGISTERED_COMPOSITE_CONTROLLERS_DICT
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-# print(REGISTERED_COMPOSITE_CONTROLLERS_DICT)
 
 osc_config = {
     'type': 'BASIC',
@@ -32,6 +32,8 @@ osc_config = {
     }
 }
 
+# Directory to save images
+os.makedirs("randomized_images", exist_ok=True)
 
 def randomize_cube(env):
     # Random color
@@ -68,46 +70,35 @@ def randomize_cube(env):
 
     env.sim.forward()
 
-
-# Create the environment with a specific camera
 env = suite.make(
     "Lift",  # Choose your task
     robots="Panda",  # Choose your robot
     controller_configs=osc_config,
     use_camera_obs=True,  # Enable camera observations
     camera_names="birdview",  # Use the top-down camera
-    camera_heights=224,  # Image resolution
-    camera_widths=224,
+    camera_heights=512,  # Image resolution
+    camera_widths=512,
     camera_depths=False,  # No depth, just RGB
 )
 
-# Reset environment
-obs = env.reset()
+num_samples = 5  # Number of randomizations/images you want to generate
 
-cube_geom_id = env.sim.model.geom_name2id("cube_g0")
+for i in range(num_samples):
+    obs = env.reset()
+    randomize_cube(env)  # Apply randomization
 
-# Check original size
-original_size = env.sim.model.geom_size[cube_geom_id].copy()
-print("Original Cube Size:", original_size)
+    # Directly get the updated observation with the camera image
+    obs = env._get_observations()  # No need for env.sim.render()
 
-randomize_cube(env)  # 🔥 Randomize cube properties after reset
+    # Get the top-down camera image (uint8 RGB)
+    topdown_img = obs["birdview_image"]
 
-# Check new size
-new_size = env.sim.model.geom_size[cube_geom_id]
-print("New Cube Size:", new_size)
+    # Optional: convert to float [0,1] or save directly
+    img_float = topdown_img / 255.0
 
-# Compare
-if np.allclose(original_size, new_size):
-    print("Cube size did NOT change.")
-else:
-    print("Cube size changed successfully!")
+    # Save using matplotlib (keeps RGB)
+    plt.imsave(f"randomized_images/random_cube_{i}.png", img_float)
 
+    print(f"Saved randomized image {i}!")
 
-
-# Get the top-down view image
-topdown_img = obs["birdview_image"]
-topdown_img = topdown_img / 255.0
-plt.imshow(topdown_img)
-plt.axis("off")
-plt.show()
-
+print("All images saved.")
