@@ -1,11 +1,15 @@
 import os
 import cv2  # Optional, you can also use plt.imsave()
 import robosuite as suite
-from robosuite import load_part_controller_config
-from robosuite.controllers.composite import REGISTERED_COMPOSITE_CONTROLLERS_DICT
-
+from robosuite import load_composite_controller_config
+from robosuite.models.objects.primitive.box import BoxObject
+from robosuite.models.objects.primitive.cylinder import CylinderObject
+from robosuite.utils.mjcf_utils import add_to_dict
+from robosuite.environments.manipulation.lift import Lift
 import matplotlib.pyplot as plt
 import numpy as np
+
+# osc_config = load_composite_controller_config(controller='BASIC')
 
 osc_config = {
     'type': 'BASIC',
@@ -35,70 +39,77 @@ osc_config = {
 # Directory to save images
 os.makedirs("randomized_images", exist_ok=True)
 
-def randomize_cube(env):
-    # Random color
-    random_color = np.concatenate([np.random.rand(3), [1.0]])
-    for name in ["cube_g0", "cube_g0_vis"]:
-        geom_id = env.sim.model.geom_name2id(name)
-        env.sim.model.geom_rgba[geom_id] = random_color
+# Object pool settings
+SHAPES = ["cube", "cylinder"]
+COLORS = {
+    "red": [1, 0, 0, 1],
+    "green": [0, 1, 0, 1],
+    "blue": [0, 0, 1, 1]
+}
 
-    # Random size (shape)
-    random_size = np.random.uniform(low=0.02, high=0.05, size=3)
-    for name in ["cube_g0", "cube_g0_vis"]:
-        geom_id = env.sim.model.geom_name2id(name)
-        env.sim.model.geom_size[geom_id] =   random_size
+# Custom environment with 5 randomized objects
+class MultiObjectLift(Lift):
+    def _load_model(self):
+        super()._load_model()
+        table_z = self.table_offset[2]
+        self.robots[0].robot_model.set_base_xpos([-2, 0, 0])
+        
+        # Create and add 5 randomized objects
+        for i in range(5):
+            shape = np.random.choice(SHAPES)
+            color_name = np.random.choice(list(COLORS.keys()))
+            color_rgba = COLORS[color_name]
 
-    # Random position for the cube_main body
-    cube_body_id = env.sim.model.body_name2id("cube_main")
-    random_pos = np.array([
-        np.random.uniform(-0.5, 0.5),   # x range (adjust based on your workspace)
-        np.random.uniform(-0.5, 0.5),   # y range
-        np.random.uniform(0.8, 1.0)     # z range (above the table)
-    ])
-    env.sim.model.body_pos[cube_body_id] = random_pos
+            # Choose shape
+            if shape == "cube":
+                obj = BoxObject(
+                    name=f"obj{i}",
+                    size=[0.025, 0.025, 0.025],
+                    rgba=color_rgba,
+                    material=None,
+                    obj_type="all"
+                )
+            else:
+                obj = CylinderObject(
+                    name=f"obj{i}",
+                    size=[0.025, 0.025],  # (radius, height)
+                    rgba=color_rgba,
+                    material=None,
+                    obj_type="all"
+                )
 
-    # Random orientation as a normalized quaternion
-    random_quat = np.random.randn(4)  # Sample random quaternion
-    random_quat /= np.linalg.norm(random_quat)  # Normalize it to unit quaternion
-    env.sim.model.body_quat[cube_body_id] = random_quat
+            # Random position in X-Y plane
+            pos_xy = np.random.uniform(low=-0.35, high=0.35, size=2)
+            pos = [pos_xy[0], pos_xy[1], table_z + 0.02]  # 0.02 = object half-height
 
-    env.sim.forward()  # Apply the changes to the simulation
+            obj.get_obj().set("pos", f"{pos[0]} {pos[1]} {pos[2]}")
 
-    # # Optional: Random mass
-    # cube_body_id = env.sim.model.body_name2id("cube")
-    # env.sim.model.body_mass[cube_body_id] = np.random.uniform(0.1, 1.0)
+            # Add to the model
+            self.model.merge_objects([obj])
+            add_to_dict(self.model.worldbody, "body", obj.get_obj())
 
-    env.sim.forward()
-
-env = suite.make(
-    "Lift",  # Choose your task
-    robots="Panda",  # Choose your robot
-    controller_configs=osc_config,
-    use_camera_obs=True,  # Enable camera observations
-    camera_names="birdview",  # Use the top-down camera
-    camera_heights=512,  # Image resolution
-    camera_widths=512,
-    camera_depths=False,  # No depth, just RGB
-)
-
-num_samples = 5  # Number of randomizations/images you want to generate
+# Image generation loop
+num_samples = 5
 
 for i in range(num_samples):
-    obs = env.reset()
-    randomize_cube(env)  # Apply randomization
+    env = MultiObjectLift(
+        robots="Panda",
+        controller_configs=osc_config,
+        has_renderer=True,
+        camera_names="birdview",
+        camera_heights=512,
+        camera_widths=512,
+        camera_depths=False
+    )
 
-    # Directly get the updated observation with the camera image
-    obs = env._get_observations()  # No need for env.sim.render()
+    # obs = env.reset()
 
-    # Get the top-down camera image (uint8 RGB)
-    topdown_img = obs["birdview_image"]
+    # # Save top-down image
+    # image = obs["birdview_image"]
+    image = env.sim.render(camera_name="birdview", width=512, height=512)
+    plt.imsave(f"randomized_images/scene_{i+1}.png", image)
 
-    # Optional: convert to float [0,1] or save directly
-    img_float = topdown_img / 255.0
+    print(f"Saved scene {i+1}!")
 
-    # Save using matplotlib (keeps RGB)
-    plt.imsave(f"randomized_images/random_cube_{i}.png", img_float)
+print("All randomized object scenes saved.")
 
-    print(f"Saved randomized image {i}!")
-
-print("All images saved.")
