@@ -101,11 +101,16 @@ for i in range(num_samples):
         camera_widths=512,
         camera_depths=False
     )
+    # reset the environment
+    env.reset()
+    env.sim.forward()
+    # TODO: remove the body with body_names == cube_main out of the table by changing its position
+    for body_name in env.sim.model.body_names:
+        if "cube_main" in body_name:
+            qpos_addr = env.sim.model.get_joint_qpos_addr("cube_joint0")
+            env.sim.data.qpos[qpos_addr[0]:qpos_addr[0]+7] = np.array([5.0, 5.0, 0.0, 1, 0, 0, 0])  # pos + unit quaternion
+            env.sim.forward()
 
-    # obs = env.reset()
-
-    # # Save top-down image
-    # image = obs["birdview_image"]
     image = env.sim.render(camera_name="birdview", width=512, height=512)
     plt.imsave(f"randomized_images/scene_{i+1}.png", image)
 

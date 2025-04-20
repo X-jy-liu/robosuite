@@ -96,6 +96,8 @@ cube2_pos = obs.get("cube2_pos", None)  # Extract second cube position
 print(f'Second Cube Pos: {cube2_pos}')
 cube2_pos = env.sim.data.body_xpos[env.sim.model.body_name2id("cube2_main")]
 print(f'Second Cube Pos: {cube2_pos}')
+ini_cube_pos = env.sim.data.body_xpos[env.sim.model.body_name2id("cube_main")]
+print(f"initial cube position: {ini_cube_pos}")
 
 for _ in range(100):  # Run for 1000 steps
     action = np.zeros(env.action_dim)  # Constant action to keep the robot still
