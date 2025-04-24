@@ -104,7 +104,7 @@ symbolic_plan_1 = [
     ('move', 'red_cube', 'contact'),
     ('gripper_close',),
     ('lift', 'red_cube', 'above'),
-    ('move', 'blue_block', 'above'),
+    ('move', 'blue_cube', 'above'),
     ('gripper_open',)
 ]
 
@@ -119,7 +119,7 @@ symbolic_plan_2 = [
 ]
 
 executor = SkillExecutor(env)
-executor.execute_plan(symbolic_plan_2)
+executor.execute_plan(symbolic_plan_1)
 executor.reset_gripper()
 
 
