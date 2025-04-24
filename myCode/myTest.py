@@ -1,7 +1,11 @@
 from vanilla_text2action import parse_instruction
 from robosuite import make
 from robosuite.controllers import load_composite_controller_config
-
+from robosuite.environments.manipulation.lift import Lift
+from robosuite.models.objects import BoxObject
+from robosuite.utils.mjcf_utils import add_to_dict
+from SkillExcutor import SkillExecutor
+import numpy as np
 
 # Define controller
 controller = {
@@ -29,7 +33,7 @@ controller = {
     }
 }
 
-controller = load_composite_controller_config(controller="BASIC")
+# controller = load_composite_controller_config(controller="BASIC")
 
 # env = make(
 #     env_name="Lift",
@@ -52,11 +56,6 @@ controller = load_composite_controller_config(controller="BASIC")
 # site_ori = env.sim.data.site_xmat[site_id].reshape(3, 3)
 # print("Cube site orientation:", site_ori)
 
-from robosuite.environments.manipulation.lift import Lift
-from robosuite.models.objects import BoxObject
-from robosuite.utils.mjcf_utils import add_to_dict
-import numpy as np
-
 class DualCubeLift(Lift):
     def _load_model(self):
         # Load the base model (includes one cube)
@@ -66,10 +65,10 @@ class DualCubeLift(Lift):
         second_cube = BoxObject(
             name="cube2",
             size=[0.02, 0.02, 0.02],
-            rgba=[0, 1, 0, 1],  # green cube
+            rgba=[0, 0, 1, 1],  # green cube in RGBA format
         )
         # set the position of the second cube
-        second_cube.get_obj().set("pos", "0.35 0.35 0.8")
+        second_cube.get_obj().set("pos", "0.2 -0.2 0.8")
 
         # Merge the new object into the simulation model
         self.model.merge_objects([second_cube])
@@ -99,8 +98,33 @@ print(f'Second Cube Pos: {cube2_pos}')
 ini_cube_pos = env.sim.data.body_xpos[env.sim.model.body_name2id("cube_main")]
 print(f"initial cube position: {ini_cube_pos}")
 
-for _ in range(100):  # Run for 1000 steps
-    action = np.zeros(env.action_dim)  # Constant action to keep the robot still
-    obs, reward, done, info = env.step(action)
-    env.render()  # This shows the visual output
+symbolic_plan_1 = [
+    ('move', 'red_cube', 'above'),
+    ('gripper_open',),
+    ('move', 'red_cube', 'contact'),
+    ('gripper_close',),
+    ('lift', 'red_cube', 'above'),
+    ('move', 'blue_block', 'above'),
+    ('gripper_open',)
+]
+
+symbolic_plan_2 = [
+    ('move', 'blue_cube', 'above'),
+    ('gripper_open',),
+    ('move', 'blue_cube', 'contact'),
+    ('gripper_close',),
+    ('lift', 'blue_cube', 'above'),
+    ('move', 'red_cube', 'above'),
+    ('gripper_open',)
+]
+
+executor = SkillExecutor(env)
+executor.execute_plan(symbolic_plan_2)
+executor.reset_gripper()
+
+
+# for _ in range(100):  # Run for 1000 steps
+#     action = np.zeros(env.action_dim)  # Constant action to keep the robot still
+#     obs, reward, done, info = env.step(action)
+#     env.render()  # This shows the visual output
 

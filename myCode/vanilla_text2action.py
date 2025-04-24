@@ -15,7 +15,7 @@ import numpy as np
 ##############################
 
 class SimulationEnvironment:
-    def __init__(self, table_height=0.75, objects=None):
+    def __init__(self, table_height=0.8, objects=None):
         """
         objects can be a dictionary that stores info about each object:
           {

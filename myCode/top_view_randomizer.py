@@ -8,6 +8,8 @@ from robosuite.utils.mjcf_utils import add_to_dict
 from robosuite.environments.manipulation.lift import Lift
 import matplotlib.pyplot as plt
 import numpy as np
+import json
+from tqdm import tqdm
 
 # osc_config = load_composite_controller_config(controller='BASIC')
 
@@ -53,6 +55,7 @@ class MultiObjectLift(Lift):
         super()._load_model()
         table_z = self.table_offset[2]
         self.robots[0].robot_model.set_base_xpos([-2, 0, 0])
+        self.object_metadata = []  # Store object info for later access
         
         # Create and add 5 randomized objects
         for i in range(5):
@@ -88,10 +91,18 @@ class MultiObjectLift(Lift):
             self.model.merge_objects([obj])
             add_to_dict(self.model.worldbody, "body", obj.get_obj())
 
-# Image generation loop
-num_samples = 5
+            # save the object metadata
+            self.object_metadata.append({
+                "name": f"obj{i}",
+                "shape": shape,
+                "color": color_name,
+                "position": pos
+            })
 
-for i in range(num_samples):
+# Image generation loop
+num_samples = 2000
+
+for i in tqdm(range(num_samples),desc="Generating scenes",unit="scene"):
     env = MultiObjectLift(
         robots="Panda",
         controller_configs=osc_config,
@@ -114,7 +125,9 @@ for i in range(num_samples):
     image = env.sim.render(camera_name="birdview", width=512, height=512)
     plt.imsave(f"randomized_images/scene_{i+1}.png", image)
 
-    print(f"Saved scene {i+1}!")
+    # Save metadata as JSON
+    with open(f"randomized_images/scene_{i+1}.json", "w") as f:
+        json.dump(env.object_metadata, f, indent=2)
 
 print("All randomized object scenes saved.")
 
