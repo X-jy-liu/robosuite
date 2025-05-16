@@ -1,0 +1,37 @@
+{
+    "task": "Move the blue cube to position (0.1, 0.1).",
+    "environment": {
+      "objects": [
+        {
+          "name": "red_cube",
+          "shape": "cube",
+          "color": "red",
+          "position": [0.0, 0.0],
+          "size": 0.02
+        },
+        {
+          "name": "blue_cube",
+          "shape": "cube",
+          "color": "blue",
+          "position": [0.2, -0.2],
+          "size": 0.02
+        }
+      ]
+    },
+    "available_functions": {
+      "move": {
+        "params": ["obj_name", "mode"],
+        "modes": ["above", "contact"]
+      },
+      "gripper_open": {
+        "params": []
+      },
+      "gripper_close": {
+        "params": []
+      },
+      "lift": {
+        "params": ["obj_name", "mode"],
+        "modes": ["above"]
+      }
+    }
+  }

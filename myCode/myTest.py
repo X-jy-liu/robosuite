@@ -4,7 +4,7 @@ from robosuite.controllers import load_composite_controller_config
 from robosuite.environments.manipulation.lift import Lift
 from robosuite.models.objects import BoxObject
 from robosuite.utils.mjcf_utils import add_to_dict
-from SkillExcutor import SkillExecutor
+from SkillExecutor import SkillExecutor
 import numpy as np
 
 # Define controller
@@ -65,7 +65,7 @@ class DualCubeLift(Lift):
         second_cube = BoxObject(
             name="cube2",
             size=[0.02, 0.02, 0.02],
-            rgba=[0, 0, 1, 1],  # green cube in RGBA format
+            rgba=[0, 0, 1, 1],  # blue cube in RGBA format
         )
         # set the position of the second cube
         second_cube.get_obj().set("pos", "0.2 -0.2 0.8")
