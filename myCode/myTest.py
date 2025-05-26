@@ -68,7 +68,7 @@ class DualCubeLift(Lift):
             rgba=[0, 0, 1, 1],  # blue cube in RGBA format
         )
         # set the position of the second cube
-        second_cube.get_obj().set("pos", "0.2 -0.2 0.8")
+        second_cube.get_obj().set("pos", "0.2 -0.2 0.82")
 
         # Merge the new object into the simulation model
         self.model.merge_objects([second_cube])
@@ -91,35 +91,33 @@ env = DualCubeLift(
 )
 
 obs = env.reset()
-cube2_pos = obs.get("cube2_pos", None)  # Extract second cube position
-print(f'Second Cube Pos: {cube2_pos}')
+# cube2_pos = obs.get("cube2_pos", None)  # Extract second cube position
+# print(f'Second Cube Pos: {cube2_pos}')
 cube2_pos = env.sim.data.body_xpos[env.sim.model.body_name2id("cube2_main")]
 print(f'Second Cube Pos: {cube2_pos}')
 ini_cube_pos = env.sim.data.body_xpos[env.sim.model.body_name2id("cube_main")]
 print(f"initial cube position: {ini_cube_pos}")
 
 symbolic_plan_1 = [
-    ('move', 'red_cube', 'above'),
-    ('gripper_open',),
-    ('move', 'red_cube', 'contact'),
-    ('gripper_close',),
-    ('lift', 'red_cube', 'above'),
-    ('move', 'blue_cube', 'above'),
-    ('gripper_open',)
+    ('lift_sequence', 'red_cube'),  # perform the full lift (above + contact + grip + lift up)
+    ('move', [0.2, -0.2, 0.9]),     # move to blue cube position
+    ('gripper_open',)               # open gripper
 ]
 
 symbolic_plan_2 = [
-    ('move', 'blue_cube', 'above'),
-    ('gripper_open',),
-    ('move', 'blue_cube', 'contact'),
-    ('gripper_close',),
-    ('lift', 'blue_cube', 'above'),
-    ('move', 'red_cube', 'above'),
-    ('gripper_open',)
+    ('lift_sequence', 'blue_cube'),  # perform the full lift (above + contact + grip + lift up)
+    ('move', 'red_cube'),       # move to red cube position
+    ('gripper_open',)                 # open gripper
+]
+
+symbolic_plan_3 = [
+    ('lift_sequence', 'red_cube'),  # perform the full lift (above + contact + grip + lift up)
+    ('move', [0.1, 0.1, 0.8]),    # move to certrain position
+    ('gripper_open',)                # open gripper
 ]
 
 executor = SkillExecutor(env)
-executor.execute_plan(symbolic_plan_1)
+executor.execute_plan(symbolic_plan_3)
 executor.reset_gripper()
 
 

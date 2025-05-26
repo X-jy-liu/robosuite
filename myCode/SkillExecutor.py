@@ -11,24 +11,33 @@ class SkillExecutor:
             print(f"Executing: {step}")
             getattr(self, f"do_{step[0]}")(*step[1:])
 
-    def do_move(self, obj_name, mode):
-        target_pos = self._get_obj_position(obj_name)
-        if mode == "above":
-            target_pos += np.array([0, 0, 0.1])
-        elif mode == "contact":
-            target_pos += np.array([0, 0, 0.0])
+    def do_move(self, target):
+        """ Move to an object or a specific coordinate. """
+        if isinstance(target, str):
+            target_pos = self._get_obj_position(target)
+            target_pos[2] += 0.1  # Move above the object
+        else:
+            target_pos = np.array(target)
+            target_pos[2] += 0.08 # Adjust Z to be above the target position to avoid collision with the table
         self._move_ee(target_pos)
+
+    def do_lift_sequence(self, obj_name):
+        """ Move above the object, descend to grip, close gripper, then lift. """
+        obj_pos = self._get_obj_position(obj_name)
+        above_pos = obj_pos + np.array([0, 0, 0.1])
+        contact_pos = obj_pos
+
+        self._move_ee(above_pos)
+        self._grip(-1)  # open gripper
+        self._move_ee(contact_pos)
+        self._grip(1)
+        self._move_ee(above_pos)  # lift after gripping
 
     def do_gripper_open(self):
         self._grip(-1)
 
     def do_gripper_close(self):
         self._grip(1)
-
-    def do_lift(self, obj_name, mode):
-        if mode == "above":
-            current_pos = self.env._get_observations()["robot0_eef_pos"]
-            self._move_ee(current_pos + np.array([0, 0, 0.1]))
 
     def _get_obj_position(self, name):
         obs = self.env._get_observations()

@@ -129,3 +129,6 @@ robosuite/models/assets/demonstrations_private
 
 # bird_view training images
 randomized_images/
+
+# training data
+trainingData.zip
