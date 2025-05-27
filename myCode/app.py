@@ -92,6 +92,6 @@ def call_llm(prompt: str):
 def generate_plan(payload: PromptInput):
     prompt = construct_prompt(payload)
     plan = call_llm(prompt)
-    return {"symbolic_plan": plan}
+    return plan
 
 # visit the following URL to test the API: http://localhost:8000/docs

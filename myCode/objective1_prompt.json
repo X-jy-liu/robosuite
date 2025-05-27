@@ -1,0 +1,65 @@
+{
+    "task": "stack green cube on the red cylinder.",
+    "environment": {
+      "objects": [
+        {
+          "name": "obj0",
+          "shape": "cube",
+          "color": "red",
+          "position": [-0.2, -0.2],
+          "size": 0.025
+        },
+        {
+          "name": "obj1",
+          "shape": "cube",
+          "color": "blue",
+          "position": [0.2, -0.2],
+          "size": 0.025
+        },
+        {
+          "name": "obj2",
+          "shape": "cube",
+          "color": "green",
+          "position": [-0.2, 0.2],
+          "size": 0.025
+        },
+        {
+          "name": "obj3",
+          "shape": "cylinder",
+          "color": "red",
+          "position": [0.2, 0.2],
+          "size": 0.025
+        },
+        {
+          "name": "obj4",
+          "shape": "cylinder",
+          "color": "blue",
+          "position": [0.0, 0.0],
+          "size": 0.025
+        }
+      ]
+    },
+    "available_functions": {
+      "move": {
+        "params": ["target"],
+        "description": "Move the robot's end-effector to a target, which can be an object name (e.g., 'obj1') or a specific 3-element coordinate [x, y, z]."
+      },
+      "lift_sequence": {
+        "params": ["obj_name"],
+        "description": "Perform a full pick-up sequence on the specified object: automatically moves above the object, descends to make contact, closes the gripper to grasp, and lifts the object back up to the safe height. IMPORTANT: This function handles all necessary motions internally, so you do NOT need to issue separate 'move' or 'gripper' commands before or after it. The object name must exactly match one of the predefined objects in the environment (e.g., 'obj0', 'obj1', 'obj2', 'obj3', 'obj4')."
+      },
+      "gripper_close": {
+        "params": [],
+        "description": "Close the gripper."
+      },
+      "gripper_open": {
+        "params": [],
+        "description": "Open the gripper."
+      }
+      
+    },
+    "IMPORTANT rules": [
+        "The final step in the plan must always be 'gripper_open' to ensure the gripper is left open at the end."
+        ]
+  }
+  

@@ -137,7 +137,7 @@ while True:
         env.reset()
         env._setup_camera()
         env.sim.forward()
-        # TODO: remove the body with body_names == cube_main out of the table by changing its position
+        # TODO: remove the body with body_names == cube_main out of the table by changing its position (done)
         for body_name in env.sim.model.body_names:
             if "cube_main" in body_name:
                 qpos_addr = env.sim.model.get_joint_qpos_addr("cube_joint0")
