@@ -1,5 +1,5 @@
 {
-    "task": "stack green cube on the red cylinder.",
+    "task": "stack green cube on the red cube.",
     "environment": {
       "objects": [
         {

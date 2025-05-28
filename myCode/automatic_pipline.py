@@ -16,7 +16,8 @@ import numpy as np
 # --- STEP 1: Query LLM API ---
 client = TestClient(app)
 
-with open("objective1_prompt.json", "r") as f:
+prompt_path = '/home/jingyang/robosuite/myCode/objective1_prompt.json'
+with open(prompt_path, "r") as f:
     user_prompt = json.load(f)
 
 response = client.post("/generate_plan", json=user_prompt)
