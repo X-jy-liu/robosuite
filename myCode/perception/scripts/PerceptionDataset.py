@@ -35,7 +35,7 @@ class PerceptionDataset(Dataset):
             labels = json.load(f)
 
         # Initialize tensors
-        presence = torch.zeros(self.num_objects)
+        # presence = torch.zeros(self.num_objects)
         shape = torch.zeros(self.num_objects, dtype=torch.long)
         color = torch.zeros(self.num_objects, dtype=torch.long)
         position = torch.zeros(self.num_objects, 3)
@@ -43,20 +43,20 @@ class PerceptionDataset(Dataset):
         for i, obj in enumerate(labels):
             if i >= self.num_objects:
                 break  # Ignore extra objects
-            presence[i] = 1  # Mark object present
+            # presence[i] = 1  # Mark object present
             shape[i] = self.shape_map[obj['shape']]
             color[i] = self.color_map[obj['color']]
             position[i] = torch.tensor(obj['position'])
 
-        return image, presence, shape, color, position
+        return image, shape, color, position
     
 
 # Example usage:
 if __name__ == "__main__":
     dataset = PerceptionDataset(data_dir='/home/jingyang/robosuite/myCode/perception/data', num_objects=5)
     for i in range(len(dataset)):
-        image, presence, shape, color, position = dataset[i]
-        print(f"Image {i}: Presence: {presence}, Shape: {shape}, Color: {color}, Position: {position}")
+        image, shape, color, position = dataset[i]
+        print(f"Image {i}: Shape: {shape}, Color: {color}, Position: {position}")
         # Limit to 10 iterations for demonstration
         if i == 10:
             break
