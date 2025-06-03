@@ -8,7 +8,7 @@ import torchvision.transforms as T
 class PerceptionDataset(Dataset):
     def __init__(self, data_dir, num_objects=5, transform=None):
         self.data_dir = data_dir
-        self.image_files = sorted([f for f in os.listdir(data_dir) if f.endswith('.png')])
+        self.image_files = sorted([f for f in os.listdir(data_dir) if f.endswith('.png')])[:5000]  # Limit to first 1000 images for demonstration
         self.num_objects = num_objects
         self.transform = transform or T.Compose([
             T.Resize((224, 224)),
@@ -53,7 +53,11 @@ class PerceptionDataset(Dataset):
 
 # Example usage:
 if __name__ == "__main__":
-    dataset = PerceptionDataset(data_dir='/home/jingyang/robosuite/myCode/perception/data', num_objects=5)
+    home_dir = os.path.expanduser('~')
+    data_dir = os.path.join(home_dir, 'robosuite', 'myCode', 'perception', 'data')
+    print(f"Data directory: {data_dir}")
+    dataset = PerceptionDataset(data_dir=data_dir, num_objects=5)
+    print(f"Number of images in dataset: {len(dataset)}")
     for i in range(len(dataset)):
         image, shape, color, position = dataset[i]
         print(f"Image {i}: Shape: {shape}, Color: {color}, Position: {position}")
