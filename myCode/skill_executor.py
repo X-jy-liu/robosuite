@@ -24,13 +24,12 @@ class SkillExecutor:
             target_pos[2] += 0.08 # Adjust Z to be above the target position to avoid collision with the table
         self._move_ee(target_pos)
 
-    def do_lift_sequence(self, obj_name):
-        """ Move above the object, descend to grip, close gripper, then lift. """
+    def do_grip_and_pickup(self, obj_name):
+        """ descend to grip(contact_pos), close gripper, then lift(above_pos). """
         obj_pos = self._get_obj_position(obj_name)
         above_pos = obj_pos + np.array([0, 0, 0.15])
         contact_pos = obj_pos
 
-        # self._move_ee(above_pos)
         self._grip(-1)  # open gripper
         self._move_ee(contact_pos)
         self._grip(1)
@@ -73,7 +72,7 @@ class SkillExecutor:
             self.env.render()
         time.sleep(1)
 
-    def idle(self, duration=1):
+    def idle(self, mode='release', duration=1):
         """ 
         Move the gripper 0.3m above the current position, 
         then keep the robot idle at that position for the specified duration.
@@ -82,18 +81,47 @@ class SkillExecutor:
         obs = self.env._get_observations()
         current_pos = np.array(obs["robot0_eef_pos"])
 
-        # Compute target idle position (0.3m above)
-        target_pos = current_pos + np.array([0, 0, 0.1])
+        if mode == 'release':
+            # Open the gripper
+            self._grip(-1)
+            # Compute target release idle position (0.3m above)
+            target_pos = current_pos + np.array([0, 0, 0.3])
 
-        # Move the end-effector to the idle position
-        success = self._move_ee(target_pos)
-        if not success:
-            print("[WARN] Could not reach idle position, staying at current location.")
-
+            # Move the end-effector to the idle position
+            success = self._move_ee(target_pos)
+            if not success:
+                print("[WARN] Could not reach idle position, staying at current location.")
+        elif mode == 'hold':
+            # Hold the current position
+            target_pos = current_pos
+        else:
+            raise ValueError("Invalid mode. Use 'release' or 'hold'.")
+        
+        # Only continue if environment is still running
+        if getattr(self.env, "done", False):
+            print("[INFO] Environment is terminated. Skipping idle step.")
+            return
+        
         # Hold position (send zero action) for the duration
         action = np.zeros(self.env.action_dim)
-        steps = int(duration * 100)
+        steps = int(duration * 500)
         for _ in range(steps):
             self.env.step(action)
             self.env.render()
             time.sleep(0.01)
+    
+    def get_all_object_positions(self):
+        """
+        Return a dictionary mapping object names (without '_main' suffix)
+        to their position coordinates.
+        """
+        object_positions = {}
+        for i, body_name in enumerate(self.env.sim.model.body_names):
+            # debugging
+            print(f"Body {i}: {body_name}")
+            if body_name.endswith('_main'):
+                obj_name = body_name.replace('_main', '')
+                pos = self.env.sim.data.body_xpos[i]
+                object_positions[obj_name] = np.array(pos)
+        return object_positions
+

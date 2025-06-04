@@ -4,7 +4,7 @@ from robosuite.controllers import load_composite_controller_config
 from robosuite.environments.manipulation.lift import Lift
 from robosuite.models.objects import BoxObject
 from robosuite.utils.mjcf_utils import add_to_dict
-from SkillExecutor import SkillExecutor
+from myCode.skill_executor import SkillExecutor
 import numpy as np
 
 # Define controller

@@ -8,15 +8,13 @@ from robosuite.environments.manipulation.lift import Lift
 from robosuite.models.objects import BoxObject
 from robosuite.models.objects.primitive.cylinder import CylinderObject
 from robosuite.utils.mjcf_utils import add_to_dict
-from SkillExecutor import SkillExecutor
-from robosuite import make
-from SkillExecutor import SkillExecutor
+from myCode.skill_executor import SkillExecutor
 import numpy as np
 
 # --- STEP 1: Query LLM API ---
 client = TestClient(app)
 
-prompt_path = '/home/jingyang/robosuite/myCode/objective1_prompt.json'
+prompt_path = '/home/jingyang/robosuite/myCode/objective1_prompt_with_better_lift_logics.json'
 with open(prompt_path, "r") as f:
     user_prompt = json.load(f)
 
@@ -121,4 +119,9 @@ for obj in env.object_metadata:
 # --- STEP 3: Execute symbolic plan ---
 executor = SkillExecutor(env)
 executor.execute_plan(symbolic_plan)
-executor.idle()
+# executor.idle()
+
+obj_pos = executor.get_all_object_positions()
+print("Final object positions:")
+for obj_name, pos in obj_pos.items():
+    print(f"{obj_name}: {pos}")

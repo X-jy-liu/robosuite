@@ -1,0 +1,60 @@
+{
+  "task": "stack green cube on the red cube.",
+  "environment": {
+    "objects": [
+      {
+        "name": "obj0",
+        "shape": "cube",
+        "color": "red",
+        "position": [-0.2, -0.2],
+        "size": 0.025
+      },
+      {
+        "name": "obj1",
+        "shape": "cube",
+        "color": "blue",
+        "position": [0.2, -0.2],
+        "size": 0.025
+      },
+      {
+        "name": "obj2",
+        "shape": "cube",
+        "color": "green",
+        "position": [-0.2, 0.2],
+        "size": 0.025
+      },
+      {
+        "name": "obj3",
+        "shape": "cylinder",
+        "color": "red",
+        "position": [0.2, 0.2],
+        "size": 0.025
+      },
+      {
+        "name": "obj4",
+        "shape": "cylinder",
+        "color": "blue",
+        "position": [0.0, 0.0],
+        "size": 0.025
+      }
+    ]
+  },
+  "available_functions": {
+    "move": {
+      "params": ["target"],
+      "description": "Move the robot's end-effector to a target, which can be an object name (e.g., 'obj1') or a specific 3-element coordinate [x, y, z]."
+    },
+    "grip_and_pickup": {
+      "params": ["obj_index"],
+      "description": "It can only follow the 'move' function. It controlls the gripper down to the object (one of 'obj0', 'obj1', 'obj2', 'obj3', 'obj4') contact position. Then, it grabs it to the above position"
+    },
+    "gripper_close": {
+      "params": [],
+      "description": "Close the gripper."
+    },
+    "gripper_open": {
+      "params": [],
+      "description": "Open the gripper."
+    }
+  }
+}
