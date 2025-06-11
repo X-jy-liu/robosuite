@@ -37,7 +37,7 @@ class MultiObjectLift(Lift):
         super()._load_model()
         table_z = self.table_offset[2]
         half_height = 0.0125  # Half height for objects
-        cylinder_callibration = 0.0001 # Calibration offset for cylinder height
+        cylinder_callibration = 0.0 # Calibration offset for cylinder height
         # checking the height of the table
         print(f"Table height: {table_z}")
         self.object_metadata = []  # Store object info for later access
@@ -47,8 +47,8 @@ class MultiObjectLift(Lift):
             ("obj0", "cube", "red", [-0.2, -0.2, table_z + half_height]),
             ("obj1", "cube", "blue", [0.2, -0.2, table_z + half_height]),
             ("obj2", "cube", "green", [-0.2, 0.2, table_z + half_height]),
-            ("obj3", "cylinder", "red", [0.15, 0.15, table_z + half_height + cylinder_callibration]),
-            ("obj4", "cylinder", "blue", [0.05, -0.05, table_z + half_height + cylinder_callibration]),
+            ("obj3", "cylinder", "red", [0.15, 0.15, table_z + 2*half_height + cylinder_callibration]),
+            ("obj4", "cylinder", "blue", [0.05, -0.05, table_z + 2*half_height + cylinder_callibration]),
         ]
 
         for name, shape, color_name, pos in predefined_objects:
@@ -102,7 +102,7 @@ for _ in range(10):
     env.step(np.zeros(env.action_dim))
     env.render()
 
-# mvoe the inital redish cube out of the table / camera view
+# move the inital redish cube out of the table / camera view
 for body_name in env.sim.model.body_names:
     if "cube_main" in body_name:
         qpos_addr = env.sim.model.get_joint_qpos_addr("cube_joint0")

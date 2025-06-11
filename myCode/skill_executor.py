@@ -21,7 +21,7 @@ class SkillExecutor:
         else:
             target_pos = np.array(target)
             self._move_ee(above_pos + target_pos)  # Move above the coordinate
-            target_pos[2] += 0.08 # Adjust Z to be above the target position to avoid collision with the table
+            target_pos[2] += 0.025 # Adjust Z to be above the target position to avoid collision with the table
         self._move_ee(target_pos)
 
     def do_grip_and_pickup(self, obj_name):
@@ -117,11 +117,10 @@ class SkillExecutor:
         """
         object_positions = {}
         for i, body_name in enumerate(self.env.sim.model.body_names):
-            # debugging
-            print(f"Body {i}: {body_name}")
             if body_name.endswith('_main'):
                 obj_name = body_name.replace('_main', '')
                 pos = self.env.sim.data.body_xpos[i]
                 object_positions[obj_name] = np.array(pos)
+                print(f"{obj_name} position: {pos}")
         return object_positions
 

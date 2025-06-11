@@ -1,5 +1,5 @@
 {
-    "task": "stack green cube on the blue cube.",
+    "task": "move the red cylinder to (0.1,0.1,0.8).",
     "environment": {
       "objects": [
         {
@@ -42,7 +42,7 @@
     "available_functions": {
       "move": {
         "params": ["target"],
-        "description": "Target can be one of 'obj0, obj1, obj2, obj3, obj4' or a specific 3-element coordinate [x, y, z].",
+        "description": "Target can be one of 'obj0', 'obj1', 'obj2', 'obj3', or 'obj4', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters.",
         "examples": [
           ["move", "obj1"],
           ["move", [0.1, 0.1, 0.1]]
@@ -86,6 +86,16 @@
           ["move", "obj0"],
           ["gripper_open"]
         ]
+      },
+      {
+        "task": "move the red cylinder to (0.1,0.1,0.8)",
+        "plan": [
+          ["move", "obj3"],
+          ["grip_and_pickup", "obj3"],
+          ["move", [0.1, 0.1, 0.8]],
+          ["gripper_open"]
+        ]
       }
-    ]
+    ],
+    "instructions" :"DON'T use the object properties, like this [['move', {'name': 'obj2', 'shape': 'cube', 'color': 'green', 'position': [-0.2, 0.2], 'size': 0.025}], in the symbolic plan."
   }

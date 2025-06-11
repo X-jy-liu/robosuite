@@ -25,33 +25,38 @@ class PromptInput(BaseModel):
     task: str
     environment: Dict[str, List[ObjectSpec]]
     available_functions: Dict[str, FunctionSpec]
+    examples: List[dict] = []
+    instructions: str = ""
 
-EXAMPLE_PLAN = """
-    Example:
-    Given this task: "Stack the red cube on the blue cube."
-
-    Plan:
-    [
-    ("move", "red_cube", "above"),
-    ("gripper_open",),
-    ("move", "red_cube", "contact"),
-    ("gripper_close",),
-    ("lift", "red_cube", "above"),
-    ("move", "blue_cube", "above"),
-    ("gripper_open",)
-    ]
-    """
 
 # -----------------------------------
 # Step 4: Build prompt from JSON input
 # -----------------------------------
 def construct_prompt(payload: PromptInput) -> str:
-    obj_descriptions = "\n".join([str(obj.model_dump()) for obj in payload.environment["objects"]])
+    # Format objects
+    obj_descriptions = "\n".join([
+        f"- {obj.name}: shape={obj.shape}, color={obj.color}, position={obj.position}, size={obj.size}"
+        for obj in payload.environment.get("objects", [])
+    ])
+
+    # Format functions
     func_descriptions = "\n".join([
-        f"{name}({', '.join(spec.params)}) -> modes: {spec.modes}"
+        f"- {name}({', '.join(spec.params)}) -> modes: {spec.modes}"
         for name, spec in payload.available_functions.items()
     ])
 
+    # Format examples (if any)
+    example_blocks = ""
+    if payload.examples:
+        formatted_examples = []
+        for ex in payload.examples:
+            ex_task = ex.get("task", "")
+            ex_plan = ex.get("plan", [])
+            plan_str = "\n  ".join([str(tuple(step)) for step in ex_plan])
+            formatted_examples.append(f'Example Task: "{ex_task}"\n  Plan:\n  {plan_str}')
+        example_blocks = "\n\n" + "\n\n".join(formatted_examples)
+
+    # Final prompt string
     prompt = f"""
         Task: {payload.task}
 
@@ -62,13 +67,18 @@ def construct_prompt(payload: PromptInput) -> str:
         {func_descriptions}
 
         Instructions:
-        Return a symbolic plan using only the available functions. Use correct syntax and function signatures. Respond ONLY with a valid Python list of tuples. Do NOT include 'Plan:', 'Answer:', or any explanation text.
+        {payload.instructions.strip()}
 
-        {EXAMPLE_PLAN}
+        {example_blocks}
+
         Now, generate a symbolic plan for this task:
         {payload.task}
+
+        Respond ONLY with a valid Python list of tuples.
         """
-    return prompt
+
+    return prompt.strip()
+
 
 # -----------------------------------
 # Step 5: Query GPT-4 or similar LLM
