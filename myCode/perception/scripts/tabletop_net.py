@@ -1,16 +1,16 @@
 import torch
 import torch.nn as nn
-import torchvision.models as models
+from torchvision.models import resnet18, ResNet18_Weights
 
-class PerceptionNet(nn.Module):
+class TabletopNet(nn.Module):
     def __init__(self, num_objects=5, num_shape_classes=2, num_color_classes=3):
-        super(PerceptionNet, self).__init__()
+        super(TabletopNet, self).__init__()
         self.num_objects = num_objects
         self.num_shape_classes = num_shape_classes
         self.num_color_classes = num_color_classes
         
         # Backbone: ResNet18 without final classification layer
-        resnet = models.resnet18(pretrained=True)
+        resnet = resnet18(weights=ResNet18_Weights.DEFAULT)
         self.backbone = nn.Sequential(*list(resnet.children())[:-1])  # Output: (B, 512, 1, 1) remove the last fc layer
         self.feature_dim = 512
 
@@ -56,7 +56,7 @@ class PerceptionNet(nn.Module):
 
 # Example usage
 if __name__ == '__main__':
-    model = PerceptionNet(num_objects=5, num_shape_classes=2, num_color_classes=3)
+    model = TabletopNet(num_objects=5, num_shape_classes=2, num_color_classes=3)
     print(model)
 
     # Dummy input tensor (batch size 1, 3 channels, 224x224 image)

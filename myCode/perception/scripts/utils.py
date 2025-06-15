@@ -59,7 +59,10 @@ def error_plot(train_errors, val_errors, num_epochs, plot_name, if_save=True):
     plt.grid()
     
     if if_save:
-        os.makedirs('robosuite/myCode/perception/plots/', exist_ok=True)
-        plt.savefig(plot_name + '.png')
+        plot_dir = '/home/s2644572/robosuite/myCode/perception/plots/'
+        os.makedirs(plot_dir, exist_ok=True)
+        save_path = os.path.join(plot_dir, plot_name + '.png')
+        plt.savefig(save_path)
+        print(f"Plot saved as {save_path}")
     
     plt.show()

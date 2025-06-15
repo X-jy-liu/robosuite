@@ -11,7 +11,7 @@ from utils import error_plot, PerceptionLoss
 def train_one_epoch(model, dataloader, criterion, optimizer, device):
     model.train()
     total_loss = 0.0
-    progress_bar = tqdm(dataloader, desc="Train", unit='batches', leave=False)
+    progress_bar = tqdm(dataloader, desc="Train", unit='batches', leave=True)
     for images, shapes, colors, positions in progress_bar:
         images = images.to(device)
         shapes = shapes.to(device)
@@ -38,7 +38,7 @@ def validate_one_epoch(model, dataloader, criterion, device):
     total_loss = 0.0
 
     with torch.no_grad():
-        progress_bar = tqdm(dataloader, desc="Val", unit='batches', leave=False)
+        progress_bar = tqdm(dataloader, desc="Val", unit='batches', leave=True)
         for images, shapes, colors, positions in progress_bar:
             images = images.to(device)
             shapes = shapes.to(device)
@@ -62,9 +62,9 @@ def main():
     data_dir = os.path.join(home_dir, 'robosuite', 'myCode', 'perception', 'data', 'train_val')
     num_objects = 5
     batch_size = 32
-    num_epochs = 20
+    num_epochs = 1
     learning_rate = 1e-4
-    plot_name = 'train_val_loss_1'
+    plot_name = 'test_plot' # without .png extension
     model_save_path = os.path.join(home_dir, 'robosuite', 'myCode', 'perception', 'checkpoints', 'test_model.pth')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
@@ -110,8 +110,9 @@ def main():
             os.makedirs('checkpoints', exist_ok=True)
             best_model = model.state_dict()
             tqdm.write("Best model updated.")
+
     # plot the training and validation errors
-    error_plot(train_errors, val_errors, num_epochs, plot_name)
+    error_plot(train_errors, val_errors, num_epochs, plot_name, if_save=True)
     torch.save(best_model, model_save_path)
     print("Training completed and final model saved.")
 
