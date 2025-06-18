@@ -31,9 +31,9 @@ def convert_label(json_path, output_txt_path):
             print(f"Unknown class: {key}")
             continue
 
-        # Convert from [-3.5, 3.5] (assuming your sim uses world coords) to [0, 1]
-        x_center = (pos_x + 3.5) / 7
-        y_center = (pos_y + 3.5) / 7
+        # Convert from [-0.35, 0.35] (assuming your sim uses world coords) to [0, 1]
+        x_center = (pos_x + 0.35) / 0.7
+        y_center = (pos_y + 0.35) / 0.7
 
         line = f"{class_id} {x_center:.6f} {y_center:.6f} {BOX_WIDTH:.6f} {BOX_HEIGHT:.6f}"
         lines.append(line)
@@ -46,8 +46,11 @@ if __name__ == "__main__":
     # json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels_json/train"
     # output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels/train"
 
-    json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels_json/val"
-    output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels/val"
+    # json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels_json/val"
+    # output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels/val"
+
+    json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels_json"
+    output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels"
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -56,4 +59,5 @@ if __name__ == "__main__":
             json_path = os.path.join(json_dir, json_file)
             output_txt_path = os.path.join(output_dir, json_file.replace('.json', '.txt'))
             convert_label(json_path, output_txt_path)
+            # break
             # print(f"Converted {json_file} to {output_txt_path}")
