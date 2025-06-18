@@ -132,3 +132,5 @@ myCode/perception/data/
 
 # training data
 trainingData.zip
+
+myCode/yolo_perception/data/

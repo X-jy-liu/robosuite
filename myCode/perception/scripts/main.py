@@ -62,10 +62,9 @@ def main():
     data_dir = os.path.join(home_dir, 'robosuite', 'myCode', 'perception', 'data', 'train_val')
     num_objects = 5
     batch_size = 32
-    num_epochs = 1
+    num_epochs = 200
     learning_rate = 1e-4
-    plot_name = 'test_plot' # without .png extension
-    model_save_path = os.path.join(home_dir, 'robosuite', 'myCode', 'perception', 'checkpoints', 'test_model.pth')
+    plot_name = 'training_1' # without .png extension
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
 
@@ -110,10 +109,14 @@ def main():
             os.makedirs('checkpoints', exist_ok=True)
             best_model = model.state_dict()
             tqdm.write("Best model updated.")
+            print(f"Best validation loss updated to: {best_val_loss:.4f} at epoch {epoch + 1}")
+            file_name = f"best_model_training_1_epoch_{epoch + 1}.pth"
+            model_save_path = os.path.join(home_dir, 'robosuite', 'myCode', 'perception', 'checkpoints', file_name)
+            torch.save(best_model, model_save_path)
 
     # plot the training and validation errors
     error_plot(train_errors, val_errors, num_epochs, plot_name, if_save=True)
-    torch.save(best_model, model_save_path)
+    # torch.save(best_model, model_save_path)
     print("Training completed and final model saved.")
 
 if __name__ == "__main__":

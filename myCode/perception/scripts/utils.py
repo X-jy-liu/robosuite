@@ -1,10 +1,6 @@
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import os
-from robosuite.environments.manipulation.lift import Lift
-from robosuite.models.objects import BoxObject
-from robosuite.models.objects.primitive.cylinder import CylinderObject
-from robosuite.utils.mjcf_utils import add_to_dict
 
 class PerceptionLoss(nn.Module):
     def __init__(self, weight_shape=1.0, weight_color=1.0, weight_position=10.0):
