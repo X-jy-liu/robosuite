@@ -3,16 +3,18 @@ from pydantic import BaseModel
 from typing import List, Dict
 import openai
 import os
-import ast  # for safe evaluation of string output from LLM
+import ast
 import json
 from pathlib import Path
+import numpy as np
+
 from robosuite.environments.manipulation.lift import Lift
-from myCode.skill_executor import SkillExecutor
-from config_controller import controller
 from robosuite.models.objects import BoxObject, CylinderObject
 from robosuite.utils.mjcf_utils import add_to_dict
-from myCode.multi_object_lift import MultiObjectLift
-import numpy as np
+
+from myCode.skill_executor import SkillExecutor
+from config_controller import controller
+from myCode.my_env.multi_object_lift import MultiObjectLift
 
 app = FastAPI()
 
@@ -36,24 +38,20 @@ class PromptInput(BaseModel):
     examples: List[dict] = []
     instructions: str = ""
 
-
-# -----------------------------------
+# ----------------------------
 # Step 2: Prompt construction and LLM interaction
-# -----------------------------------
+# ----------------------------
 def construct_prompt(payload: PromptInput, command: str, mode: str = "chain", initial_command: str = None) -> str:
-    # Format environment
     obj_descriptions = "\n".join([
         f"- {obj.name}: shape={obj.shape}, color={obj.color}, position={obj.position}, size={obj.size}"
         for obj in payload.environment.get("objects", [])
     ])
 
-    # Format functions
     func_descriptions = "\n".join([
         f"- {name}({', '.join(spec.params)}) -> modes: {spec.modes}"
         for name, spec in payload.available_functions.items()
     ])
 
-    # Format examples
     example_blocks = ""
     if payload.examples:
         formatted_examples = []
@@ -64,52 +62,52 @@ def construct_prompt(payload: PromptInput, command: str, mode: str = "chain", in
             formatted_examples.append(f'Example Task: "{ex_task}"\n  Plan:\n  {plan_str}')
         example_blocks = "\n\n" + "\n\n".join(formatted_examples)
 
-    # Final instruction
     if mode == "override" or not initial_command:
         task_instruction = f"Now, generate a symbolic plan for this task:\n{command}"
-    else:  # mode == "chain"
+    else:
         task_instruction = f"""Now, generate a symbolic plan for the original task, 
-modified by the following instruction:
-Original Task: {initial_command}
-Follow-up Instruction: {command}"""
+                            modified by the following instruction:
+                            Original Task: {initial_command}
+                            Follow-up Instruction: {command}"""
 
-    # Assemble the full prompt
     prompt = f"""
-Environment Objects:
-{obj_descriptions}
+    You are a robot planning assistant. Your job is to interpret natural language commands and generate symbolic manipulation plans based on the environment, using available robot functions. You reason geometrically, use object positions, and compute targets when needed (e.g., for ambiguous spatial tasks). You always explain your logic clearly before giving the symbolic plan.
 
-Available Functions:
-{func_descriptions}
+    Environment Objects:
+    {obj_descriptions}
 
-Instructions:
-{payload.instructions.strip()}
+    Available Functions:
+    {func_descriptions}
 
-{example_blocks}
+    Instructions:
+    {payload.instructions.strip()}
 
-{task_instruction}
+    {example_blocks}
 
-First, verify if the command is valid based on the current environment objects.
+    {task_instruction}
 
-If the command references any objects that do not exist, or violates spatial constraints, explain the issue clearly.
+    First, verify if the command is valid based on the current environment objects.
 
-If possible, generate a corrected version of the command and proceed to create a symbolic plan for that.
+    If the command references any objects that do not exist, or violates spatial constraints, explain the issue clearly.
 
-Otherwise, return an empty plan (`[]`) and describe why no valid plan can be generated.
+    If the task is valid:
+    - Explain how the symbolic plan is generated, using positions, geometry, and available functions.
+    - Then return the symbolic plan.
 
-If you're unsure how to proceed, ask the user for clarification in your explanation.
+    If you're unsure how to proceed, ask the user for clarification.
 
-Respond in the following format:
+    Respond in the following format:
 
-Explanation:
-<your reasoning>
+    Explanation:
+    <your reasoning>
 
-Corrected Command (if applicable):
-<corrected command or same as input>
+    Symbolic Plan:
+    <valid Python list of tuples>
 
-Symbolic Plan:
-<valid Python list of tuples>
-
-""".strip()
+    """.strip()
+    print("Environment objects passed to LLM:")
+    for obj in payload.environment.get("objects", []):
+        print(vars(obj))
 
     return prompt
 
@@ -125,9 +123,7 @@ def call_llm(prompt: str):
     content = response["choices"][0]["message"]["content"]
 
     try:
-        # Use simple heuristics to parse response
         explanation = extract_block(content, "Explanation:")
-        corrected_command = extract_block(content, "Corrected Command:")
         plan_str = extract_block(content, "Symbolic Plan:")
         symbolic_plan = ast.literal_eval(plan_str.strip())
     except Exception as e:
@@ -135,12 +131,10 @@ def call_llm(prompt: str):
 
     return {
         "explanation": explanation,
-        "corrected_command": corrected_command,
         "symbolic_plan": symbolic_plan
     }
 
 def extract_block(text, header):
-    """Helper to extract the text after a header like 'Explanation:'"""
     lines = text.splitlines()
     found = False
     block = []
@@ -153,53 +147,71 @@ def extract_block(text, header):
             found = True
     return "\n".join(block).strip()
 
-# -----------------------------------
-# Step 4: Simulator and utils
-# -----------------------------------
-
+# ----------------------------
+# Step 3: Simulator Wrapper
+# ----------------------------
 class SimWrapper:
     def __init__(self):
         self.env = MultiObjectLift(
             robots="Panda",
             controller_configs=controller,
-            has_renderer=True  # Set to True only if needed
+            has_renderer=True
         )
         self.env.reset()
 
-        # Move the default cube away
         for body_name in self.env.sim.model.body_names:
             if "cube_main" in body_name:
-                qpos_addr = self.env.sim.model.get_joint_qpos_addr("cube_joint0")
-                self.env.sim.data.qpos[qpos_addr[0]:qpos_addr[0]+7] = np.array([5.0, 5.0, 0.0, 1, 0, 0, 0])
-                self.env.sim.forward()
-
+                raise ValueError(f"The default cube '{body_name}' still exists in the environment. Please remove it before running the simulation.")
         self.executor = SkillExecutor(self.env)
 
     def get_current_state(self):
-        return self.executor.get_all_object_positions()
+        return self.executor.get_all_object_descriptions()
 
     def execute_plan(self, plan):
         print("Executing:", plan)
         self.executor.execute_plan(plan)
+
+    def reset_robot(self):
+        self.executor.reset_robot_only()
+
+def check_scene_consistency(current_objs: List[ObjectSpec], expected_objs: List[ObjectSpec], threshold=0.01):
+    """
+    Raises ValueError if the current scene deviates too much from the prompt baseline.
+    Compares only positions of objects with the same name.
+    """
+    mismatches = []
+    expected_dict = {obj.name: obj for obj in expected_objs}
+
+    for obj in current_objs:
+        if obj.name in expected_dict:
+            expected_pos = np.array(expected_dict[obj.name].position)
+            current_pos = np.array(obj.position)
+            dist = np.linalg.norm(expected_pos - current_pos)
+            if dist > threshold:
+                mismatches.append((obj.name, dist, current_pos.tolist(), expected_pos.tolist()))
+    
+    if mismatches:
+        details = "\n".join([
+            f"{name}: distance={dist:.3f}, current={cur}, expected={exp}"
+            for name, dist, cur, exp in mismatches
+        ])
+        raise ValueError(f"🚨 Scene mismatch detected:\n{details}")
+
 
 def load_default_prompt(path="prompt.json") -> PromptInput:
     with open(path, "r") as f:
         data = json.load(f)
     return PromptInput(**data)
 
-# -----------------------------------
-# Step 4: FastAPI lifespan management and app definition
-# -----------------------------------
-
-# Global state
+# ----------------------------
+# Step 4: FastAPI app and session
+# ----------------------------
 sim = SimWrapper()
-session = {"running": False}
 SESSION = {
     "base_prompt": None,
     "initial_command": None,
     "history": []
 }
-log = []
 
 async def lifespan(app: FastAPI):
     prompt_path = Path('/home/jingyang/robosuite/myCode/objective1_prompt_with_better_lift_logics.json')
@@ -214,13 +226,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@app.post(
-        "/init_session",
-        description="Manually reinitialize the planning session. Only use this if you want to override the default tabletop setup loaded from prompt.json."
-        )
+@app.post("/init_session")
 def init_session(payload: PromptInput):
     SESSION["base_prompt"] = payload
-    SESSION["initial_command"] = None  # reset
+    SESSION["initial_command"] = None
     SESSION["history"] = []
     return {"status": "Session initialized"}
 
@@ -231,33 +240,35 @@ def chat_step(command: str, mode: str = None):
 
     payload = SESSION["base_prompt"]
 
-    # Decide mode automatically if not explicitly given
     if SESSION["initial_command"] is None:
         mode = "override"
         SESSION["initial_command"] = command
+        print("🔄 Initial command set:", command)
     else:
         mode = mode or "chain"
 
     SESSION["history"].append((mode, command))
 
-    # Update environment objects
-    raw_state = sim.get_current_state()
-    object_specs = [
-        ObjectSpec(
-            name=name,
-            shape="cube" if "cube" in name else "cylinder",
-            color="red",  # optionally update with real color detection
-            position=pos.tolist(),
-            size=0.025
-        ) for name, pos in raw_state.items()
-    ]
+    raw_objects = sim.get_current_state()
+    object_specs = [ObjectSpec(**obj) for obj in raw_objects.values()]
     payload.environment["objects"] = object_specs
-
-    # Build prompt
+    # ✅ Check scene match
+    try:
+        check_scene_consistency(
+            current_objs=object_specs,
+            expected_objs=payload.environment["objects"],  # <-- Already ObjectSpec instances
+            threshold=0.05
+        )
+    except ValueError as e:
+        print(str(e))
+        return {"error": "Scene mismatch", "details": str(e)}
+    
     prompt = construct_prompt(payload, command, mode, SESSION["initial_command"])
 
     try:
         result = call_llm(prompt)
+        print("🔍 LLM Explanation:\n", result["explanation"])
+        print("📋 Symbolic Plan:\n", result["symbolic_plan"])
     except Exception as e:
         return {"error": f"LLM failed: {e}"}
 
@@ -266,13 +277,32 @@ def chat_step(command: str, mode: str = None):
     return {
         "mode": mode,
         "command": command,
-        "corrected_command": result["corrected_command"],
         "explanation": result["explanation"],
         "symbolic_plan": result["symbolic_plan"],
-        "current_objects": raw_state
-}
+        "current_objects": raw_objects
+    }
 
+@app.post("/reset_scene_and_robot")
+def reset_scene_and_robot():
+    global sim
+    try:
+        sim.executor.idle_robot()  # stop any motion safely
+        sim.env.close()  # close rendering
+        sim = SimWrapper()  # reinitialize everything
+        SESSION["initial_command"] = None
+        SESSION["history"] = []
+        print("✅ Full reset complete")
+        return {"status": "Scene and robot reset"}
+    except Exception as e:
+        print(f"⚠️ Reset crashed: {e}")
+        return {"error": str(e)}
+
+@app.post("/reset_robot_only")
+def reset_robot_only():
+    sim.reset_robot()
+    SESSION["initial_command"] = None
+    return {"status": "Robot reset, scene preserved"}
 
 @app.get("/")
 def read_root():
-    return {"message": "Interactive Planning API in http://127.0.0.1:8000/docs. Use /init_session then /chat_step."}
+    return {"message": "Interactive Planning API at http://127.0.0.1:8000/docs. Use /init_session then /chat_step."}

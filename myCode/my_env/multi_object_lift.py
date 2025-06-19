@@ -1,6 +1,7 @@
 #TODO: enable to take the input of different layouts (five objects) 
 
-from robosuite.environments.manipulation.lift import Lift
+# from robosuite.environments.manipulation.lift import Lift
+from myCode.my_env.lift_without_default_cube import Lift
 from robosuite.models.objects import BoxObject
 from robosuite.models.objects.primitive.cylinder import CylinderObject
 from robosuite.utils.mjcf_utils import add_to_dict
@@ -12,7 +13,6 @@ class MultiObjectLift(Lift):
         half_height = 0.0125  # Half height for objects
         cylinder_calibration = 0.0 # Calibration offset for cylinder height
         # checking the height of the table
-        print(f"Table height: {table_z}")
         self.object_metadata = []  # Store object info for later access
         self.COLORS = {
             "red": [1, 0, 0, 1],
@@ -25,8 +25,8 @@ class MultiObjectLift(Lift):
             ("obj0", "cube", "red", [-0.2, -0.2, table_z + half_height]),
             ("obj1", "cube", "blue", [0.2, -0.2, table_z + half_height]),
             ("obj2", "cube", "green", [-0.2, 0.2, table_z + half_height]),
-            ("obj3", "cylinder", "red", [0.15, 0.15, table_z + 2*half_height + cylinder_calibration]),
-            ("obj4", "cylinder", "blue", [0.0, -0.0, table_z + 2*half_height + cylinder_calibration]),
+            ("obj3", "cylinder", "red", [0.15, 0.15, table_z + half_height + cylinder_calibration]),
+            ("obj4", "cylinder", "blue", [0.0, -0.0, table_z + half_height + cylinder_calibration]),
         ]
 
         for name, shape, color_name, pos in predefined_objects:

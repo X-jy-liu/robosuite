@@ -5,53 +5,63 @@ from fastapi.testclient import TestClient
 from app import app  # Your FastAPI LLM app
 from config_controller import controller
 from myCode.skill_executor import SkillExecutor
-from myCode.multi_object_lift import MultiObjectLift
+from myCode.my_env.multi_object_lift import MultiObjectLift
+from fastapi.testclient import TestClient
 import numpy as np
 
-# --- STEP 1: Query LLM API ---
-client = TestClient(app)
+from fastapi.testclient import TestClient
 
-prompt_path = '/home/jingyang/robosuite/myCode/objective1_prompt_with_better_lift_logics.json'
-with open(prompt_path, "r") as f:
-    user_prompt = json.load(f)
+with TestClient(app) as client:  # ✅ Triggers startup event
+    # --- STEP 1: Load prompt and send command ---
+    prompt_path = '/home/jingyang/robosuite/myCode/objective1_prompt_with_better_lift_logics.json'
+    with open(prompt_path, "r") as f:
+        user_prompt_data = json.load(f)
 
-response = client.post("/generate_plan", json=user_prompt)
-symbolic_plan = response.json()  # Expecting list of [action, args]
+    # user_command = user_prompt_data["task"]
+    user_command = "Put the red cube and the blue cube together"
 
-print("Generated symbolic plan:")
-print(symbolic_plan)
+    response = client.post("/chat_step", params={
+        "command": user_command,
+        "mode": "override"
+    })
 
-# --- STEP 2: Create the environment and reset it ---
-env = MultiObjectLift(
-    robots="Panda",
-    controller_configs=controller,
-    has_renderer=True)
-obs = env.reset()
+    response_json = response.json()
+    if "error" in response_json:
+        raise RuntimeError(f"LLM API failed: {response_json['error']}")
 
-for _ in range(10):
-    env.step(np.zeros(env.action_dim))
-    env.render()
+    symbolic_plan = response_json.get("symbolic_plan", [])
+    if not symbolic_plan:
+        raise ValueError(f"No symbolic plan returned. Explanation: {response_json.get('explanation', 'N/A')}")
 
-# move the inital redish cube out of the table / camera view
-for body_name in env.sim.model.body_names:
-    if "cube_main" in body_name:
-        qpos_addr = env.sim.model.get_joint_qpos_addr("cube_joint0")
-        env.sim.data.qpos[qpos_addr[0]:qpos_addr[0]+7] = np.array([5.0, 5.0, 0.0, 1, 0, 0, 0])  # pos + unit quaternion
-        env.sim.forward()
+    print("Received command:", user_command)
+    print("Generated symbolic plan:")
+    print("With the explanation:", response_json.get("explanation", "N/A"))
+    print(symbolic_plan)
 
-# print the objects information
-for obj in env.object_metadata:
-    body_id = env.sim.model.body_name2id(obj["name"]+'_main') # Append '_main' for MuJoCo body name
-    pos = env.sim.data.body_xpos[body_id]
-    quat = env.sim.data.body_xquat[body_id]
-    print(f"{obj['name']} position: {pos}, quaternion: {quat}")
+    # --- STEP 2: Create environment ---
+    env = MultiObjectLift(
+        robots="Panda",
+        controller_configs=controller,
+        has_renderer=True
+    )
+    env.reset()
 
-# --- STEP 3: Execute symbolic plan ---
-executor = SkillExecutor(env)
-executor.execute_plan(symbolic_plan)
-# executor.idle()
+    for _ in range(10):
+        env.step(np.zeros(env.action_dim))
+        env.render()
 
-obj_pos = executor.get_all_object_positions()
-print("Final object positions:")
-for obj_name, pos in obj_pos.items():
-    print(f"{obj_name}: {pos}")
+    for obj in env.object_metadata:
+        body_id = env.sim.model.body_name2id(obj["name"] + '_main')
+        pos = env.sim.data.body_xpos[body_id]
+        quat = env.sim.data.body_xquat[body_id]
+        print(f"{obj['name']} position: {pos}, quaternion: {quat}")
+
+    # --- STEP 3: Execute plan ---
+    executor = SkillExecutor(env)
+    executor.execute_plan(symbolic_plan)
+
+    # --- STEP 4: Report positions ---
+    obj_info = executor.get_all_object_descriptions()
+    print("Final object positions:")
+    for obj_name, obj in response_json["current_objects"].items():
+        print(f"{obj_name} - Position: {obj['position']}, Shape: {obj['shape']}, Color: {obj['color']}")

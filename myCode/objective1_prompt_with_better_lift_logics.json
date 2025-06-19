@@ -1,5 +1,4 @@
 {
-    "task": "move the red cylinder to (0.1,0.1,0.8)",
     "environment": {
       "objects": [
         {
@@ -95,7 +94,37 @@
           ["move", [0.1, 0.1, 0.8]],
           ["gripper_open"]
         ]
-      }
-    ],
-    "instructions" :"DON'T use the object properties, like this [['move', {'name': 'obj2', 'shape': 'cube', 'color': 'green', 'position': [-0.2, 0.2], 'size': 0.025}], in the symbolic plan."
-  }
+      },
+      {
+          "task": "put the red cylinder and the blue cube together",
+          "plan": [
+            ["move", "obj3"],
+            ["grip_and_pickup", "obj3"],
+            ["move", [0.2, 0.0, 0.8]],
+            ["gripper_open"]
+          ],
+          "explanation": "Move obj3 toward obj1. posA=(0.2,0.2), posB=(0.2,-0.2), direction=(0.0,-0.4), α=0.6 → (0.2,-0.04,0.8)"
+        },
+        {
+          "task": "move the red cube close to the green cube",
+          "plan": [
+            ["move", "obj0"],
+            ["grip_and_pickup", "obj0"],
+            ["move", [-0.2, 0.0, 0.8]],
+            ["gripper_open"]
+          ],
+          "explanation": "Move obj0 toward obj2. posA=(-0.2,-0.2), posB=(-0.2,0.2), direction=(0.0,0.4), α=0.4 → (-0.2,-0.04,0.8)"
+        },
+        {
+          "task": "separate the blue cylinder and the green cube",
+          "plan": [
+            ["move", "obj4"],
+            ["grip_and_pickup", "obj4"],
+            ["move", [0.2, -0.4, 0.8]],
+            ["gripper_open"]
+          ],
+          "explanation": "Move obj4 away from obj2. posA=(0.0,0.0), posB=(-0.2,0.2), direction=(-0.2,0.2), α=-0.5 → (0.0,0.0) + (-0.1,0.1) = (-0.1,0.1,0.8)"
+        }
+      ],
+    "instructions": "DON'T use the object properties (e.g., dicts) in the symbolic plan. For ambiguous commands like 'put A and B together' or 'move A close to B', avoid stacking. Instead, move object A toward object B using a directional vector with a scaling factor α (0 < α < 1), and place it on the same table height (z=0.8). For 'separate A and B', move object A away from B by using α < 0. Always return 3-element coordinates in [x, y, z] format."
+}

@@ -19,6 +19,9 @@ class SkillExecutor:
             self._move_ee(above_pos + target_pos)  # Move above the object
             target_pos[2] += 0.07  # Move above the object
         else:
+            # fill the index 2 as 0.8 as default Z position if the target is a coordinate as two elements list
+            if len(target) == 2:
+                target = list(target) + [0.8]
             target_pos = np.array(target)
             self._move_ee(above_pos + target_pos)  # Move above the coordinate
             target_pos[2] += 0.025 # Adjust Z to be above the target position to avoid collision with the table
@@ -114,17 +117,38 @@ class SkillExecutor:
             self.env.render()
             time.sleep(0.01)
     
-    def get_all_object_positions(self):
+    def get_all_object_descriptions(self):
         """
-        Return a dictionary mapping object names (without '_main' suffix)
-        to their position coordinates.
+        Return a dictionary mapping object names to their full description,
+        including name, shape, color, position, and size — suitable for ObjectSpec.
         """
-        object_positions = {}
-        for i, body_name in enumerate(self.env.sim.model.body_names):
-            if body_name.endswith('_main'):
-                obj_name = body_name.replace('_main', '')
-                pos = self.env.sim.data.body_xpos[i]
-                object_positions[obj_name] = np.array(pos)
-                print(f"{obj_name} position: {pos}")
-        return object_positions
+        object_descriptions = {}
+        for obj in self.env.object_metadata:
+            name = obj["name"]
+            shape = obj.get("shape", "cube")  # fallback
+            color = obj.get("color", "red")   # fallback
+            size = obj.get("size", 0.025)
+
+            body_name = name + "_main"
+            if body_name in self.env.sim.model.body_names:
+                body_id = self.env.sim.model.body_name2id(body_name)
+                pos = self.env.sim.data.body_xpos[body_id]
+                object_descriptions[name] = {
+                    "name": name,
+                    "shape": shape,
+                    "color": color,
+                    "position": pos.tolist(),
+                    "size": size
+                }
+        return object_descriptions
+    
+    def reset_robot_only(self):
+        """
+        Reset the robot to its initial position without resetting the environment.
+        This is useful for reusing the same environment instance.
+        """
+        self.env._reset_robot()
+        self.env._set_robot_pos(self.initial_pos)
+        self.env._set_robot_quat([1, 0, 0, 0])
+
 
