@@ -58,7 +58,8 @@ class SkillExecutor:
 
             action = np.concatenate([error * 3, [0, 0, 0], [grip_action]])
             self.env.step(action)
-            self.env.render()
+            if self.env.viewer is not None:
+                self.env.render()
 
             if np.linalg.norm(error) < threshold:
                 return True
@@ -69,7 +70,8 @@ class SkillExecutor:
         action = np.array([0, 0, 0, 0, 0, 0, state])
         for _ in range(10):
             self.env.step(action)
-            self.env.render()
+            if self.env.viewer is not None:
+                self.env.render()
         time.sleep(1)
 
     def idle(self, mode='release', duration=1):
@@ -107,6 +109,8 @@ class SkillExecutor:
         steps = int(duration * 500)
         for _ in range(steps):
             self.env.step(action)
+            if self.env.viewer is not None:
+                self.env.viewer()
             self.env.render()
             time.sleep(0.01)
     

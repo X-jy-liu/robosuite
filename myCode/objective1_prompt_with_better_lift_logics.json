@@ -97,5 +97,5 @@
         ]
       }
     ],
-    "instructions" :"DON'T use the object properties, like this [['move', {'name': 'obj2', 'shape': 'cube', 'color': 'green', 'position': [-0.2, 0.2], 'size': 0.025}], in the symbolic plan. If the command involes an object that is not in the environment, you should not use it in the symbolic plan. For example, if the task is to lift a green cube, but there is no green cube in the environment, return 'error: The command involves objects not existing'."
+    "instructions" :"DON'T use the object properties, like this [['move', {'name': 'obj2', 'shape': 'cube', 'color': 'green', 'position': [-0.2, 0.2], 'size': 0.025}], in the symbolic plan."
   }
