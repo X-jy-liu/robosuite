@@ -2,7 +2,7 @@
 
 import json
 from fastapi.testclient import TestClient
-from app import app  # Your FastAPI LLM app
+from myCode.app import app  # Your FastAPI LLM app
 from config_controller import controller
 from myCode.skill_executor import SkillExecutor
 from myCode.my_env.multi_object_lift import MultiObjectLift

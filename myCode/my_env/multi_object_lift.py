@@ -68,3 +68,19 @@ class MultiObjectLift(Lift):
         self.sim.model.cam_pos[cam_id] = [0.0, 0.0, 1.5]  # Adjust height as needed
         self.sim.model.cam_quat[cam_id] = [1.0, 0.0, 0.0, 0.0]  # Look straight down
         self.sim.model.cam_fovy[cam_id] = 60  # Smaller FOV to zoom in tighter
+
+    def _reset_robot(self):
+        """
+        Reset the robot joint positions and gripper state without resetting the entire environment.
+        Intended to be called when object layout remains unchanged but robot should return to rest.
+        """
+        # Reset robot joint positions to their default (rest) state
+        self.robots[0].reset(deterministic=True)
+
+        # Set gripper state to open
+        if hasattr(self.robots[0], "gripper"):
+            self.robots[0].gripper.set_action(-1)  # Fully open
+
+        # Sync simulation data with these new initial states
+        self.sim.forward()
+

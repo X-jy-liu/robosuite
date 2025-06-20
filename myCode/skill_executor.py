@@ -150,5 +150,3 @@ class SkillExecutor:
         self.env._reset_robot()
         self.env._set_robot_pos(self.initial_pos)
         self.env._set_robot_quat([1, 0, 0, 0])
-
-

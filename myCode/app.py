@@ -8,10 +8,6 @@ import json
 from pathlib import Path
 import numpy as np
 
-from robosuite.environments.manipulation.lift import Lift
-from robosuite.models.objects import BoxObject, CylinderObject
-from robosuite.utils.mjcf_utils import add_to_dict
-
 from myCode.skill_executor import SkillExecutor
 from config_controller import controller
 from myCode.my_env.multi_object_lift import MultiObjectLift
@@ -86,6 +82,21 @@ def construct_prompt(payload: PromptInput, command: str, mode: str = "chain", in
 
     {task_instruction}
 
+    Note:
+    For tasks like “move close to” or “put together” 
+    - First compute the direction vector between the two objects.
+    - Then choose an interpolation factor α ∈ [0, 1] and move one object along that direction.
+    - Before finalizing the plan, **check whether the final distance between the two objects is at least 0.06**.
+    - If the α results in a distance < 0.06 (too close / overlap), **reduce α** accordingly.
+    - You must explain each of these steps before outputting the symbolic plan.
+
+    For tasks like “separate A and B”:
+    - Compute the direction from A to B.
+    - Reverse the direction to increase separation.
+    - Choose a reasonable interpolation factor α (e.g., 1.0 for full length, >1.0 to increase it).
+    - There is no strict constraint on separation distance, but you should ensure the final distance is larger than before.
+    - Your choice of α may be revised later based on scene layout or user feedback.
+
     First, verify if the command is valid based on the current environment objects.
 
     If the command references any objects that do not exist, or violates spatial constraints, explain the issue clearly.
@@ -105,7 +116,7 @@ def construct_prompt(payload: PromptInput, command: str, mode: str = "chain", in
     <valid Python list of tuples>
 
     """.strip()
-    print("Environment objects passed to LLM:")
+    print("Environment objects passed to LLM from the base prompt:")
     for obj in payload.environment.get("objects", []):
         print(vars(obj))
 
@@ -121,6 +132,8 @@ def call_llm(prompt: str):
     )
 
     content = response["choices"][0]["message"]["content"]
+    # Debugging output
+    print("Raw LLM response: ", content)
 
     try:
         explanation = extract_block(content, "Explanation:")
@@ -178,17 +191,28 @@ def check_scene_consistency(current_objs: List[ObjectSpec], expected_objs: List[
     """
     Raises ValueError if the current scene deviates too much from the prompt baseline.
     Compares only positions of objects with the same name.
+    If expected position is missing z, it infers based on shape.
     """
     mismatches = []
     expected_dict = {obj.name: obj for obj in expected_objs}
 
     for obj in current_objs:
         if obj.name in expected_dict:
-            expected_pos = np.array(expected_dict[obj.name].position)
-            current_pos = np.array(obj.position)
-            dist = np.linalg.norm(expected_pos - current_pos)
+            expected = expected_dict[obj.name]
+            cur_pos = np.array(obj.position[:3])  # Use actual 3D from simulator
+
+            # --- Handle expected position autofill ---
+            table_height = 0.8
+            exp_pos_raw = expected.position
+            if len(exp_pos_raw) == 2:
+                z_val = table_height + 0.0125 # if expected.shape == "cube" else 0.25
+                exp_pos = np.array([*exp_pos_raw, z_val])
+            else:
+                exp_pos = np.array(exp_pos_raw[:3])
+
+            dist = np.linalg.norm(exp_pos - cur_pos)
             if dist > threshold:
-                mismatches.append((obj.name, dist, current_pos.tolist(), expected_pos.tolist()))
+                mismatches.append((obj.name, dist, cur_pos.tolist(), exp_pos.tolist()))
     
     if mismatches:
         details = "\n".join([
@@ -196,6 +220,8 @@ def check_scene_consistency(current_objs: List[ObjectSpec], expected_objs: List[
             for name, dist, cur, exp in mismatches
         ])
         raise ValueError(f"🚨 Scene mismatch detected:\n{details}")
+    else:
+        print("✅ Scene consistency check passed.")
 
 
 def load_default_prompt(path="prompt.json") -> PromptInput:
@@ -216,12 +242,26 @@ SESSION = {
 async def lifespan(app: FastAPI):
     prompt_path = Path('/home/jingyang/robosuite/myCode/objective1_prompt_with_better_lift_logics.json')
     try:
-        SESSION["base_prompt"] = load_default_prompt(prompt_path)
+        base_prompt = load_default_prompt(prompt_path)
+        SESSION["base_prompt"] = base_prompt
+        # Load real scene state
+        raw_objects = sim.get_current_state()
+        scene_objects = [ObjectSpec(**obj) for obj in raw_objects.values()]
+        expected_objects = base_prompt.environment.get("objects", [])
+        # Compare to expected prompt state
+        print("🔍 Checking scene consistency at startup...")
+        check_scene_consistency(
+            current_objs=scene_objects,
+            expected_objs=expected_objects, # loaded from prompt
+            threshold=0.05  # or 0.01 if stricter
+        )
+
+
         SESSION["initial_command"] = None
         SESSION["history"] = []
         print("✅ Loaded pre-defined.json at startup.")
     except Exception as e:
-        print(f"⚠️ Failed to load prompt.json: {e}")
+        print(f"⚠️ Failed to load prompt: {e}")
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -286,7 +326,7 @@ def chat_step(command: str, mode: str = None):
 def reset_scene_and_robot():
     global sim
     try:
-        sim.executor.idle_robot()  # stop any motion safely
+        sim.executor.idle()  # stop any motion safely
         sim.env.close()  # close rendering
         sim = SimWrapper()  # reinitialize everything
         SESSION["initial_command"] = None
