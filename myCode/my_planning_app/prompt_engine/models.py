@@ -1,5 +1,5 @@
 # prompt_engine/models.py
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Dict
 
 
@@ -46,3 +46,9 @@ class PromptInput(BaseModel):
     available_functions: Dict[str, FunctionSpec]
     examples: List[dict] = []
     instructions: str = ""
+
+class ChatRequest(BaseModel):
+    command: str = Field(..., example="Put the red cube next to the green cube")
+    task_type: str = Field(..., example="ambiguous")
+    mode: str = Field(...)
+

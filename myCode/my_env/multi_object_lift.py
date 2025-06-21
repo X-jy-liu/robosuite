@@ -10,7 +10,7 @@ class MultiObjectLift(Lift):
     def _load_model(self):
         super()._load_model()
         table_z = self.table_offset[2]
-        half_height = 0.0125  # Half height for objects
+        half_height = 0.025  # Half height for objects
         cylinder_calibration = 0.0 # Calibration offset for cylinder height
         # checking the height of the table
         self.object_metadata = []  # Store object info for later access

@@ -1,0 +1,35 @@
+{
+  "instructions": [
+    "DON'T use the object properties (e.g., dicts) in the symbolic plan.",
+    "For ambiguous commands like 'put A and B together' or 'move A close to B', avoid stacking.",
+    "Instead, move object A toward object B using a directional vector with a scaling factor α (0 < α < 1).",
+    "Place the object on the same table height (z = 0.8).",
+    "For 'separate A and B', move object A away from B by using α < 0.",
+    "Always return 3-element coordinates in [x, y, z] format when the target of 'move' function is a coordinate.",
+    
+    "For 'move close to' or 'put together':",
+    "- First compute the direction vector between the two objects.",
+    "- Choose an interpolation factor α ∈ [0, 1] and move one object along that direction.",
+    "- Ensure the final distance between the two objects is at least 0.075.",
+    "- If α results in a distance < 0.06, reduce α accordingly.",
+    "- Explain each of these steps before outputting the symbolic plan.",
+
+    "For 'separate A and B':",
+    "- Compute the direction from A to B and reverse it to increase separation.",
+    "- Choose a reasonable α (e.g., 1.0 or >1.0).",
+    "- There is no strict constraint on the final distance, but ensure it's greater than the original.",
+    "- You may revise α based on the scene layout or user feedback.",
+
+    "Always verify that object names in the command exist in the current environment.",
+    "If an object is missing or the task violates spatial constraints, clearly explain the issue.",
+    
+    "If the task is valid:",
+    "- Explain how the symbolic plan is generated, using object positions, geometry, and available functions.",
+    "- Then return the symbolic plan.",
+    
+    "If you're unsure how to proceed, ask the user for clarification.",
+    
+    "Respond in the following format:",
+    "Explanation:\n<your reasoning>\n\nSymbolic Plan:\n<valid Python list of tuples>"
+  ]
+}

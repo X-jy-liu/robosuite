@@ -15,10 +15,21 @@ def extract_block(text: str, header: str) -> str:
 def format_examples(example_list):
     if not example_list:
         return ""
+    
     formatted = []
     for ex in example_list:
         ex_task = ex.get("task", "")
         ex_plan = ex.get("plan", [])
-        plan_str = "\n  ".join([str(tuple(step)) for step in ex_plan])
-        formatted.append(f'Example Task: "{ex_task}"\n  Plan:\n  {plan_str}')
+        ex_explanation = ex.get("explanation", "")
+
+        plan_str = "\n    ".join([str(tuple(step)) for step in ex_plan])
+        block = f'Example Task: "{ex_task}"\n  Plan:\n    {plan_str}'
+
+        if ex_explanation:
+            indented_explanation = ex_explanation.replace("\n", "\n    ")
+            block += "\n  Explanation:\n    " + indented_explanation
+
+        formatted.append(block)
+
     return "\n\n" + "\n\n".join(formatted)
+

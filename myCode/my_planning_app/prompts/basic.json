@@ -1,0 +1,19 @@
+{
+  "examples": [
+    {
+      "task": "lift the green cube",
+      "plan": [["move", "obj2"], ["grip_and_pickup", "obj2"]],
+      "explanation": "Step 1: Identify the target object — the green cube (obj2)\nStep 2: Move the gripper above the green cube using the symbolic action ['move', 'obj2']\nStep 3: Lift the object by executing ['grip_and_pickup', 'obj2'], which picks it up to the standard height"
+    },
+    {
+      "task": "stack green cube on red cube",
+      "plan": [["move", "obj2"], ["grip_and_pickup", "obj2"], ["move", "obj0"], ["gripper_open"]],
+      "explanation": "Step 1: Identify the green cube (obj2) as the object to be stacked\nStep 2: Move above the green cube using ['move', 'obj2'], which ensures an appropriate height for safe pickup\nStep 3: Pick up the green cube with ['grip_and_pickup', 'obj2'], lifting it to a standard height that is hard-coded to avoid collisions\nStep 4: Move to the position of the red cube (obj0) using ['move', 'obj0'], where the gripper height is also hard-coded to allow safe stacking\nStep 5: Release the green cube by executing ['gripper_open'], placing it neatly on top of the red cube\n⚠️ Note: This operation assumes proper vertical alignment to prevent tipping or overlap"
+    },
+    {
+      "task": "move the red cylinder to (0.1,0.1,0.8)",
+      "plan": [["move", "obj3"], ["grip_and_pickup", "obj3"], ["move", [0.1, 0.1, 0.8]], ["gripper_open"]],
+      "explanation": "Step 1: Identify the red cylinder (obj3) as the object to be relocated\nStep 2: Move above the red cylinder using ['move', 'obj3'], which positions the gripper at a safe height for grasping\nStep 3: Pick up the object using ['grip_and_pickup', 'obj3'], lifting it to a predefined height (z = 0.8) to avoid collisions\nStep 4: Move to the target Cartesian coordinate using ['move', [0.1, 0.1, 0.8]]\nStep 5: Release the red cylinder by executing ['gripper_open'], placing it precisely at the target location."
+    }
+  ]
+}

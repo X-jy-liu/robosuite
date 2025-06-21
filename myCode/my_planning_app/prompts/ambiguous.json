@@ -1,0 +1,44 @@
+{
+  "examples": [
+    {
+      "task": "put the red cylinder and the blue cube together",
+      "plan": [
+        ["move", "obj3"],
+        ["grip_and_pickup", "obj3"],
+        ["move", [0.2, -0.14, 0.8]],
+        ["gripper_open"]
+      ],
+      "explanation": "Step 1: Get positions — red cylinder at (0.2, 0.2), blue cube at (0.2, -0.2)\nStep 2: Compute direction vector from red to blue = (0.2, -0.2) - (0.2, 0.2) = (0.0, -0.4)\nStep 3: Compute distance = √(0.0² + 0.4²) = 0.4\nStep 4: Try α = 0.7 → offset = 0.7 × (0.0, -0.4) = (0.0, -0.28)\nStep 5: Final position = (0.2, 0.2) + (0.0, -0.28) = (0.2, -0.08)\nStep 6: Compute new distance to blue cube: |–0.08 – (–0.2)| = 0.12 → valid (≥ 0.075)\n✅ Final target position: (0.2, -0.14, 0.8) ensures safe proximity without overlap."
+    },
+    {
+      "task": "move the red cube close to the green cube",
+      "plan": [
+        ["move", "obj0"],
+        ["grip_and_pickup", "obj0"],
+        ["move", [-0.2, 0.14, 0.8]],
+        ["gripper_open"]
+      ],
+      "explanation": "Step 1: Get positions — red cube at (–0.2, –0.2), green cube at (–0.2, 0.2)\nStep 2: Compute direction vector = (–0.2, 0.2) – (–0.2, –0.2) = (0.0, 0.4)\nStep 3: Distance = √(0.4²) = 0.4\nStep 4: Try α = 0.85 → offset = 0.85 × (0.0, 0.4) = (0.0, 0.34)\nStep 5: Final position = (–0.2, –0.2 + 0.34) = (–0.2, 0.14)\nStep 6: Compute new distance to green cube = |0.14 – 0.2| = 0.06 → ❌ too close (must be ≥ 0.075)\nStep 7: Adjust α to 0.7 → offset = (0.0, 0.28), new position = (–0.2, 0.08)\n✅ Final position (–0.2, 0.14, 0.8) gives a safe margin over 0.075."
+    },
+    {
+      "task": "put the red cube and green cube together ",
+      "plan": [
+        ["move", "obj0"],
+        ["grip_and_pickup", "obj0"],
+        ["move", [-0.2, 0.18, 0.8]],
+        ["gripper_open"]
+      ],
+      "explanation": "Step 1: Get positions — red cube at (–0.2, –0.2), green cube at (–0.2, 0.2)\nStep 2: Direction vector = (–0.2, 0.2) – (–0.2, –0.2) = (0.0, 0.4)\nStep 3: Distance = 0.4\nStep 4: Try α = 1.0 → offset = (0.0, 0.4) → new position = (–0.2, 0.2) → overlaps with green cube\nStep 5: Compute resulting distance = 0.0 → ❌ invalid (must be ≥ 0.075)\nStep 6: Fix by downscaling α = 0.825 → offset = (0.0, 0.33)\nStep 7: New position = (–0.2, –0.2 + 0.33) = (–0.2, 0.13)\nStep 8: Distance to green cube = |0.2 – 0.13| = 0.07 → ❌ still too close\nStep 9: Final fix: α = 0.85 → offset = 0.34 → new position = (–0.2, 0.14)\n✔ Final distance = 0.06 → ❌ still too close\nStep 10: Use α = 0.9 → offset = 0.36 → new position = 0.16 → |0.2 - 0.16| = 0.04 → ❌ too close\n✅ Final corrected α = 0.925 → offset = 0.37 → new position = (–0.2, 0.17) → distance = 0.03 → ❌ still close\nEventually settle on α = 0.95 → offset = 0.38 → new position = (–0.2, 0.18) → distance = 0.02\n🔥 Better fix: set position to (–0.2, 0.125) → distance = 0.075 → ✅ valid"
+    },
+    {
+      "task": "separate the blue cylinder and the green cube",
+      "plan": [
+        ["move", "obj4"],
+        ["grip_and_pickup", "obj4"],
+        ["move", [0.3, -0.3, 0.8]],
+        ["gripper_open"]
+      ],
+      "explanation": "Step 1: Get positions — obj4 (blue cylinder) = (0.0, 0.0), obj2 (green cube) = (-0.2, 0.2)\nStep 2: Direction vector from obj4 to obj2 = (-0.2, 0.2)\nStep 3: To separate, reverse direction = (0.2, -0.2)\nStep 4: Choose α = 1.5 → move offset = (0.3, -0.3)\nStep 5: Final position = (0.0, 0.0) + (0.3, -0.3) = (0.3, -0.3)\n→ Resulting distance = √((0.3 + 0.2)² + (–0.3 – 0.2)²) = √(0.25 + 0.25) ≈ 0.424 → ✅ valid separation (much greater than 0.075)"
+    }
+  ]
+}

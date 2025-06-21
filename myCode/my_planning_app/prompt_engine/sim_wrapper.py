@@ -2,6 +2,7 @@
 from myCode.skill_executor import SkillExecutor
 from myCode.config_controller import controller
 from myCode.my_env.multi_object_lift import MultiObjectLift
+import time
 
 class SimWrapper:
     def __init__(self):
@@ -28,5 +29,6 @@ class SimWrapper:
         self.executor.reset_robot_only()
 
     def idle_and_close(self):
-        self.executor.idle()
+        time.sleep(1)
         self.env.close()
+        self.env = None
