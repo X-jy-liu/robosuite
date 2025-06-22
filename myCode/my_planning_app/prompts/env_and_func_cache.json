@@ -1,23 +1,12 @@
 {
   "environment": {
     "objects": [
-      { "name": "obj0", "shape": "cube", "color": "red", "position": [0.121, -0.128], "size": 0.05 },
-      { "name": "obj1", "shape": "cube", "color": "blue", "position": [-0.199, 0.12], "size": 0.05 },
-      { "name": "obj2", "shape": "cube", "color": "blue", "position": [-0.039, -0.235], "size": 0.05 },
-      { "name": "obj3", "shape": "cube", "color": "blue", "position": [0.075, 0.022], "size": 0.05 },
-      { "name": "obj4", "shape": "cube", "color": "green", "position": [0.045, 0.155], "size": 0.05 }
+      { "name": "obj0", "shape": "cube", "color": "red", "position": [-0.2, -0.2], "size": 0.025 },
+      { "name": "obj1", "shape": "cube", "color": "blue", "position": [0.2, -0.2], "size": 0.025 },
+      { "name": "obj2", "shape": "cube", "color": "green", "position": [-0.2, 0.2], "size": 0.025 },
+      { "name": "obj3", "shape": "cylinder", "color": "red", "position": [0.15, 0.15], "size": 0.025 },
+      { "name": "obj4", "shape": "cylinder", "color": "blue", "position": [0.0, 0.0], "size": 0.025 }
     ]
-  },
-  "shape_details": {
-    "cube": {
-      "size": [0.05, 0.05, 0.05],
-      "description": "Each cube has equal dimensions of 0.05 meters."
-    },
-    "cylinder": {
-      "height": 0.05,
-      "diameter": 0.05,
-      "description": "Each cylinder is 0.05 meters tall and 0.05 meters in diameter."
-    }
   },
   "available_functions": {
     "move": {
