@@ -1,0 +1,11 @@
+{
+  "environment": {
+    "objects": [
+      { "name": "obj0", "shape": "cube", "color": "red", "position": [-0.2, -0.2], "size": 0.05 },
+      { "name": "obj1", "shape": "cube", "color": "blue", "position": [0.2, -0.2], "size": 0.05 },
+      { "name": "obj2", "shape": "cube", "color": "green", "position": [-0.2, 0.2], "size": 0.05 },
+      { "name": "obj3", "shape": "cylinder", "color": "red", "position": [0.15, 0.15], "size": 0.05 },
+      { "name": "obj4", "shape": "cylinder", "color": "blue", "position": [0.0, 0.0], "size": 0.05 }
+    ]
+  }
+}

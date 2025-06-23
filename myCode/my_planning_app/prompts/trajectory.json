@@ -1,0 +1,19 @@
+{
+  "examples": [
+    {
+      "task": "move blue cube to point 4 vida poinst 2 without collision",
+      "plan": [["move", [0.2,-0.2,0.875]], ["move", [0.2,-0.2,0.825]], ["gripper_close"], ["move", [0.2,-0.2,0.835]], ["move", [0.1,-0.1,0.835]], ["move", [-0.1,-0.1, 0.835]], ["move", [0.05, 0.2, 0.835]], ["gripper_open"]],
+      "explanation": "Step 1: Move the gripper to the position of the blue cube at (0.2, -0.2, 0.825) but with a certrain distance above to prepare to grip, using the action ['move', [0.2, -0.2, 0.825 + 0.05]] -> ['move', [0.2,-0.2, 0.875]]\nStep 2: Lower the gripper to the blue cube's geometrical centre ['move', [0.2, -0.2, 0.825]] and close the gripper to grip the cube ['gripper_close'].\nStep 3: Move the gripper (with the object) a bit higher to detach from the table vertically and avoid collision with the table, using the action ['move', [0.1,-0.1, 0.835]]. The height won't exceed 0.835 in later manipulation to avoid easy collision-free trajectories.\nStep 4: Move the gripper to the point 2. There is no objects lying between point 2 and [0.2, -0.2, 0.835], so the trajectory is collision-free. The action is ['move', [0.1,-0.1, 0.835]].\nStep 5: Move the griper to point 4. But it will collide with the blue cylinder at [0.0, 0.0, 0.825], so we need an intermediate point to avoid the blue cylinder. Here we use ['move', [-0.1, -0.1, 0.835]] which can be alternated by other points as long as the trajectory is collision-free.\nStep 6: Trying to reach point 4 from [-0.1, -0.1, 0.835], we check the trajectory between [-0.1, -0.1, 0.835] and [0.05, 0.2, 0.835]. There is no objects lying between these two points, so the trajectory is collision-free and the action is ['move', [0.05, 0.2, 0.0835]]\nStep 7: Finally, we open the gripper to release the blue cube at point 4 ['gripper_open']."
+    },
+    {
+      "tasks": "move the blue cude to cycle around the blue cylinder for once and return to the original position",
+      "plan": [],
+      "explanation": ""
+    },
+    {
+      "tasks": "move the red cylinder to pass point 2, point 3, and point 5 in order",
+      "plan": [],
+      "explanation": ""
+    }
+  ]
+}

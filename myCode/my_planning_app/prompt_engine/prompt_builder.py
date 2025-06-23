@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from prompt_engine.utils import format_examples
+from .utils import format_examples
 
 # Path config (adjust if needed)
 # load home directory
@@ -45,6 +45,12 @@ def construct_prompt(command: str,
     for name, spec in available_functions.items()
     ])
 
+    # 4. Format scene configuration
+    scene_config_example = load_json("scene_config_example.json")["environment"]
+    scene_config = "\n".join([
+        f"- {obj['name']}: shape={obj['shape']}, color={obj['color']}, position={obj['position']}, size={obj['size']}"
+        for obj in scene_config_example.get("objects", [])
+    ])
 
     example_blocks = format_examples(examples)
 
@@ -64,17 +70,22 @@ def construct_prompt(command: str,
     prompt = f"""
 You are a robot planning assistant that generates symbolic plans based on high-level language commands.
 
-Environment Objects:
-{obj_descriptions}
-
 Available Functions:
 {func_descriptions}
 
 Instructions:
 {instruction_block}
 
-Examples:
+Example Scene and Tasks:
+
+Example Scene:
+{scene_config}
+
+Example Tasks with explained symbolic plans matching the scene:
 {example_blocks}
+
+Current Scene:
+{obj_descriptions}
 
 {task_instruction}
 """.strip()

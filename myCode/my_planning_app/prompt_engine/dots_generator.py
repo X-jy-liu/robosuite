@@ -1,7 +1,7 @@
 import random
 import json
 import math
-from prompt_engine.models import ObjectSpec
+from .models import ObjectSpec
 from typing import List, Tuple, Optional
 from pathlib import Path
 
@@ -57,16 +57,40 @@ class DotGenerator:
         if len(valid_dots) < num_dots:
             print(f"⚠️ Only found {len(valid_dots)} valid dots after {max_attempts} attempts.")
         return valid_dots
+    
+    def save_dots_to_json(self, dots: List[Tuple[float, float]], output_path: Path):
+        """
+        Save the generated dots to a JSON file in the format:
+        {
+            "reference_points": {
+                "point_1": [x1, y1],
+                "point_2": [x2, y2],
+                ...
+            }
+        }
+        """
+        reference_points = {
+            f"point_{i + 1}": [x, y] for i, (x, y) in enumerate(dots)
+        }
+
+        with open(output_path, "w") as f:
+            json.dump({"reference_points": reference_points}, f, indent=4)
+
+        print(f"✅ Saved {len(dots)} dots to: {output_path}")
+
 
 if __name__ == "__main__":
     # Example usage
     from pathlib import Path
 
     HOME_DIR = Path.home()
-    env_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "env_and_func.json"
+    env_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "scene_config_example.json"
 
     generator = DotGenerator(env_path)
     dots = generator.generate_valid_dots(num_dots=5, clearance=0.08)
+    # save the dots to a JSON file
+    output_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "generated_dots.json"
+    generator.save_dots_to_json(dots, output_path)
 
     for dot in dots:
         print(f"Dot at position: {dot}")

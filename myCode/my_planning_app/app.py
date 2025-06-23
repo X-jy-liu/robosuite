@@ -13,6 +13,9 @@ from prompt_engine.dots_generator import DotGenerator
 import time
 from datetime import datetime
 import random
+from fastapi.responses import HTMLResponse
+import json
+
 
 app = FastAPI()
 
@@ -57,9 +60,11 @@ def init_session(req: InitSessionRequest):
         # Dots
         dots_generator = DotGenerator(save_path)
         valid_dots = dots_generator.generate_valid_dots(num_dots=5, clearance=0.08, seed=random.randint(0, 10000))
-        SESSION["reference_dots"] = valid_dots
-        print(f"✅ Generated {len(valid_dots)} valid dots for trajectory generation.")
+        # save the valid dots in .json format
+        dots_output_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "generated_dots.json"
+        dots_generator.save_dots_to_json(valid_dots, dots_output_path)
 
+        SESSION["reference_dots"] = valid_dots
         # Prompt
         base_prompt = load_default_prompt(save_path)
         SESSION["base_prompt"] = base_prompt
@@ -85,6 +90,70 @@ def init_session(req: InitSessionRequest):
 
     except Exception as e:
         return {"error": f"Session initialization failed: {e}"}
+
+@app.get("/show_scene", response_class=HTMLResponse)
+def show_scene():
+    try:
+        raw_objects = SESSION["base_prompt"].environment.get("objects", []) if SESSION["base_prompt"] else []
+        objects = [obj if isinstance(obj, dict) else obj.__dict__ for obj in raw_objects]
+        dots = SESSION["reference_dots"] if SESSION["reference_dots"] else []
+        print(dots)
+
+        return f"""
+        <html>
+        <head>
+            <title>Scene Visualization</title>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        </head>
+        <body>
+            <h2>Scene Objects and Reference Dots</h2>
+            <div id="scenePlot" style="width:90vw;height:80vh;"></div>
+            <script>
+                const objects = {json.dumps(objects)};
+                const dots = {json.dumps(dots)};
+
+                const objTrace = {{
+                    x: objects.map(o => o.position[0]),
+                    y: objects.map(o => o.position[1]),
+                    text: objects.map(o => o.shape + " (" + o.color + ")"),
+                    mode: 'markers+text',
+                    type: 'scatter',
+                    name: 'Objects',
+                    marker: {{ size: 15, color: 'blue' }},
+                    textposition: 'top center'
+                }};
+
+                const dotTrace = {{
+                    x: dots.map(d => d[0]),
+                    y: dots.map(d => d[1]),
+                    mode: 'markers',
+                    type: 'scatter',
+                    name: 'Reference Dots',
+                    marker: {{ size: 10, color: 'red', symbol: 'cross' }}
+                }};
+
+                const layout = {{
+                    title: 'Top-down Scene View',
+                    xaxis: {{
+                        title: 'X Position',
+                        range: [-0.4, 0.4],
+                        constrain: 'domain',
+                    }},
+                    yaxis: {{
+                        title: 'Y Position',
+                        range: [-0.4, 0.4],
+                        scaleanchor: "x"
+                    }},
+                    showlegend: true
+                }};
+
+                Plotly.newPlot('scenePlot', [objTrace, dotTrace], layout);
+            </script>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        return HTMLResponse(f"<h2>Error visualizing scene: {e}</h2>")
 
 @app.post("/chat_step")
 def chat_step(request: ChatRequest):

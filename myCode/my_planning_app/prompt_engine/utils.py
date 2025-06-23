@@ -42,7 +42,8 @@ def log_experiment_entry(entry: dict, filename_prefix: str = "log"):
     LOG_DIR = Path.home() / "robosuite" / "myCode" / "my_planning_app" / "logs"
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{filename_prefix}_{timestamp}.json"
+    initial_command = entry.get("initial_command", "unknown")
+    filename = f"{filename_prefix}_{initial_command}_{timestamp}.json"
     file_path = LOG_DIR / filename
 
     with open(file_path, "w") as f:
@@ -55,13 +56,15 @@ def log_task_summary(SESSION: dict):
         return
 
     initial_cmd = SESSION["initial_command"]
+    initial_cmd_save_format = '_'.join(initial_cmd.split())
+    task_type = SESSION.get("task_type", "unknown")
     full_log = {
-        "initial_command": initial_cmd,
+        "initial_command": initial_cmd_save_format,
         "timestamp": datetime.now().isoformat(),
         "steps": SESSION["current_task_logs"]
     }
 
-    log_experiment_entry(full_log, filename_prefix="task")
+    log_experiment_entry(full_log, filename_prefix=task_type)
 
     # reset task buffer
     SESSION["current_task_logs"] = []
