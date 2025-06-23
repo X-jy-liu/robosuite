@@ -1,7 +1,7 @@
 import random
 import json
 import math
-from models import ObjectSpec
+from prompt_engine.models import ObjectSpec
 from typing import List, Tuple, Optional
 from pathlib import Path
 

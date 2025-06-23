@@ -2,7 +2,7 @@ import random
 import json
 import numpy as np
 from typing import List, Tuple, Optional
-from pathlib import PathDotGenerator
+from pathlib import Path
 
 # Constants
 TABLE_Z = 0.8

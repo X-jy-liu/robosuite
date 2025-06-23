@@ -142,11 +142,11 @@ class SkillExecutor:
                 }
         return object_descriptions
     
-    def reset_robot_only(self):
-        """
-        Reset the robot to its initial position without resetting the environment.
-        This is useful for reusing the same environment instance.
-        """
-        self.env._reset_robot()
-        self.env._set_robot_pos(self.initial_pos)
-        self.env._set_robot_quat([1, 0, 0, 0])
+    # def reset_robot(self):
+    #     """
+    #     Reset the robot to its initial position without resetting the environment.
+    #     This is useful for reusing the same environment instance.
+    #     """
+    #     self.env._reset_robot()
+    #     self.env._set_robot_pos(self.initial_pos)
+    #     self.env._set_robot_quat([1, 0, 0, 0])

@@ -2,14 +2,19 @@
 from myCode.skill_executor import SkillExecutor
 from myCode.config_controller import controller
 from myCode.my_env.multi_object_lift import MultiObjectLift
-import time
+from myCode.config_controller import controller
+from myCode.my_planning_app.prompt_engine.prompt_loader import load_default_prompt
+from myCode.my_planning_app.prompt_engine.models import ObjectSpec
 
 class SimWrapper:
-    def __init__(self):
+    def __init__(self, scene_config_path=None):
+        # Initialize the environment with the controller configuration
+        self.scene_config_path = scene_config_path
         self.env = MultiObjectLift(
             robots="Panda",
             controller_configs=controller,
-            has_renderer=True
+            has_renderer=True,
+            scene_config_path = self.scene_config_path
         )
         self.env.reset()
 
@@ -25,10 +30,61 @@ class SimWrapper:
         print("Executing:", plan)
         self.executor.execute_plan(plan)
 
-    def reset_robot(self):
-        self.executor.reset_robot_only()
+    # def set_object_pose(self, object_name, position, orientation = None):
+    #     """
+    #     Sets the pose of an object in the MuJoCo simulation by name.
+    #     Args:
+    #         object_name (str): name of the object (must match mujoco body name).
+    #         position (list): [x, y, z]
+    #         orientation (list): [x, y, z, w] quaternion
+    #     """
+    #     sim = self.env.sim
 
-    def idle_and_close(self):
-        time.sleep(1)
-        self.env.close()
-        self.env = None
+    #     if orientation is None:
+    #         orientation = [0, 0, 0, 1]
+
+    #     try:
+    #         body_id = sim.model.body_name2id(object_name)
+    #         sim.model.body_pos[body_id] = position
+    #         sim.model.body_quat[body_id] = orientation
+    #         sim.forward()
+    #         print(f"✅ Object '{object_name}' pose set to {position}, {orientation}")
+    #     except Exception as e:
+    #         print(f"❌ Failed to set pose for '{object_name}': {e}")
+
+
+    # def reset_scene(self):
+    #     """
+    #     Reload the initial scene setup without restarting the viewer or creating a new instance.
+    #     """
+    #     try:
+    #         # Load initial scene from config again
+    #         base_prompt = load_default_prompt(self.scene_config_path)
+    #         raw_objects = base_prompt.environment.get("objects", [])
+    #         objects = [ObjectSpec(**obj) for obj in raw_objects.values()]
+    #         print("debugging ...")
+    #         print(f"type of objects: {type(objects)}")
+    #         print(f"objects: {objects}")
+    #         # Reset the environment manually
+    #         self.env.reset()
+
+    #         # Reset objects to initial positions
+    #         for obj in objects:
+    #             name = obj["name"]
+    #             pos = obj["position"]
+    #             self.set_object_pose(name, pos)
+    #     except Exception as e:
+    #         print(f"Error resetting scene: {e}")
+
+    #     # Reset robot (if needed)
+    #     self.reset_robot()
+
+    #     print("🔄 SimWrapper scene reset from saved config.")
+
+    # def reset_robot(self):
+    #     self.executor.reset_robot()
+
+    # def idle_and_close(self):
+    #     time.sleep(1)
+    #     self.env.close()
+    #     self.env = None

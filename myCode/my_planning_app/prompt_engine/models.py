@@ -48,7 +48,10 @@ class PromptInput(BaseModel):
     instructions: str = ""
 
 class ChatRequest(BaseModel):
-    command: str = Field(..., example="Put the red cube next to the green cube")
-    task_type: str = Field(..., example="ambiguous")
+    command: str = Field(..., example="Lift the red cube")
+    task_type: str = Field(..., example="basic")
     mode: str = Field(...)
 
+class InitSessionRequest(BaseModel):
+    regenerate_scene: bool = Field(True, description="Whether to regenerate the scene configuration",
+                            example=True)
