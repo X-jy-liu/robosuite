@@ -22,6 +22,7 @@ app = FastAPI()
 SESSION = {
     "base_prompt": None,
     "initial_command": None,
+    "task_type": None,
     "scene_config_path": None,
     "reference_dots": None,
     "history": [],
@@ -169,6 +170,7 @@ def chat_step(request: ChatRequest):
     SESSION["history"].append((mode, request.command))
 
     prev_objects = sim.get_current_state()
+    SESSION["task_type"] = request.task_type
 
     try:
         prompt = construct_prompt(

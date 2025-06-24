@@ -53,5 +53,5 @@ class ChatRequest(BaseModel):
     mode: str = Field(...)
 
 class InitSessionRequest(BaseModel):
-    regenerate_scene: bool = Field(True, description="Whether to regenerate the scene configuration",
-                            example=True)
+    regenerate_scene: bool = Field(False, description="Whether to regenerate the scene configuration",
+                            example=False)

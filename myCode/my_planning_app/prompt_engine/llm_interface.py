@@ -18,12 +18,20 @@ def call_llm(prompt: str):
     print(content)
     print("---------------------------")
 
+    explanation = extract_block(content, "Explanation:")
+    plan_str = extract_block(content, "Symbolic Plan:")
+
+    # No plan given - return a clarification message
+    if not plan_str.strip():
+        return {
+            "message": content,
+            "symbolic_plan": None,
+            "needs_clarification": True
+        }
     try:
-        explanation = extract_block(content, "Explanation:")
-        plan_str = extract_block(content, "Symbolic Plan:")
         symbolic_plan = ast.literal_eval(plan_str.strip())
     except Exception as e:
-        raise RuntimeError(f"Failed to parse LLM response: {e}")
+        raise RuntimeError(f"Failed to parse the symbolic plan: {e}")
 
     return {
         "explanation": explanation,
