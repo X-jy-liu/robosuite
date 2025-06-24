@@ -1,21 +1,12 @@
 # prompt_engine/models.py
 from pydantic import BaseModel, Field
-from typing import List, Dict
+from typing import List, Dict, Any
 
 
 class FunctionSpec(BaseModel):
-    """
-    Defines a robot function’s input parameters and optional operating modes.
-    Example:
-    {
-        "move": {
-            "params": ["obj", "target_pos"],
-            "modes": ["precise", "fast"]
-        }
-    }
-    """
     params: List[str]
-    modes: List[str] = []
+    description: str
+    examples: List[List[Any]]
 
 
 class ObjectSpec(BaseModel):
@@ -54,4 +45,6 @@ class ChatRequest(BaseModel):
 
 class InitSessionRequest(BaseModel):
     regenerate_scene: bool = Field(False, description="Whether to regenerate the scene configuration",
+                            example=False)
+    regenerate_dots: bool = Field(False, description="Whether to regenerate the dots in the scene",
                             example=False)

@@ -21,6 +21,7 @@ def construct_prompt(command: str,
                      initial_command: Optional[str] = None) -> str:
     # 1. Load base environment and function definitions
     base_data = load_json("env_and_func.json")
+    scene_dots_data = load_json("generated_dots.json")["reference_points"]
     environment = base_data["environment"]
     available_functions = base_data["available_functions"]
 
@@ -29,17 +30,31 @@ def construct_prompt(command: str,
     shared_instructions = shared_instruction_data["instructions"]
 
     # 3. Load task-specific examples
-    example_data = load_json(f"{task_type}.json")
-    examples = example_data["examples"]
+    if task_type == "trajectory":
+        example_data = load_json("trajectory.json")
+        examples = example_data["examples"]
+
+        example_dots_data = load_json("dots_example.json")["reference_points"]
+        example_dots_descriptions = "\n".join([
+            f"{name}: {coord}" for name, coord in example_dots_data.items()
+        ])
+        example_dots_block = f"\n\nReference Points:\n{example_dots_descriptions}"
+    else:
+        example_data = load_json(f"{task_type}.json")
+        examples = example_data["examples"]
 
     # 4. Build object and function descriptions
     obj_descriptions = "\n".join([
-        f"- {obj['name']}: shape={obj['shape']}, color={obj['color']}, position={obj['position']}, size={obj['size']}"
+        f"{obj['name']}: shape={obj['shape']}, color={obj['color']}, position={obj['position']}, size={obj['size']}"
         for obj in environment.get("objects", [])
     ])
+    scene_dots_descriptions = "\n".join([
+            f"{name}: {coord}" for name, coord in scene_dots_data.items()
+        ])
+    scene_dots_block = f"\n\nReference Points:\n{scene_dots_descriptions}"
 
     func_descriptions = "\n\n".join([
-    f"- {name}({', '.join(spec['params'])})\n"
+    f"  {name}({', '.join(spec['params'])})\n"
     f"  Description: {spec['description']}\n"
     f"  Examples: {spec['examples']}"
     for name, spec in available_functions.items()
@@ -48,7 +63,7 @@ def construct_prompt(command: str,
     # 4. Format scene configuration
     scene_config_example = load_json("scene_config_example.json")["environment"]
     scene_config = "\n".join([
-        f"- {obj['name']}: shape={obj['shape']}, color={obj['color']}, position={obj['position']}, size={obj['size']}"
+        f"{obj['name']}: shape={obj['shape']}, color={obj['color']}, position={obj['position']}, size={obj['size']}"
         for obj in scene_config_example.get("objects", [])
     ])
 
@@ -78,14 +93,16 @@ Instructions:
 
 Example Scene and Tasks:
 
-Example Scene:
+Example Scene and reference points (if applicable):
 {scene_config}
+{example_dots_block if task_type == "trajectory" else ""}
 
 Example Tasks with explained symbolic plans matching the scene:
 {example_blocks}
 
-Current Scene:
+Current Scene and reference points (if applicable):
 {obj_descriptions}
+{scene_dots_block if task_type == "trajectory" else ""}
 
 {task_instruction}
 """.strip()
@@ -95,6 +112,6 @@ Current Scene:
 if __name__ == "__main__":
     # Example usage
     command = "put the red cube and blue cube together"
-    task_type = "ambiguous"
+    task_type = "trajectory"  # or "manipulation", "navigation", etc.
     prompt = construct_prompt(command=command, task_type=task_type)
     print(prompt)

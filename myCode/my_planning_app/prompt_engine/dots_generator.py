@@ -14,7 +14,7 @@ class DotGenerator:
         self.env_and_func_path = env_and_func_path
         self.table_bounds = table_bounds
         self.objects: List[ObjectSpec] = self._load_objects()
-        print(f"✅ Loaded {len(self.objects)} objects from: {env_and_func_path}")
+        print(f"Loaded {len(self.objects)} objects from: {env_and_func_path}")
 
     def _load_objects(self) -> List[ObjectSpec]:
         with open(self.env_and_func_path, "r") as f:
@@ -48,11 +48,23 @@ class DotGenerator:
         attempts = 0
         max_attempts = 500
         while len(valid_dots) < num_dots and attempts < max_attempts:
-            x = round(random.uniform(x_min, x_max), 3)
-            y = round(random.uniform(y_min, y_max), 3)
+            # Soft-bias sampling: pick a random object as center
+            obj = random.choice(self.objects)
+            ox, oy = obj.position[:2]
+
+            # Sample from a Gaussian centered at the object
+            x = round(random.gauss(ox, 0.08), 3)  # std deviation controls spread
+            y = round(random.gauss(oy, 0.08), 3)
+
+            # Clamp to table bounds
+            if not (x_min <= x <= x_max and y_min <= y <= y_max):
+                attempts += 1
+                continue
+
             if is_valid_dot(x, y):
                 valid_dots.append((x, y))
             attempts += 1
+
 
         if len(valid_dots) < num_dots:
             print(f"⚠️ Only found {len(valid_dots)} valid dots after {max_attempts} attempts.")
@@ -78,9 +90,22 @@ class DotGenerator:
 
         print(f"✅ Saved {len(dots)} dots to: {output_path}")
 
+    def load_dots_from_json(self, input_path: Path) -> List[Tuple[float, float]]:
+        """
+        Load dots from a JSON file saved using `save_dots_to_json`, and return them as a list of (x, y) tuples.
+        """
+        with open(input_path, "r") as f:
+            data = json.load(f)
+
+        reference_points = data.get("reference_points", {})
+        dots = [tuple(coord) for coord in reference_points.values()]
+        print(f"✅ Loaded {len(dots)} dots from: {input_path}")
+        return dots
+
+
 
 if __name__ == "__main__":
-    # Example usage
+    # Example usage (need to remove the . before models when importing it)
     from pathlib import Path
 
     HOME_DIR = Path.home()
@@ -90,7 +115,8 @@ if __name__ == "__main__":
     dots = generator.generate_valid_dots(num_dots=5, clearance=0.08)
     # save the dots to a JSON file
     output_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "generated_dots.json"
-    generator.save_dots_to_json(dots, output_path)
+    # generator.save_dots_to_json(dots, output_path)
+    print(generator.load_dots_from_json(output_path))
 
     for dot in dots:
         print(f"Dot at position: {dot}")
