@@ -22,8 +22,13 @@
   "available_functions": {
     "move": {
       "params": ["target"],
-      "description": "Target can be one of 'obj0', 'obj1', 'obj2', 'obj3', or 'obj4', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters.",
+      "description": "Target can be one of 'obj0', 'obj1', 'obj2', 'obj3', or 'obj4', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters. The actual position of gripper is adjusted based on the target input by a certain build-in above distance. When it requires precise manipulation in trajectory planning, use the 'gripper_move' function instead.",
       "examples": [["move", "obj1"], ["move", [0.1, 0.1, 0.835]]]
+    },
+    "gripper_move":{
+      "params": ["target"],
+      "description": "Target can only be a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters. It is used for precise manipulation in trajectory planning.",
+      "examples": [["gripper_move", [0.1, 0.1, 0.835]]]
     },
     "grip_and_pickup": {
       "params": ["object"],

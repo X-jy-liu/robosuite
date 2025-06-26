@@ -194,6 +194,9 @@ def chat_step(request: ChatRequest):
             initial_command=SESSION["initial_command"]
         )
         # loggin the interpertation time
+        print("---------- prompt ----------")
+        print(prompt)
+        print("----------------------------")
         start_time = time.time()
         result = call_llm(prompt)
         llm_time = time.time() - start_time

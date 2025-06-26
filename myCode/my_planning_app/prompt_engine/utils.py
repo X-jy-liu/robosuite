@@ -1,10 +1,12 @@
 # prompt_engine/utils.py
 
 import json
+import re
 from pathlib import Path
 from datetime import datetime
+from ast import literal_eval
 
-def extract_block(text: str, header: str) -> str:
+def extract_symbolic_plan_block(text: str, header: str) -> str:
     lines = text.splitlines()
     found = False
     block = []
@@ -15,6 +17,39 @@ def extract_block(text: str, header: str) -> str:
             block.append(line)
         elif line.strip().startswith(header):
             found = True
+    return "\n".join(block).strip()
+
+def extract_symbolic_plan_block(text: str, header: str = "Symbolic Plan") -> str:
+    lines = text.splitlines()
+    found = False
+    block = []
+    for line in lines:
+        if not found:
+            if line.strip().lower().startswith(header.lower()):
+                found = True
+            continue
+        # Collect lines that look like list items
+        if "[" in line and "]" in line:
+            # Strip trailing commas or whitespace
+            clean_line = line.strip().rstrip(",")
+            block.append(clean_line)
+    # Wrap in brackets to make a valid Python list
+    return "[\n" + ",\n".join(block) + "\n]"
+
+def extract_explanation_block(text: str) -> str:
+    lines = text.splitlines()
+    found = False
+    block = []
+    for line in lines:
+        stripped = line.strip()
+        if found:
+            if stripped.lower().startswith("symbolic plan"):
+                break
+            block.append(line)
+        elif stripped.lower().startswith("explanation:"):
+            found = True
+            # Include the "Explanation:" line itself
+            block.append(line)
     return "\n".join(block).strip()
 
 def format_examples(example_list):

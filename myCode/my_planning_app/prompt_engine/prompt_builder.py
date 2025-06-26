@@ -83,15 +83,15 @@ def construct_prompt(command: str,
     instruction_block = "\n".join(shared_instructions) if isinstance(shared_instructions, list) else shared_instructions
 
     prompt = f"""
-You are a robot planning assistant that generates symbolic plans based on high-level language commands.
+You are a symbolic planner for a robot arm. You must generate a collision-free symbolic plan for moving objects in a cluttered scene.
+
+Each object has a position and a radius of 0.05 meters (size = 0.05). Collisions must be avoided by checking that all straight-line path segments between waypoints are at least 0.07 meters away from any object center.
 
 Available Functions:
 {func_descriptions}
 
 Instructions:
 {instruction_block}
-
-Example Scene and Tasks:
 
 Example Scene and reference points (if applicable):
 {scene_config}

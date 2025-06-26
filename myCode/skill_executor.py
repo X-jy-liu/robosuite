@@ -7,7 +7,14 @@ class SkillExecutor:
         self.initial_pos = env._get_observations()["robot0_eef_pos"]
 
     def execute_plan(self, plan):
+        if plan is None:
+            print("[ERROR] Received None as the symbolic plan. Skipping execution.")
+            return
         for step in plan:
+            if not isinstance(step, list) or not step:
+                continue
+            if isinstance(step[0], str) and step[0].startswith("//"):
+                continue
             print(f"Executing: {step}")
             getattr(self, f"do_{step[0]}")(*step[1:])
 
@@ -25,6 +32,10 @@ class SkillExecutor:
             target_pos = np.array(target)
             self._move_ee(above_pos + target_pos)  # Move above the coordinate
             target_pos[2] += 0.025 # Adjust Z to be above the target position to avoid collision with the table
+        self._move_ee(target_pos)
+    
+    def do_gripper_move(self, target):
+        target_pos = np.array(target)
         self._move_ee(target_pos)
 
     def do_grip_and_pickup(self, obj_name):

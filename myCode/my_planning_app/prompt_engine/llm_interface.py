@@ -2,7 +2,7 @@
 import openai
 import os
 import ast
-from prompt_engine.utils import extract_block
+from prompt_engine.utils import extract_symbolic_plan_block, extract_explanation_block
 
 def call_llm(prompt: str):
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -18,8 +18,8 @@ def call_llm(prompt: str):
     print(content)
     print("---------------------------")
 
-    explanation = extract_block(content, "Explanation:")
-    plan_str = extract_block(content, "Symbolic Plan:")
+    explanation = extract_explanation_block(content)
+    plan_str = extract_symbolic_plan_block(content, "Symbolic Plan:")
 
     # No plan given - return a clarification message
     if not plan_str.strip():
