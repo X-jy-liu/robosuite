@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from prompt_engine.prompt_loader import load_default_prompt, load_reference_dots
 from prompt_engine.prompt_builder import construct_prompt
+from prompt_engine.trajectory_prompt_builder import construct_trajectory_prompt
 from prompt_engine.models import ObjectSpec, ChatRequest, InitSessionRequest
 from prompt_engine.llm_interface import call_llm
 from prompt_engine.sim_wrapper import SimWrapper
@@ -14,6 +15,9 @@ import time
 from datetime import datetime
 import random
 from fastapi.responses import HTMLResponse
+from trajectory_planning.json_loader import load_objects_from_json, load_dots_from_json
+from trajectory_planning.rpm_generator import RPMGenerator
+from trajectory_planning.dijkstra_path_from_points import dijkstra_path_from_points,build_symbolic_plan
 import json
 
 
@@ -66,6 +70,15 @@ def init_session(req: InitSessionRequest):
             print("Reusing existing dots ...")
         
         SESSION["reference_dots"] = valid_dots
+        # load the objects and dots specs from .json files
+        scene_json_path = Path.home() / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "env_and_func.json"
+        dots_json_path = Path.home() / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "generated_dots.json"
+        objects_specs = load_objects_from_json(scene_json_path)
+        dots_specs = load_dots_from_json(dots_json_path)
+        graph, nodes = RPMGenerator(objects_specs,dots_specs, max_rpm=1000).build()
+        SESSION["roadmap_graph"] = graph
+        SESSION["roadmap_nodes"] = nodes
+
 
         # === Sim & Prompt Setup ===
         global sim
@@ -187,23 +200,51 @@ def chat_step(request: ChatRequest):
     SESSION["task_type"] = request.task_type
 
     try:
-        prompt = construct_prompt(
-            command=request.command,
-            task_type=request.task_type,
-            mode=mode,
-            initial_command=SESSION["initial_command"]
-        )
-        # loggin the interpertation time
-        print("---------- prompt ----------")
-        print(prompt)
-        print("----------------------------")
-        start_time = time.time()
-        result = call_llm(prompt)
-        llm_time = time.time() - start_time
+        if SESSION["task_type"] != "trajectory":
+            prompt = construct_prompt(
+                command=request.command,
+                task_type=request.task_type,
+                mode=mode,
+                initial_command=SESSION["initial_command"]
+            )
+            # loggin the interpertation time
+            print("---------- prompt ----------")
+            print(prompt)
+            print("----------------------------")
+            start_time = time.time()
+            result = call_llm(prompt,task_type=request.task_type)
+            llm_time = time.time() - start_time
+            symbolic_plan = result["symbolic_plan"]
+        else:
+            prompt = construct_trajectory_prompt(
+                command=request.command,
+                task_type=request.task_type,
+                mode=mode,
+                initial_command=SESSION["initial_command"],
+            )
+            print("---------- prompt ----------")
+            print(prompt)
+            print("----------------------------")
+            start_time = time.time()
+            result = call_llm(prompt,task_type=request.task_type)
+            llm_time = time.time() - start_time
+            trajectory_points = result.get("trajectory_points")
+            # check if the trajectory points are valid, it should be a list of lists. Each inner list has two elements [x, y]
+            if not isinstance(trajectory_points, list) or not all(isinstance(pt, list) and len(pt) == 2 for pt in trajectory_points):
+                return {"error": f"Invalid trajectory points format. Expected a list of [x, y] pairs.\n Received: {trajectory_points}"}
+            _, waypoints = dijkstra_path_from_points( 
+                trajectory_points,
+                SESSION["roadmap_graph"],
+                SESSION["roadmap_nodes"]
+            )
+            symbolic_plan = build_symbolic_plan(waypoints)
+            print("---------- symbolic plan (debugging)----------")
+            print(symbolic_plan)
+            print("-----------------------------------------------")
     except Exception as e:
         return {"error": f"LLM or prompt failed: {e}"}
 
-    sim.execute_plan(result["symbolic_plan"])
+    sim.execute_plan(symbolic_plan)
     curr_objects = sim.get_current_state()
 
     step_log = {
@@ -211,7 +252,7 @@ def chat_step(request: ChatRequest):
             "mode": mode,
             "task_type": request.task_type,
             "task_command": request.command,
-            "symbolic_plan": result["symbolic_plan"],
+            "symbolic_plan": symbolic_plan if request.task_type == 'trajecotry' else result["symbolic_plan"],
             "explanation": result["explanation"],
             "llm_interpretation_time_sec": round(llm_time, 3),
             "start_env": prev_objects,

@@ -2,9 +2,9 @@
 import openai
 import os
 import ast
-from prompt_engine.utils import extract_symbolic_plan_block, extract_explanation_block
+from prompt_engine.utils import extract_symbolic_plan_block, extract_explanation_block, extract_waypoints
 
-def call_llm(prompt: str):
+def call_llm(prompt: str, task_type: str) -> dict:
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     response = openai.ChatCompletion.create(
@@ -32,7 +32,13 @@ def call_llm(prompt: str):
         symbolic_plan = ast.literal_eval(plan_str.strip())
     except Exception as e:
         raise RuntimeError(f"Failed to parse the symbolic plan: {e}")
-
+    if task_type == "trajectory":
+        trajectory_points = extract_waypoints(content)
+        return {
+            "explanation": explanation,
+            "trajectory_points": trajectory_points,
+        }
+    
     return {
         "explanation": explanation,
         "symbolic_plan": symbolic_plan

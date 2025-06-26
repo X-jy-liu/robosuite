@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 from datetime import datetime
-from ast import literal_eval
+import ast
 
 def extract_symbolic_plan_block(text: str, header: str) -> str:
     lines = text.splitlines()
@@ -36,6 +36,23 @@ def extract_symbolic_plan_block(text: str, header: str = "Symbolic Plan") -> str
     # Wrap in brackets to make a valid Python list
     return "[\n" + ",\n".join(block) + "\n]"
 
+def extract_waypoints(response: str):
+    """
+    Extracts the first list of 2D waypoints from the raw LLM response.
+    """
+    # Match something that looks like [[x, y], [x, y], ...]
+    match = re.search(r'\[\s*\[.*?\]\s*\]', response, re.DOTALL)
+    
+    if match:
+        try:
+            waypoints = ast.literal_eval(match.group())
+            if isinstance(waypoints, list) and all(isinstance(p, list) and len(p) == 2 for p in waypoints):
+                return waypoints
+        except Exception as e:
+            print(f"Failed to parse waypoint list: {e}")
+    
+    return None
+
 def extract_explanation_block(text: str) -> str:
     lines = text.splitlines()
     found = False
@@ -64,6 +81,28 @@ def format_examples(example_list):
 
         plan_str = "\n    ".join([str(tuple(step)) for step in ex_plan])
         block = f'Example Task: "{ex_task}"\n  Plan:\n    {plan_str}'
+
+        if ex_explanation:
+            indented_explanation = ex_explanation.replace("\n", "\n    ")
+            block += "\n  Explanation:\n    " + indented_explanation
+
+        formatted.append(block)
+
+    return "\n\n" + "\n\n".join(formatted)
+
+def format_trajectory_examples(example_list):
+    if not example_list:
+        return ""
+    
+    formatted = []
+    for ex in example_list:
+        ex_task = ex.get("task", "")
+        ex_points = [ex.get("points of trajectory", [])]  # renamed from 'plan'
+        ex_explanation = ex.get("explanation", "")
+
+        # Format the list of 2D waypoints
+        points_str = "\n    ".join([str(point) for point in ex_points])
+        block = f'Example Task: "{ex_task}"\n  Trajectory Points:\n    {points_str}'
 
         if ex_explanation:
             indented_explanation = ex_explanation.replace("\n", "\n    ")

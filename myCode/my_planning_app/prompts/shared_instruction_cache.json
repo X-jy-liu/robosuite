@@ -20,9 +20,25 @@
     "- Choose a reasonable α (e.g., 1.0 or >1.0).",
     "- There is no strict constraint on the final distance, but ensure it's greater than the original.",
     "- You may revise α based on the scene layout or user feedback.",
-    
-    "For trajectory tasks:",
-    
+
+    "For trajectry tasks:",
+    "It has to make sure the trajectory is collision-free",
+    "Use 'gripper_move' instead of 'move' for precise control; 'move' has smoothing that is unsuitable here.",
+    "Do not use 'grip_and_pickup' as it lifts too high. Instead, use 'gripper_move' to approach at 0.875, gripper_open, lower to 0.825 to grip with 'gripper_close', then lift to 0.835.",
+    "After finishing the pick-up process, height stays 0.835 during the trajectory to ensure 2D motion and test LLMs' collision avoidance ability.",
+    "Always finish with 'gripper_open' to release the object.",
+
+    "During trajectory execution:",
+    "Whenever two consecutive 'gripper_move' actions are used, perform a collision check on the 2D line segment between their (x, y) coordinates (assuming z = 0.835).",
+    "Exclude the held object from collision checking.",
+    "For each segment, check all objects for possible collisions:",
+    "- For object P, and segment A→B, compute:",
+    " - AP = P - A, AB = B - A",
+    " - t = (AP • AB) / ||AB||² → clamp to [0, 1]",
+    " - Closest = A + t·AB",
+    " - Distance = ||P - Closest||",
+    " - If distance < 0.07: ❌ Collision → insert detour",
+    "In that case, insert an intermediate waypoint from the reference points to safely detour around the object, keeping z = 0.835.",
 
     "Always verify that object names in the command exist in the current environment.",
     "If an object is missing or the task violates spatial constraints, clearly explain the issue.",

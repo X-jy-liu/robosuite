@@ -8,7 +8,7 @@ class TestPromptBuilder(unittest.TestCase):
         prompt = construct_prompt(command=command, task_type=task_type)
 
         self.assertIn("lift the green cube", prompt)
-        self.assertIn("Environment Objects:", prompt)
+        self.assertIn("Example Scene and reference points (if applicable):", prompt)
         self.assertIn("Available Functions:", prompt)
         self.assertIn("Examples:", prompt)
         self.assertIn("Now, generate a symbolic plan", prompt)
@@ -22,8 +22,8 @@ class TestPromptBuilder(unittest.TestCase):
         self.assertIn("put the red cube and green cube together", prompt)
         self.assertIn("Instructions:", prompt)
         self.assertIn("Examples:", prompt)
-        self.assertIn("Environment Objects:", prompt)
-
+        self.assertIn("Example Scene and reference points (if applicable):", prompt)
+        self.assertIn("Current Scene and reference points (if applicable):", prompt)
     def test_chain_mode_prompt(self):
         prompt = construct_prompt(
             command="move it closer to the blue cube",
