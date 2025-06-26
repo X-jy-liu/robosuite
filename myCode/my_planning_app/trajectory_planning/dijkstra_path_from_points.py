@@ -43,9 +43,9 @@ def dijkstra_path_from_points(trajectory_points, graph, nodes):
 
 def build_symbolic_plan(waypoint_path):
     idx = 0
-    height_0 = 0.865
+    height_0 = 0.875
     height_1 = 0.825
-    const_height = 0.835
+    const_height = 0.85
     symbolic_plan = []
     for pt in waypoint_path:
         # round to 3 decimal places

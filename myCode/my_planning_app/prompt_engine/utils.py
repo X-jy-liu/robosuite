@@ -6,35 +6,33 @@ from pathlib import Path
 from datetime import datetime
 import ast
 
-def extract_symbolic_plan_block(text: str, header: str) -> str:
-    lines = text.splitlines()
-    found = False
-    block = []
-    for line in lines:
-        if found:
-            if line.strip() == "":
-                break
-            block.append(line)
-        elif line.strip().startswith(header):
-            found = True
-    return "\n".join(block).strip()
+def extract_symbolic_plan(text):
+    """
+    Extracts a symbolic plan (list of lists) from LLM output, ignoring comments.
+    """
+    # Find the line starting with "symbolic plan:" and extract the plan part
+    match = re.search(r"symbolic plan:\s*(\[.*)", text, re.DOTALL)
+    if not match:
+        raise ValueError("No symbolic plan found in the text.")
+    
+    raw_plan = match.group(1)
 
-def extract_symbolic_plan_block(text: str, header: str = "Symbolic Plan") -> str:
-    lines = text.splitlines()
-    found = False
-    block = []
-    for line in lines:
-        if not found:
-            if line.strip().lower().startswith(header.lower()):
-                found = True
-            continue
-        # Collect lines that look like list items
-        if "[" in line and "]" in line:
-            # Strip trailing commas or whitespace
-            clean_line = line.strip().rstrip(",")
-            block.append(clean_line)
-    # Wrap in brackets to make a valid Python list
-    return "[\n" + ",\n".join(block) + "\n]"
+    # Remove line comments (// ...) and block trailing commas
+    clean_lines = []
+    for line in raw_plan.splitlines():
+        line = re.sub(r'//.*', '', line)  # remove '//' comments
+        if line.strip():  # skip empty lines
+            clean_lines.append(line)
+
+    clean_str = "\n".join(clean_lines)
+
+    try:
+        plan = ast.literal_eval(clean_str)
+        if not isinstance(plan, list):
+            raise ValueError(f"Extracted plan is not a list. \n received {clean_str}")
+        return plan
+    except Exception as e:
+        raise ValueError("Failed to parse symbolic plan.") from e
 
 def extract_waypoints(response: str):
     """

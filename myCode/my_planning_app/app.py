@@ -215,6 +215,9 @@ def chat_step(request: ChatRequest):
             result = call_llm(prompt,task_type=request.task_type)
             llm_time = time.time() - start_time
             symbolic_plan = result["symbolic_plan"]
+            print("---------- symbolic plan (debugging)----------")
+            print(symbolic_plan)
+            print("-----------------------------------------------")
         else:
             prompt = construct_trajectory_prompt(
                 command=request.command,
@@ -252,7 +255,7 @@ def chat_step(request: ChatRequest):
             "mode": mode,
             "task_type": request.task_type,
             "task_command": request.command,
-            "symbolic_plan": symbolic_plan if request.task_type == 'trajecotry' else result["symbolic_plan"],
+            "symbolic_plan": symbolic_plan,
             "explanation": result["explanation"],
             "llm_interpretation_time_sec": round(llm_time, 3),
             "start_env": prev_objects,

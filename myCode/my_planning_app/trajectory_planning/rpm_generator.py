@@ -9,7 +9,7 @@ class SceneObject:
         self.position = np.array(position)
         self.size = size
 
-    def is_collision(self, point, buffer=0.02):
+    def is_collision(self, point, buffer=0.05):
         return np.linalg.norm(point - self.position) <= self.size + buffer
 
 
@@ -41,7 +41,7 @@ class RPMGenerator:
                 return False
         return True
 
-    def build(self, k_radius=0.2, bounds=([-0.3, 0.3], [-0.3, 0.3]), max_retries=5):
+    def build(self, k_radius=0.2, bounds=([-0.28, 0.28], [-0.28, 0.28]), max_retries=5):
         retries = 0
         while retries < max_retries:
             self.nodes = []
