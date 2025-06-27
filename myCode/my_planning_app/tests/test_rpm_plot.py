@@ -10,11 +10,12 @@ scene_data = load_objects_from_json(scene_json_path)
 dots_data = load_dots_from_json(dots_json_path)
 
 rpm_generator = RPMGenerator(
-    objects_pos=scene_data, 
-    ref_pnt_pos=dots_data,
-    max_rpm=500
+    obj_specs=scene_data, 
+    pnt_specs=dots_data,
+    roadmap_buffer=0.05,
+    max_rpm=50
 )
-graph, nodes = rpm_generator.build(bounds=([-0.3, 0.3], [-0.3, 0.3]))
+graph, nodes = rpm_generator.build(roadmap_bounds=([-0.28, 0.28], [-0.28, 0.28]), k_radius=0.2, max_retries=5)
 
 # plot the roadmap
-rpm_generator.visualize_prm(graph, nodes, scene_data, dots_data)
+rpm_generator.visualize_prm(graph, nodes, scene_data, dots_data, ax = None)

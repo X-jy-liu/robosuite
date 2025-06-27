@@ -1,11 +1,11 @@
 {
   "environment": {
     "objects": [
-      { "name": "obj0", "shape": "cube", "color": "red", "position": [0.051, 0.089], "size": 0.05 },
-      { "name": "obj1", "shape": "cylinder", "color": "blue", "position": [0.089, -0.111], "size": 0.05 },
-      { "name": "obj2", "shape": "cube", "color": "blue", "position": [0.213, 0.249], "size": 0.05 },
-      { "name": "obj3", "shape": "cube", "color": "red", "position": [-0.171, -0.171], "size": 0.05 },
-      { "name": "obj4", "shape": "cylinder", "color": "green", "position": [0.231, -0.244], "size": 0.05 }
+      { "name": "obj0", "shape": "cube", "color": "green", "position": [-0.014, -0.194], "size": 0.05 },
+      { "name": "obj1", "shape": "cylinder", "color": "blue", "position": [0.155, 0.06], "size": 0.05 },
+      { "name": "obj2", "shape": "cylinder", "color": "green", "position": [-0.095, -0.038], "size": 0.05 },
+      { "name": "obj3", "shape": "cube", "color": "green", "position": [-0.201, 0.161], "size": 0.05 },
+      { "name": "obj4", "shape": "cube", "color": "green", "position": [0.084, 0.216], "size": 0.05 }
     ]
   },
   "shape_details": {
@@ -22,13 +22,8 @@
   "available_functions": {
     "move": {
       "params": ["target"],
-      "description": "Target can be one of 'obj0', 'obj1', 'obj2', 'obj3', or 'obj4', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters. The actual position of gripper is adjusted based on the target input by a certain build-in above distance. When it requires precise manipulation in trajectory planning, use the 'gripper_move' function instead.",
+      "description": "Target can be one of 'obj0', 'obj1', 'obj2', 'obj3', or 'obj4', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters.",
       "examples": [["move", "obj1"], ["move", [0.1, 0.1, 0.835]]]
-    },
-    "gripper_move":{
-      "params": ["target"],
-      "description": "Target can only be a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters. It is used for precise manipulation in trajectory planning.",
-      "examples": [["gripper_move", [0.1, 0.1, 0.835]]]
     },
     "grip_and_pickup": {
       "params": ["object"],

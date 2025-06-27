@@ -19,7 +19,9 @@ from trajectory_planning.json_loader import load_objects_from_json, load_dots_fr
 from trajectory_planning.rpm_generator import RPMGenerator
 from trajectory_planning.dijkstra_path_from_points import dijkstra_path_from_points,build_symbolic_plan
 import json
-
+import matplotlib.pyplot as plt
+import io
+import base64
 
 app = FastAPI()
 
@@ -29,6 +31,8 @@ SESSION = {
     "task_type": None,
     "scene_config_path": None,
     "reference_dots": None,
+    "obj_specs": None,
+    "pnt_specs": None,
     "history": [],
     "current_task_logs": []
 }
@@ -36,6 +40,7 @@ SESSION = {
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # No scene generation or prompt loading here anymore
+    print("API Loaded")
     print("🚀 Server starting...")
     yield
     print("🛑 Server shutting down...")
@@ -46,48 +51,59 @@ app = FastAPI(lifespan=lifespan)
 def init_session(req: InitSessionRequest):
     try:
         HOME_DIR = Path.home()
-        save_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "env_and_func.json"
+        scene_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "env_and_func.json"
         dots_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "generated_dots.json"
 
-        SESSION["scene_config_path"] = str(save_path)
-        generator = SceneGenerator()
-        dots_generator = DotGenerator(save_path)
+        SESSION["scene_config_path"] = str(scene_path)
         # === Scene Generation ===
-        if req.regenerate_scene or not save_path.exists():
+        if req.regenerate_scene or not scene_path.exists():
+            print("Generating new scene ...")
+            generator = SceneGenerator(obj_bounds=[-0.22, 0.22], min_distance=0.11, object_size=0.05)
             scene = generator.generate_scene(num_objects=5, seed=random.randint(0, 10000))
-            generator.save_to_json(scene, save_path)
-            print("New scene generated and saved.")
+            generator.save_to_json(scene, scene_path)
+            print(f"New scene generated and saved at {scene_path}.")
         else:
-            print("Reusing existing scene ...")
+            print(f"Reusing existing scene ...")
+            print(f"Loaded from {scene_path}...")
 
         # === Dots Generation ===
+        dots_generator = DotGenerator(env_and_func_path = scene_path, dots_bounds = [-0.25, 0.25])
         if req.regenerate_dots or not dots_path.exists():
-            valid_dots = dots_generator.generate_valid_dots(num_dots=5, clearance=0.08, seed=random.randint(0, 10000))
+            print("Generating reference dots ...")
+            valid_dots = dots_generator.generate_valid_dots(num_dots=5, buffer=0.05, seed=random.randint(0, 10000))
             dots_generator.save_dots_to_json(valid_dots, dots_path)
             print("New dots generated and saved.")
         else:
-            valid_dots = dots_generator.load_dots_from_json(dots_path)
             print("Reusing existing dots ...")
+            valid_dots = dots_generator.load_dots_from_json(dots_path)
+            print(f"Reference dots loaded from {dots_path}.")
         
         SESSION["reference_dots"] = valid_dots
-        # load the objects and dots specs from .json files
-        scene_json_path = Path.home() / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "env_and_func.json"
-        dots_json_path = Path.home() / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "generated_dots.json"
-        objects_specs = load_objects_from_json(scene_json_path)
-        dots_specs = load_dots_from_json(dots_json_path)
-        graph, nodes = RPMGenerator(objects_specs,dots_specs, max_rpm=1000).build()
+
+        # === Generate RPM ===
+        print("Generating roadmap PRM ...")
+        obj_specs = load_objects_from_json(scene_path)
+        pnt_specs = load_dots_from_json(dots_path)
+        rpm_generator = RPMGenerator(obj_specs, pnt_specs, roadmap_buffer=0.05, max_rpm=200)
+        graph, nodes = rpm_generator.build(roadmap_bounds=[-0.28, 0.28])
+        print("Roadmap PRM generated successfully.")
+        print(f"Number of nodes in graph: {len(nodes)}")
+        print(f"Number of edges in graph: {len(graph.edges)}")
+        
         SESSION["roadmap_graph"] = graph
         SESSION["roadmap_nodes"] = nodes
-
+        SESSION["obj_specs"] = obj_specs
+        SESSION["pnt_specs"] = pnt_specs
 
         # === Sim & Prompt Setup ===
+        print("Initializing simulation environment...")
         global sim
-        sim = SimWrapper(scene_config_path=save_path)
-        base_prompt = load_default_prompt(save_path)
+        sim = SimWrapper(scene_config_path=scene_path)
+        base_prompt = load_default_prompt(scene_path)
 
         SESSION["base_prompt"] = base_prompt
         dots_description = load_reference_dots(dots_path)
-
+        print("Base prompt and reference dots loaded successfully.")
         # === Check Consistency ===
         raw_objects = sim.get_current_state()
         scene_objects = [ObjectSpec(**obj) for obj in raw_objects.values()]
@@ -182,6 +198,37 @@ def show_scene():
         """
     except Exception as e:
         return HTMLResponse(f"<h2>Error visualizing scene: {e}</h2>")
+    
+@app.get("/show_rpm", response_class=HTMLResponse)
+def show_rpm():
+    try:
+        rpm = RPMGenerator(SESSION["obj_specs"], SESSION["pnt_specs"], roadmap_buffer=0.05, max_rpm=100)
+        # Generate plot as image
+        fig, ax = plt.subplots(figsize=(6, 6))
+
+        rpm.visualize_prm(
+            SESSION.get("roadmap_graph"), 
+            SESSION.get("roadmap_nodes"), 
+            SESSION["obj_specs"], 
+            SESSION["pnt_specs"])
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close(fig)
+        buf.seek(0)
+        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+        html_content = f"""
+        <html>
+        <head><title>PRM Visualization</title></head>
+        <body>
+        <h2>Roadmap PRM Visualization</h2>
+        <img src="data:image/png;base64,{img_base64}" />
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content)
+    except Exception as e:
+        return HTMLResponse(f"<h2>Error generating PRM: {e}</h2>")
 
 @app.post("/chat_step")
 def chat_step(request: ChatRequest):

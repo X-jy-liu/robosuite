@@ -9,12 +9,11 @@ class DotGenerator:
     def __init__(
         self,
         env_and_func_path: Path,
-        table_bounds: Tuple[Tuple[float, float], Tuple[float, float]] = ((-0.35, 0.35), (-0.35, 0.35))
+        dots_bounds: List[float],
     ):
         self.env_and_func_path = env_and_func_path
-        self.table_bounds = table_bounds
+        self.dots_bounds = dots_bounds
         self.objects: List[ObjectSpec] = self._load_objects()
-        print(f"Loaded {len(self.objects)} objects from: {env_and_func_path}")
 
     def _load_objects(self) -> List[ObjectSpec]:
         with open(self.env_and_func_path, "r") as f:
@@ -24,7 +23,7 @@ class DotGenerator:
     def generate_valid_dots(
         self,
         num_dots: int = 5,
-        clearance: float = 0.08,
+        buffer: float = None,
         seed: Optional[int] = None
     ) -> List[Tuple[float, float]]:
         """
@@ -34,14 +33,14 @@ class DotGenerator:
             random.seed(seed)
 
         valid_dots = []
-        x_min, x_max = self.table_bounds[0]
-        y_min, y_max = self.table_bounds[1]
+        x_min, x_max = self.dots_bounds
+        y_min, y_max = self.dots_bounds
 
         def is_valid_dot(x: float, y: float) -> bool:
             for obj in self.objects:
                 ox, oy = obj.position[:2]
                 distance = math.sqrt((x - ox) ** 2 + (y - oy) ** 2)
-                if distance < (obj.size + clearance):
+                if distance < (obj.size + buffer):
                     return False
             return True
 
@@ -112,7 +111,7 @@ if __name__ == "__main__":
     env_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "scene_config_example.json"
 
     generator = DotGenerator(env_path)
-    dots = generator.generate_valid_dots(num_dots=5, clearance=0.08)
+    dots = generator.generate_valid_dots(num_dots=5, buffer=0.08)
     # save the dots to a JSON file
     output_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "generated_dots.json"
     # generator.save_dots_to_json(dots, output_path)

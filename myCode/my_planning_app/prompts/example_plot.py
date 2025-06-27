@@ -2,21 +2,43 @@ import matplotlib.pyplot as plt
 
 # Reference points
 reference_points = {
-    "point_1": [-0.1, -0.1],
-    "point_2": [0.1, -0.1],
-    "point_3": [0.0, -0.2],
-    "point_4": [0.05, 0.2],
-    "point_5": [-0.29, 0.0]
-}
+        "point_1": [
+            -0.033,
+            -0.209
+        ],
+        "point_2": [
+            0.115,
+            0.219
+        ],
+        "point_3": [
+            0.162,
+            0.022
+        ],
+        "point_4": [
+            0.003,
+            -0.106
+        ],
+        "point_5": [
+            0.115,
+            0.249
+        ]
+    }
 
 # Environment objects
+# objects = [
+#     {"name": "obj0", "shape": "cube", "color": "red", "position": [-0.2, -0.2], "size": 0.05},
+#     {"name": "obj1", "shape": "cube", "color": "blue", "position": [0.2, -0.2], "size": 0.05},
+#     {"name": "obj2", "shape": "cube", "color": "green", "position": [-0.2, 0.2], "size": 0.05},
+#     {"name": "obj3", "shape": "cylinder", "color": "red", "position": [0.15, 0.15], "size": 0.05},
+#     {"name": "obj4", "shape": "cylinder", "color": "blue", "position": [0.0, 0.0], "size": 0.05}
+# ]
 objects = [
-    {"name": "obj0", "shape": "cube", "color": "red", "position": [-0.2, -0.2], "size": 0.05},
-    {"name": "obj1", "shape": "cube", "color": "blue", "position": [0.2, -0.2], "size": 0.05},
-    {"name": "obj2", "shape": "cube", "color": "green", "position": [-0.2, 0.2], "size": 0.05},
-    {"name": "obj3", "shape": "cylinder", "color": "red", "position": [0.15, 0.15], "size": 0.05},
-    {"name": "obj4", "shape": "cylinder", "color": "blue", "position": [0.0, 0.0], "size": 0.05}
-]
+      { "name": "obj0", "shape": "cube", "color": "green", "position": [-0.101, 0.058], "size": 0.05 },
+      { "name": "obj1", "shape": "cylinder", "color": "green", "position": [-0.22, 0.173], "size": 0.05 },
+      { "name": "obj2", "shape": "cube", "color": "green", "position": [0.018, 0.163], "size": 0.05 },
+      { "name": "obj3", "shape": "cube", "color": "green", "position": [0.186, 0.146], "size": 0.05 },
+      { "name": "obj4", "shape": "cube", "color": "green", "position": [-0.093, 0.191], "size": 0.05 }
+    ]
 
 fig, ax = plt.subplots(figsize=(6, 6))
 

@@ -16,11 +16,11 @@ COLORS = ["red", "green", "blue"]
 class SceneGenerator:
     def __init__(
         self,
-        table_bounds: Tuple[Tuple[float, float], Tuple[float, float]] = ((-0.25, 0.25), (-0.25, 0.25)),
-        min_distance: float = 0.08,
-        object_size: float = OBJECT_SIZE
+        obj_bounds: List[float], # Assuming a square table with bounds
+        min_distance: float,
+        object_size: float = OBJECT_SIZE,
     ):
-        self.table_bounds = table_bounds
+        self.table_bounds = obj_bounds
         self.min_distance = min_distance
         self.object_size = object_size
 
@@ -39,8 +39,8 @@ class SceneGenerator:
         attempts = 0
         max_attempts = 100
 
-        x_min, x_max = self.table_bounds[0]
-        y_min, y_max = self.table_bounds[1]
+        x_min, x_max = self.table_bounds
+        y_min, y_max = self.table_bounds
 
         while len(scene) < num_objects and attempts < max_attempts:
             shape = random.choice(SHAPES)
