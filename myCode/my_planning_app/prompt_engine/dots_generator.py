@@ -24,6 +24,7 @@ class DotGenerator:
         self,
         num_dots: int = 5,
         buffer: float = None,
+        min_dot_distance: float = 0.05,
         seed: Optional[int] = None
     ) -> List[Tuple[float, float]]:
         """
@@ -41,6 +42,10 @@ class DotGenerator:
                 ox, oy = obj.position[:2]
                 distance = math.sqrt((x - ox) ** 2 + (y - oy) ** 2)
                 if distance < (obj.size + buffer):
+                    return False
+            # check clearance from existing dots
+            for dx, dy in valid_dots:
+                if math.sqrt((x - dx) ** 2 + (y - dy) ** 2) < min_dot_distance:
                     return False
             return True
 

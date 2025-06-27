@@ -70,7 +70,10 @@ def init_session(req: InitSessionRequest):
         dots_generator = DotGenerator(env_and_func_path = scene_path, dots_bounds = [-0.25, 0.25])
         if req.regenerate_dots or not dots_path.exists():
             print("Generating reference dots ...")
-            valid_dots = dots_generator.generate_valid_dots(num_dots=5, buffer=0.05, seed=random.randint(0, 10000))
+            valid_dots = dots_generator.generate_valid_dots(num_dots=5, 
+                                                            buffer=0.05, 
+                                                            min_dot_distance=0.05, 
+                                                            seed=random.randint(0, 10000))
             dots_generator.save_dots_to_json(valid_dots, dots_path)
             print("New dots generated and saved.")
         else:
@@ -147,8 +150,8 @@ def show_scene():
                 const dots = {json.dumps(dots)};
 
                 const objTrace = {{
-                    x: objects.map(o => o.position[0]),
-                    y: objects.map(o => o.position[1]),
+                    x: objects.map(o => o.position[1]),
+                    y: objects.map(o => o.position[0]),
                     text: objects.map(o => o.name + ": " + o.shape + " (" + o.color + ")"),
                     mode: 'markers+text',
                     type: 'scatter',
@@ -185,7 +188,7 @@ def show_scene():
                     }},
                     yaxis: {{
                         title: 'Y Position',
-                        range: [-0.4, 0.4],
+                        range: [0.4, -0.4],
                         scaleanchor: 'x'
                     }},
                     showlegend: true

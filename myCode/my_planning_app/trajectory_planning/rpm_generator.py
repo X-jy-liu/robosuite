@@ -211,7 +211,7 @@ class RPMGenerator:
 
             # Plot reference points
             for name, pos in pnt_specs.items():
-                x, y = pos
+                y,  x= pos
                 ax.plot(x, y, 'go')
                 ax.text(x, y - 0.02, name, fontsize=8, ha='center', color='green', zorder=4)
 
@@ -226,7 +226,7 @@ class RPMGenerator:
             # Final layout
             ax.set_title("PRM with Objects and Reference Points")
             ax.set_xlim(-0.4, 0.4)
-            ax.set_ylim(-0.4, 0.4)
+            ax.set_ylim(0.4, -0.4)
             ax.set_aspect('equal')
             ax.grid(True)
             ax.legend(loc='upper right')

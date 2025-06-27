@@ -1,11 +1,11 @@
 {
   "environment": {
     "objects": [
-      { "name": "obj0", "shape": "cube", "color": "green", "position": [-0.014, -0.194], "size": 0.05 },
-      { "name": "obj1", "shape": "cylinder", "color": "blue", "position": [0.155, 0.06], "size": 0.05 },
-      { "name": "obj2", "shape": "cylinder", "color": "green", "position": [-0.095, -0.038], "size": 0.05 },
-      { "name": "obj3", "shape": "cube", "color": "green", "position": [-0.201, 0.161], "size": 0.05 },
-      { "name": "obj4", "shape": "cube", "color": "green", "position": [0.084, 0.216], "size": 0.05 }
+      { "name": "obj0", "shape": "cylinder", "color": "red", "position": [-0.063, 0.018], "size": 0.05 },
+      { "name": "obj1", "shape": "cube", "color": "blue", "position": [0.215, 0.07], "size": 0.05 },
+      { "name": "obj2", "shape": "cylinder", "color": "blue", "position": [0.051, -0.104], "size": 0.05 },
+      { "name": "obj3", "shape": "cube", "color": "red", "position": [0.043, 0.139], "size": 0.05 },
+      { "name": "obj4", "shape": "cube", "color": "blue", "position": [-0.216, -0.186], "size": 0.05 }
     ]
   },
   "shape_details": {
