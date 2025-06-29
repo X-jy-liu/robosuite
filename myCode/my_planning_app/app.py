@@ -246,7 +246,7 @@ def chat_step(request: ChatRequest):
 
     SESSION["history"].append((mode, request.command))
 
-    prev_objects = sim.get_current_state()
+    init_obj = sim.get_current_state()
     SESSION["task_type"] = request.task_type
 
     try:
@@ -258,9 +258,9 @@ def chat_step(request: ChatRequest):
                 initial_command=SESSION["initial_command"]
             )
             # loggin the interpertation time
-            print("---------- prompt ----------")
+            print("---------- prompt start----------")
             print(prompt)
-            print("----------------------------")
+            print("----------  prompt end ----------")
             start_time = time.time()
             result = call_llm(prompt,task_type=request.task_type)
             llm_time = time.time() - start_time
@@ -275,9 +275,9 @@ def chat_step(request: ChatRequest):
                 mode=mode,
                 initial_command=SESSION["initial_command"],
             )
-            print("---------- prompt ----------")
+            print("---------- prompt start----------")
             print(prompt)
-            print("----------------------------")
+            print("----------  prompt end ----------")
             start_time = time.time()
             result = call_llm(prompt,task_type=request.task_type)
             llm_time = time.time() - start_time
@@ -297,10 +297,9 @@ def chat_step(request: ChatRequest):
     except Exception as e:
         return {"error": f"LLM or prompt failed: {e}"}
 
-    sim.execute_plan(symbolic_plan)
-    curr_objects = sim.get_current_state()
+    obj_pos_history = sim.execute_plan(symbolic_plan)
 
-    step_log = {
+    cmd_step_log = {
             "timestamp": datetime.now().isoformat(),
             "mode": mode,
             "task_type": request.task_type,
@@ -308,13 +307,21 @@ def chat_step(request: ChatRequest):
             "symbolic_plan": symbolic_plan,
             "explanation": result["explanation"],
             "llm_interpretation_time_sec": round(llm_time, 3),
-            "start_env": prev_objects,
-            "end_env": curr_objects
+            "init_obj": init_obj,
+            "obj_pos_history": obj_pos_history
         }
     
-    SESSION["current_task_logs"].append(step_log)
+    SESSION["current_task_logs"].append(cmd_step_log)
+
+    api_repsonse = {
+        "mode": mode,
+        "task_type": request.task_type,
+        "symbolic_plan": symbolic_plan,
+        "explanation": result["explanation"],
+        "status_message": "cmd steps executed successfully and logged in cache. Use /save_logs to save them."
+    }
     
-    return step_log
+    return api_repsonse
 
 @app.post("/save_logs")
 def save_logs():

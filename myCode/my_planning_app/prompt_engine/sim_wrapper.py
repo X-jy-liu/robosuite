@@ -27,8 +27,15 @@ class SimWrapper:
         return self.executor.get_all_object_descriptions()
 
     def execute_plan(self, plan):
-        print("Executing:", plan)
-        self.executor.execute_plan(plan)
+        """
+        1. Execute a symbolic plan in the MuJoCo simulation.
+        2. Returns the history of object positions after execution.
+        """
+
+        print("LLM generated plan:\n", plan)
+        obj_specs_history = self.executor.execute_plan(plan)
+
+        return obj_specs_history
 
     # def set_object_pose(self, object_name, position, orientation = None):
     #     """
