@@ -235,89 +235,67 @@ def show_rpm():
 
 @app.post("/chat_step")
 def chat_step(request: ChatRequest):
-    # Check if the simulation environment is initialized
     if "sim" not in globals() or sim is None:
         return {"error": "Simulation environment is not initialized. Call /init_session first."}
-    if SESSION["initial_command"] is None:
-        SESSION["initial_command"] = request.command
-        mode = "override"
-    else:
-        mode = request.mode or "chain"
 
-    SESSION["cmd_history"].append((mode, request.command))
+    commands = request.commands if isinstance(request.commands, list) else [request.commands]
+    all_logs = []
 
-    init_obj = sim.get_current_state()
-    SESSION["task_type"] = request.task_type
+    for i, cmd in enumerate(commands):
+        mode = "override" if (i == 0 and SESSION["initial_command"] is None) else request.mode or "chain"
+        if SESSION["initial_command"] is None:
+            SESSION["initial_command"] = cmd
 
-    try:
-        if SESSION["task_type"] != "trajectory":
-            prompt = construct_prompt(
-                command=request.command,
-                task_type=request.task_type,
-                mode=mode,
-                initial_command=SESSION["initial_command"]
-            )
-            # loggin the interpertation time
-            print("---------- prompt start----------")
-            print(prompt)
-            print("----------  prompt end ----------")
-            start_time = time.time()
-            result = call_llm(prompt,task_type=request.task_type)
-            llm_time = time.time() - start_time
-            symbolic_plan = result["symbolic_plan"]
-            print("---------- symbolic plan (debugging)----------")
-            print(symbolic_plan)
-            print("-----------------------------------------------")
-        else:
-            prompt = construct_trajectory_prompt(
-                command=request.command,
-                task_type=request.task_type,
-                mode=mode,
-                initial_command=SESSION["initial_command"],
-            )
-            print("---------- prompt start----------")
-            print(prompt)
-            print("----------  prompt end ----------")
-            start_time = time.time()
-            result = call_llm(prompt,task_type=request.task_type)
-            llm_time = time.time() - start_time
-            trajectory_points = result.get("trajectory_points")
-            # check if the trajectory points are valid, it should be a list of lists. Each inner list has two elements [x, y]
-            if not isinstance(trajectory_points, list) or not all(isinstance(pt, list) and len(pt) == 2 for pt in trajectory_points):
-                return {"error": f"Invalid trajectory points format. Expected a list of [x, y] pairs.\n Received: {trajectory_points}"}
-            _, waypoints = dijkstra_path_from_points( 
-                trajectory_points,
-                SESSION["roadmap_graph"],
-                SESSION["roadmap_nodes"]
-            )
-            symbolic_plan = build_symbolic_plan(waypoints)
-            print("---------- symbolic plan (debugging)----------")
-            print(symbolic_plan)
-            print("-----------------------------------------------")
-    except Exception as e:
-        return {"error": f"LLM or prompt failed: {e}"}
+        SESSION["cmd_history"].append((mode, cmd))
+        SESSION["task_type"] = request.task_type
+        init_obj = sim.get_current_state()
 
-    obj_pos_history = sim.execute_plan(symbolic_plan)
+        try:
+            if request.task_type != "trajectory":
+                prompt = construct_prompt(cmd, request.task_type, mode, SESSION["initial_command"])
+                print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
+                start_time = time.time()
+                result = call_llm(prompt, task_type=request.task_type)
+                llm_time = time.time() - start_time
+                symbolic_plan = result["symbolic_plan"]
+                print("---------- symbolic plan ----------\n", symbolic_plan)
+            else:
+                prompt = construct_trajectory_prompt(cmd, request.task_type, mode, SESSION["initial_command"])
+                print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
+                start_time = time.time()
+                result = call_llm(prompt, task_type=request.task_type)
+                llm_time = time.time() - start_time
+                trajectory_points = result.get("trajectory_points")
+                if not isinstance(trajectory_points, list) or not all(isinstance(pt, list) and len(pt) == 2 for pt in trajectory_points):
+                    return {"error": f"Invalid trajectory points format: {trajectory_points}"}
+                _, waypoints = dijkstra_path_from_points(trajectory_points, SESSION["roadmap_graph"], SESSION["roadmap_nodes"])
+                symbolic_plan = build_symbolic_plan(waypoints)
+                print("---------- symbolic plan ----------\n", symbolic_plan)
+        except Exception as e:
+            return {"error": f"LLM or prompt failed: {e}"}
 
-    cmd_step_log = {
+        obj_pos_history = sim.execute_plan(symbolic_plan)
+
+        cmd_step_log = {
             "timestamp": datetime.now().isoformat(),
             "mode": mode,
             "task_type": request.task_type,
-            "task_command": request.command,
+            "task_command": cmd,
             "symbolic_plan": symbolic_plan,
             "explanation": result["explanation"],
             "llm_interpretation_time_sec": round(llm_time, 3),
             "init_obj": init_obj,
             "obj_pos_history": obj_pos_history
         }
-    
-    SESSION["current_task_logs"].append(cmd_step_log)
+
+        all_logs.append(cmd_step_log)
+
+    SESSION["current_task_logs"] = all_logs
 
     api_repsonse = {
         "mode": mode,
         "task_type": request.task_type,
-        "symbolic_plan": symbolic_plan,
-        "explanation": result["explanation"],
+        "num_commands": len(commands),
         "status_message": "cmd steps executed successfully and logged in cache. Use /save_logs to save them."
     }
     
@@ -333,57 +311,36 @@ def save_logs():
     except Exception as e:
         return {"error": str(e)}
     
-# @app.post("/reset_scene")
-# def reset_scene():
-#     try:
-#         if "scene_config_path" not in SESSION:
-#             return {"error": "No scene found to reset. Please call /init_session first."}
+@app.post("/run_full_experiment")
+def run_full_experiment(params: dict):
+    try:
+        print("Received experiment params:", params)
 
-#         # Soft reset the scene without restarting SimWrapper
-#         sim.reset_scene()
+        init_result = init_session(InitSessionRequest(
+            regenerate_scene=params.get("regenerate_scene", False),
+            regenerate_dots=params.get("regenerate_dots", False)
+        ))
+        if "error" in init_result:
+            return {"init_error": init_result}
 
-#         # Re-generate reference dots
-#         scene_config_path = Path(SESSION["scene_config_path"])
-#         dots_generator = DotGenerator(scene_config_path)
-#         valid_dots = dots_generator.generate_valid_dots(num_dots=5, clearance=0.08, seed=random.randint(0, 10000))
-#         SESSION["reference_dots"] = valid_dots
+        chat_result = chat_step(ChatRequest(
+            commands=params["commands"],
+            task_type=params["task_type"],
+            mode=params.get("mode", "override")
+        ))
+        if "error" in chat_result:
+            return {"chat_error": chat_result}
 
-#         # Reload prompt and consistency check
-#         base_prompt = load_default_prompt(scene_config_path)
-#         SESSION["base_prompt"] = base_prompt
-#         raw_objects = sim.get_current_state()
-#         scene_objects = [ObjectSpec(**obj) for obj in raw_objects.values()]
-#         expected_objects = base_prompt.environment.get("objects", [])
-#         print(("debug: expected_objects", expected_objects))
-#         check_scene_consistency(current_objs=scene_objects, expected_objs=expected_objects, threshold=0.05)
-
-#         # Reset session state
-#         SESSION["initial_command"] = None
-#         SESSION["history"] = []
-#         SESSION["current_task_logs"] = []
-
-#         return {"status": "Scene reset to initial configuration"}
-#     except Exception as e:
-#         return {"error": f"Scene reset failed: {e}"}
-
-# @app.post("/reset_scene_and_robot")
-# def reset_scene_and_robot():
-#     global sim
-#     try:
-#         log_task_summary(SESSION)
-#         sim.idle_and_close()
-#         sim = SimWrapper()
-#         SESSION["initial_command"] = None
-#         SESSION["history"] = []
-#         return {"status": "Scene and robot reset"}
-#     except Exception as e:
-#         return {"error": str(e)}
-
-# @app.post("/reset_robot_only")
-# def reset_robot_only():
-#     sim.reset_robot()
-#     SESSION["initial_command"] = None
-#     return {"status": "Robot reset, scene preserved"}
+        save_result = save_logs()
+        return {
+            "init_result": init_result,
+            "chat_result": chat_result,
+            "save_result": save_result
+        }
+    except Exception as e:
+        import traceback
+        print("Exception in run_full_experiment:", traceback.format_exc())
+        return {"error": f"Exception occurred: {str(e)}"}
 
 @app.get("/")
 def read_root():

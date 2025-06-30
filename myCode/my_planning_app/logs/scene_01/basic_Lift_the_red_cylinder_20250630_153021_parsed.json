@@ -1,0 +1,7 @@
+{
+    "task_type": "simple",
+    "action": "lift",
+    "interested_object": "red cylinder",
+    "success_criteria": "z > 0.875",
+    "explanation": "For the simple task - lift action, we raise the red cylinder vertically so the x,y coordinates remain the same. As long as the z coordinate is greater than the height of the red cylinder (0.85), it is considered a successful lift. So, the success criteria is a coordinate with z > 0.875."
+}
