@@ -1,6 +1,6 @@
 # prompt_engine/models.py
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union, Optional
 
 
 class FunctionSpec(BaseModel):
@@ -39,9 +39,9 @@ class PromptInput(BaseModel):
     instructions: str = ""
 
 class ChatRequest(BaseModel):
-    command: str = Field(..., example="Lift the red cube")
-    task_type: str = Field(..., example="basic")
-    mode: str = Field(...)
+    commands: Union[str, List[str]]  # Allow single or multiple commands
+    task_type: str
+    mode: Optional[str] = None
 
 class InitSessionRequest(BaseModel):
     regenerate_scene: bool = Field(False, description="Whether to regenerate the scene configuration",

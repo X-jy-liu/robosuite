@@ -33,7 +33,7 @@ SESSION = {
     "reference_dots": None,
     "obj_specs": None,
     "pnt_specs": None,
-    "history": [],
+    "cmd_history": [],
     "current_task_logs": []
 }
 
@@ -115,7 +115,7 @@ def init_session(req: InitSessionRequest):
 
         # === Reset Metadata ===
         SESSION["initial_command"] = None
-        SESSION["history"] = []
+        SESSION["cmd_history"] = []
         SESSION["current_task_logs"] = []
 
         return {
@@ -244,7 +244,7 @@ def chat_step(request: ChatRequest):
     else:
         mode = request.mode or "chain"
 
-    SESSION["history"].append((mode, request.command))
+    SESSION["cmd_history"].append((mode, request.command))
 
     init_obj = sim.get_current_state()
     SESSION["task_type"] = request.task_type

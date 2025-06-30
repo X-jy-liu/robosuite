@@ -125,6 +125,7 @@ def log_experiment_entry(entry: dict, filename_prefix: str = "log"):
 
 def log_task_summary(SESSION: dict):
     if not SESSION["current_task_logs"]:
+        print("No task logs to summarize.")
         return
 
     initial_cmd = SESSION["initial_command"]
