@@ -31,39 +31,89 @@ def build_prompt(
         "reference_points": reference_points
     }
 
-    # Optional example commands (use the ones from your original prompt)
-    examples = """
+    # example environment
+    example_env_json = {
+    "environment": {
+    "objects": [
+      { "name": "obj0", "shape": "cube", "color": "red", "position": [-0.2, -0.2], "size": 0.05 },
+      { "name": "obj1", "shape": "cube", "color": "blue", "position": [0.2, -0.2], "size": 0.05 },
+      { "name": "obj2", "shape": "cube", "color": "green", "position": [-0.2, 0.2], "size": 0.05 },
+      { "name": "obj3", "shape": "cylinder", "color": "red", "position": [0.15, 0.15], "size": 0.05 },
+      { "name": "obj4", "shape": "cylinder", "color": "blue", "position": [0.0, 0.0], "size": 0.05 }
+        ]
+      }
+    }
+
+    example_ref_pnt_json = {
+    "reference_points": {
+        "point_1": [
+            -0.1, 
+            -0.1
+        ],
+        "point_2": [
+            0.1, 
+            -0.1
+        ],
+        "point_3": [
+            0.0, 
+            -0.2
+        ],
+        "point_4": [
+            0.05, 
+            0.2
+        ],
+        "point_5": [
+            -0.29, 
+            0.0
+        ]
+      }
+    }
+
+
+    # example commands
+    example_commands = """
 Example commands:
 Command: "Stack the red cube onto the green cylinder"
 Output:
 {
-  "task_type": "simple",
+  "task_type": "basic",
   "action": "stack",
   "interested_object": "red cube",
   "target_reference_object": "green cylinder",
   "success_criteria": [0.0, 0.0, 0.875],
-  "explanation": "For the simple task - stack action the evaluation criteria is a specific 3-element vector. The red cube is stacked on top of the green cylinder at its center position. So the x, y coordinates are the same as the cylinder's, and the z coordinate is the height of the cylinder plus the half-height of red cube. So the success criteria is a coordinate, 3-element vector."
+  "explanation": "For the basic task - stack action the evaluation criteria is a specific 3-element vector. The red cube is stacked on top of the green cylinder at its center position. So the x, y coordinates are the same as the cylinder's, and the z coordinate is the height of the cylinder plus the half-height of red cube. So the success criteria is a coordinate, 3-element vector."
 }
 
 Command: "Move the blue cylinder to [0.15, 0.0, 0.825]"
 Output:
 {
-  "task_type": "simple",
+  "task_type": "basic",
   "action": "deliver",
   "interested_object": "blue cylinder",
   "success_criteria": [0.15, 0.0, 0.825]
-  "explanation": "For the simple task - deliver action, we move it to the specified position in 3D space. So the success criteria is a coordinate, 3-element vector."
+  "explanation": "For the basic task - deliver action, we move it to the specified position in 3D space. So the success criteria is a coordinate, 3-element vector."
 }
 
 Command: "Lift the red cube"
 Output:
 {
-  "task_type": "simple",
+  "task_type": "basic",
   "action": "lift",
   "interested_object": "red cube",
-  "success_criteria": [-0.2, -0.2, z] # z > 0.875,
-  "explanation": "For the simple task - lift action, we raise the red cube vertically so the x,y coordinates remain the same. As long as the z coordinate is greater than the height of the red cube (0.85), it is considered a successful lift. So, the success criteria is a coordinate with z > 0.875."
+  "success_criteria": [-0.2, -0.2, 0.85],
+  "explanation": "For the basic task - lift action, we raise the red cube vertically so the x,y coordinates remain the same. For all lift actions, we set the z coordinate of the success criteria to be 0,85, which is the height of the table pluse the object's size. So the success criteria is a coordinate, 3-element vector."
 }
+
+Command: "Lift the blue cube"
+Output:
+{
+  "task_type": "basic",
+  "action": "lift",
+  "interested_object": "blue cube",
+  "success_criteria": [0.2, -0.2, 0.85],
+  "explanation": "For the basic task - lift action, we raise the red cube vertically so the x,y coordinates remain the same as the blue cube's initial position. For all lift actions, we set the z coordinate of the success criteria to be 0,85, which is the height of the table pluse the object's size. So the success criteria is a coordinate, 3-element vector."
+}
+
 
 Command: "Put the green cube closer to the blue cube"
 Output:
@@ -102,7 +152,6 @@ Output:
   "task_type": "trajectory",
   "action": "move_opposite",
   "interested_object": "red cylinder",
-  "interested_reference_object": "blue cylinder",
   "success_criteria": "[-0.15,-0.15, 0.825]",
   "explanation": "For the trajectory task - move_opposite action,\nStep 1: Find the center position of the blue cylinder and red cylinder, [0.0,0.0,0.825] and [0.15,0.15,0.825] respectively.\nStep 2: Find the opposite position of the red cylinder with respect to the blue cylinder, [0.0,0.0,0.825] + ([0.0,0.0,0.825] - [0.15,0.15,0.825]), which is [-0.15,-0.15, 0.825].\nStep 3: Move the red cylinder to this position."
 }
@@ -113,20 +162,30 @@ Output:
 Given a natural language command and its tasks type, extract the action and relevant entities and success criteria in a dictionary.
 
 Only the following actions are valid for each task type:
-- For **simple** tasks: "lift", "deliver", "stack"
+- For **basic** tasks: "lift", "deliver", "stack"
 - For **ambiguous** tasks: "move_closer", "move_further"
 - For **trajectory** tasks: "move_via", "move_opposite"
 
 Do not infer actions beyond this list. Make sure the action you extract is consistent with the specified task type.
 
 Example Environment:
-{json.dumps(env_json, indent=2)}
+{example_env_json}
 
-{examples if include_examples else ""}
+Example Reference Points:
+{example_ref_pnt_json}
+
+{example_commands if include_examples else ""}
 
 Now parse this command and return only the JSON:
 Command: "{command}"
 Task Type: "{task_type}"
+Current Environment: {json.dumps(env_json, indent=2)}
+The output should be a dictionary with the following keys:
+- "task_type": The type of task (one of "basic", "ambiguous", "trajectory").
+- "action": The action to be evaluated, following the valid actions for the task type.
+- "interested_object": The object(s) of interest for the evaluation.
+- "success_criteria": Criteria for success evaluation which can vary based on task type.
+- "explanation": A brief explanation of how the success criteria is determined.
 Output:"""
 
     return prompt

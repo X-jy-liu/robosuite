@@ -23,10 +23,8 @@ def call_llm_parser(full_prompt: str, model="gpt-4-turbo") -> dict:
         )
 
         content = response["choices"][0]["message"]["content"]
-
-        # Attempt to parse the output as JSON
-        parsed = json.loads(content.strip())
-        return parsed
+        response = json.loads(content) # convert the response content to a dictionary
+        return response
 
     except json.JSONDecodeError as jde:
         print(f"[JSON Decode Error] Could not parse output: {content}")
