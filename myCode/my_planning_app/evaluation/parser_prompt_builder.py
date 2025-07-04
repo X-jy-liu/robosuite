@@ -166,6 +166,12 @@ Only the following actions are valid for each task type:
 - For **ambiguous** tasks: "move_closer", "move_further"
 - For **trajectory** tasks: "move_via", "move_opposite"
 
+Each "interested_object" must always be written as two words:
+- The **first word** must be a valid color (e.g., red, green, blue).
+- The **second word** must be a valid shape (e.g., cube, cylinder).
+For **ambiguous** tasks, you must return exactly two interested objects, separated by commas.
+Never return the object with other information like, position, size, etc.
+
 Do not infer actions beyond this list. Make sure the action you extract is consistent with the specified task type.
 
 Example Environment:

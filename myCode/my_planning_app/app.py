@@ -253,15 +253,17 @@ def chat_step(request: ChatRequest):
         try:
             if request.task_type != "trajectory":
                 prompt = construct_prompt(cmd, request.task_type, mode, SESSION["initial_command"])
-                print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
+                # print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
+                print(f"🧠 Calling LLM for the command ......\n\"{SESSION['initial_command']}\"")
                 start_time = time.time()
                 result = call_llm(prompt, task_type=request.task_type)
                 llm_time = time.time() - start_time
                 symbolic_plan = result["symbolic_plan"]
-                print("---------- symbolic plan ----------\n", symbolic_plan)
+                # print("---------- symbolic plan ----------\n", symbolic_plan)
             else:
                 prompt = construct_trajectory_prompt(cmd, request.task_type, mode, SESSION["initial_command"])
-                print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
+                # print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
+                print(f"🧠 Calling LLM for the command ......\n\"{SESSION['initial_command']}\"")
                 start_time = time.time()
                 result = call_llm(prompt, task_type=request.task_type)
                 llm_time = time.time() - start_time
@@ -270,7 +272,7 @@ def chat_step(request: ChatRequest):
                     return {"error": f"Invalid trajectory points format: {trajectory_points}"}
                 _, waypoints = dijkstra_path_from_points(trajectory_points, SESSION["roadmap_graph"], SESSION["roadmap_nodes"])
                 symbolic_plan = build_symbolic_plan(waypoints)
-                print("---------- symbolic plan ----------\n", symbolic_plan)
+                # print("---------- symbolic plan ----------\n", symbolic_plan)
         except Exception as e:
             return {"error": f"LLM or prompt failed: {e}"}
 

@@ -29,38 +29,38 @@ EXPERIMENTS = [
         "commands": ["Lift the red cylinder"],
         "mode": "override"
     },
-    # {
-    #     "name": "scene1_ambiguous_1",
-    #     "regenerate_scene": False,
-    #     "regenerate_dots": False,
-    #     "task_type": "ambiguous",
-    #     "commands": ["put the red cubes together", "not enough, make them closer!"],
-    #     "mode": "override"
-    # },
-    # {
-    #     "name": "scene1_ambiguous_2",
-    #     "regenerate_scene": False,
-    #     "regenerate_dots": False,
-    #     "task_type": "ambiguous",
-    #     "commands": ["Increase the distance between the green cube and the blue cube","Can you make the distance between them larger?"],
-    #     "mode": "override"
-    # },
-    # {
-    #     "name": "Scene1_trajectory_1",
-    #     "regenerate_scene": False,
-    #     "regenerate_dots": False,
-    #     "task_type": "trajectory",
-    #     "commands": ["Move the blue cube to point 3, then point 1, then point 2"],
-    #     "mode": "override"
-    # },
-    # {
-    #     "name": "Scene1_trajectory_2",
-    #     "regenerate_scene": False,
-    #     "regenerate_dots": False,
-    #     "task_type": "trajectory",
-    #     "commands": ["Move the red cylinder to point 4, point 2, then return to its original position"],
-    #     "mode": "override"
-    # }
+    {
+        "name": "scene1_ambiguous_1",
+        "regenerate_scene": False,
+        "regenerate_dots": False,
+        "task_type": "ambiguous",
+        "commands": ["put the red cubes together"],
+        "mode": "override"
+    },
+    {
+        "name": "scene1_ambiguous_2",
+        "regenerate_scene": False,
+        "regenerate_dots": False,
+        "task_type": "ambiguous",
+        "commands": ["increase the distance between the green cube and the blue cube"],
+        "mode": "override"
+    },
+    {
+        "name": "Scene1_trajectory_1",
+        "regenerate_scene": False,
+        "regenerate_dots": False,
+        "task_type": "trajectory",
+        "commands": ["move the blue cube to point 3, then point 1, then point 2"],
+        "mode": "override"
+    },
+    {
+        "name": "Scene1_trajectory_2",
+        "regenerate_scene": False,
+        "regenerate_dots": False,
+        "task_type": "trajectory",
+        "commands": ["move the red cylinder to point 2, then return to its original position"],
+        "mode": "override"
+    }
     # Add more experiment configs here
 ]
 

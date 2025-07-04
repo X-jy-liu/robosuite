@@ -1,5 +1,24 @@
 import openai
 import json
+import re
+
+# Extract first JSON object from response (robust to Markdown formatting)
+def extract_json_block(text: str):
+    if isinstance(text, dict):
+        return text  # already parsed
+    
+    if not isinstance(text, str):
+        raise TypeError(f"Expected string or dict, got {type(text)}")
+
+    # Remove markdown-style wrapping
+    cleaned = text.strip().strip("`").replace("json", "", 1).strip()
+
+    # Extract the first JSON object
+    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+    if match:
+        return json.loads(match.group(0))
+    else:
+        raise ValueError("No valid JSON object found.")
 
 def call_llm_parser(full_prompt: str, model="gpt-4-turbo") -> dict:
     """
@@ -23,7 +42,7 @@ def call_llm_parser(full_prompt: str, model="gpt-4-turbo") -> dict:
         )
 
         content = response["choices"][0]["message"]["content"]
-        response = json.loads(content) # convert the response content to a dictionary
+        response = extract_json_block(content)
         return response
 
     except json.JSONDecodeError as jde:

@@ -27,7 +27,7 @@ class Evaluator:
         ref_pnt_mapping (dict): Mapping of reference points to their specifications.
         """
         self.task_type = task_type
-        self.action = action
+        self.action = action.lower()
         self.interested_obj = interested_obj
         self.success_criteria = success_criteria
         self.init_obj_specs = init_obj_specs
@@ -39,7 +39,6 @@ class Evaluator:
         """
         Basic evaluation logic that can be overridden by subclasses.
         """
-        self.action = self.action.lower()
 
         interested_pos = self._track_object_positions(self.obj_specs_history, self.interested_obj)
         obj_name = next((k for k, v in self.obj_mapping.items() if v == self.interested_obj), None)
@@ -55,6 +54,65 @@ class Evaluator:
 
         else:
             raise ValueError(f"Action '{self.action}' is not supported for basic evaluation.")
+        
+    def ambiguous_evaluate(self):
+        """
+        Evaluation logic for ambiguous
+        """
+        print("debugging")
+        print(f"type of self.interested_obj: {type(self.interested_obj)}")
+        lst_interested_obj = [part.strip() for part in self.interested_obj.split(",")]
+        assert len(lst_interested_obj) == 2, f"For ambiguous evaluation, interested_obj should contain exactly two objects. But found: {self.interested_obj} of length {len(self.interested_obj)}."
+        interested_pos = self._track_object_positions(self.obj_specs_history, lst_interested_obj)
+        obj_names = [k for k, v in self.obj_mapping.items() if v in self.interested_obj] # 2 elements list
+        assert len(obj_names) == 2, f"Expected two objects for ambiguous evaluation, but found {len(obj_names)}: {obj_names}"
+
+        init_pos = []
+        final_pos = []
+        for name in obj_names:
+            init_pos.append(interested_pos[name][0])  # initial position
+            final_pos.append(interested_pos[name][-1])  # final position
+        
+        return self._distance_change_check(init_pos=init_pos, final_pos=final_pos, mode=self.action)
+    
+    def trajectory_evaluate(self):
+        """
+        Evaluation logic for trajectory tasks.
+        Read the success criteria as a list of positions: list(list(float)).
+        For each position in success criteria, check if there is a position matched in the obj_specs_history in order.
+        if all positions are matched in order, return True, otherwise return False.
+        """
+        if not isinstance(self.success_criteria, list):
+            raise ValueError("For trajectory evaluation, success_criteria should be a list of positions.")
+        if not all(isinstance(pos, list) and len(pos) == 2 for pos in self.success_criteria):
+            raise ValueError("Each position in success_criteria should be a list of three floats [x, y].")
+        # check if self.instrested_ob is a string with two words, e.g., "red cube"
+        if not isinstance(self.interested_obj, str) or len(self.interested_obj.strip().split()) != 2:
+            raise ValueError(f"Invalid interested_obj format: '{self.interested_obj}'. Expected format like 'red cube'.")
+        
+        interested_obj_pos_dict = self._track_object_positions(self.obj_specs_history, self.interested_obj)
+        obj_name = next((k for k, v in self.obj_mapping.items() if v == self.interested_obj), None)
+        assert obj_name is not None, f"No object found for: '{self.interested_obj}'"
+
+        interested_obj_pos = interested_obj_pos_dict[obj_name]
+        pos_index = 0
+        traj_len = len(interested_obj_pos)
+        for checkpoint in self.success_criteria:
+            # only check the poinsitions from current pos_index onwards
+            while pos_index < traj_len:
+                if self._position_check(
+                    obj_pos = interested_obj_pos[pos_index][:2],
+                    target_pos= checkpoint
+                    ):
+                    print(f"Matched checkpoint {checkpoint} at position {[round(x,3) for x in interested_obj_pos[pos_index][:2]]}")
+                    pos_index += 1
+                    break
+                pos_index += 1
+            else:
+                # No match found for this checkpoint in the remaining trajectory
+                return False
+        print(f"Success! All checkpoints matched in order for {self.interested_obj}.")
+        return True
 
     def _position_check(self, obj_pos, target_pos, threshold=0.0125):
         """
@@ -62,36 +120,51 @@ class Evaluator:
 
         Parameters:
         ----------
-        obj_pos (list): The current position of the object as [x, y, z].
-        target_pos (list): The target position as [x, y, z].
+        obj_pos (list): The current position of the object as [x, y, z] or [x,y].
+        target_pos (list): The target position as [x, y, z] or [x,y].
         threhold (float): The threshold distance to check against.
         """
         # calculate the norm of the difference vector
         distance = np.linalg.norm(np.array(obj_pos) - np.array(target_pos))
         return distance <= threshold
     
-    def _track_object_positions(self, obj_pos_history, query):
+    def _track_object_positions(self, obj_pos_history, queries):
         """
         Track the positions of objects matching a query like 'red cube' or 'blue cylinder'.
 
         Args:
             obj_pos_history (list): A list of object dictionaries over time.
-            query (str): A string in the format 'color shape', e.g., 'red cube'.
+            queries (str or list): A string or list of strings like 'red cube' or a list of such strings.
 
         Returns:
             dict: A dictionary mapping object names (obj0, obj1, ...) to a list of positions across time steps.
         """
-        if not isinstance(query, str) or len(query.strip().split()) != 2:
-            raise ValueError(f"Invalid query format: '{query}'. Expected format like 'red cube'.")
-        color, shape = query.lower().split()
+        print("Debugging ...")
+        print(f"Type of queries: {type(queries)}\nQueries: {queries}")
+
+        if isinstance(queries, str):
+            queries = [queries]  # Wrap single string into a list
+        
+        parsed_queries = []
+        for q in queries:
+            if not isinstance(q, str) or len(q.strip().split()) != 2:
+                raise ValueError(f"Invalid query format: '{q}'. Expected format like 'blue cylinder'.")
+            color, shape = q.lower().split()
+            parsed_queries.append((color, shape))
+
         tracked_positions = {}
 
         for timestep in obj_pos_history:
             for obj_name, obj_info in timestep.items():
-                if obj_info["color"].lower() == color and obj_info["shape"].lower() == shape:
-                    if obj_name not in tracked_positions:
-                        tracked_positions[obj_name] = []
-                    tracked_positions[obj_name].append(obj_info["position"])
+                obj_color = obj_info.get("color", "").lower()
+                obj_shape = obj_info.get("shape", "").lower()
+
+                for color, shape in parsed_queries:
+                    if obj_color == color and obj_shape == shape:
+                        if obj_name not in tracked_positions:
+                            tracked_positions[obj_name] = []
+                        tracked_positions[obj_name].append(obj_info["position"])
+                        break  # Stop checking other queries once matched
         
         return tracked_positions
     
@@ -112,3 +185,56 @@ class Evaluator:
         current_height = obj_pos[2]
         
         return current_height >= target_pos[2]
+    
+    def _distance_change_check(self, init_pos, final_pos, mode):
+        """
+        check if the distance between two objects has changed according to the specified mode.
+        Parameters:
+        ----------
+        init_post (list(list(foat)): Initial positions of the objects as [[x1, y1, z1], [x2, y2, z2]].
+        final_pos (list(list(float)): Final positions of the objects as [[x1, y1, z1], [x2, y2, z2]].
+        mode (str): The mode of distance change to check, either "closer" or "further".
+        Returns:
+        -------
+        bool: True if the distance change condition is met, False otherwise.
+        """
+        if len(init_pos) != 2 or len(final_pos) != 2:
+            raise ValueError("init_pos and final_pos should each contain exactly two positions.")
+
+        init_distance = np.linalg.norm(np.array(init_pos[0]) - np.array(init_pos[1]))
+        final_distance = np.linalg.norm(np.array(final_pos[0]) - np.array(final_pos[1]))
+
+        if mode == "move_closer":
+            return final_distance < init_distance
+        elif mode == "move_further":
+            return final_distance > init_distance
+        else:
+            raise ValueError(f"Invalid mode '{mode}'. Expected 'closer' or 'further'.")
+
+
+if __name__ == "__main__":
+    # test the _track_object_positions method
+    obj_pos_history = [
+        {
+            "obj0": {"color": "red", "shape": "cube", "position": [0.1, 0.2, 0.3]},
+            "obj1": {"color": "blue", "shape": "cylinder", "position": [0.4, 0.5, 0.6]}
+        },
+        {
+            "obj0": {"color": "red", "shape": "cube", "position": [0.2, 0.3, 0.4]},
+            "obj1": {"color": "blue", "shape": "cylinder", "position": [0.5, 0.6, 0.7]}
+        }
+    ]
+
+    evaluator = Evaluator(
+        task_type="simple",
+        action="deliver",
+        interested_obj=["red cube", "blue cylinder"],
+        success_criteria=[0.2, 0.3, 0.4],
+        init_obj_specs={},
+        obj_specs_history=obj_pos_history,
+        obj_mapping={"obj0": "red cube", "obj1": "blue cylinder"},
+        ref_pnt_mapping={}
+    )
+    # tracked_positions = evaluator._track_object_positions(obj_pos_history, ["red cube", "blue cylinder"])
+    tracked_positions = evaluator._track_object_positions(obj_pos_history, "blue cylinder")
+    print(tracked_positions)  # Should print positions of the red cube across time steps

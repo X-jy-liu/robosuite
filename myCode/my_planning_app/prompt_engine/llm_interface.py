@@ -14,9 +14,9 @@ def call_llm(prompt: str, task_type: str) -> dict:
     )
 
     content = response["choices"][0]["message"]["content"]
-    print("-----RAW LLM RESPONSE-----")
+    print("\n----- RAW LLM RESPONSE START-----\n")
     print(content)
-    print("---------------------------")
+    print("\n ---- RAW LLM RESPONSE END ------\n")
     explanation = extract_explanation_block(content)
     
     if task_type in ["basic", "ambiguous"]:

@@ -14,7 +14,8 @@ class SimWrapper:
             robots="Panda",
             controller_configs=controller,
             has_renderer=True,
-            scene_config_path = self.scene_config_path
+            scene_config_path = self.scene_config_path,
+            ignore_done = True
         )
         self.env.reset()
 
@@ -32,7 +33,7 @@ class SimWrapper:
         2. Returns the history of object positions after execution.
         """
 
-        print("LLM generated plan:\n", plan)
+        print("\nLLM generated plan:\n", plan)
         obj_specs_history = self.executor.execute_plan(plan)
 
         return obj_specs_history

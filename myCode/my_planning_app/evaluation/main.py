@@ -35,7 +35,7 @@ log_dir = Path.home()/"robosuite"/"myCode"/"my_planning_app"/"logs"/"scene_01"/"
 assert log_dir.exists(), f"Log directory {log_dir} does not exist."
 log_paths = list(log_dir.glob("*.json")) # read all log .json files within the log_dir
 for i, log_path in enumerate(log_paths):
-    print(f"Processing log file {i+1}/{len(log_paths)} ...")
+    print(f"\nProcessing log file {i+1}/{len(log_paths)}...\n   \"{log_path.stem}\"\n")
     log_name = log_path.stem  # Get the name of the log file without extension
     # read experiment logs
     initial_command, task_type, init_obj, obj_pos_history = read_experiment_log(log_path)
@@ -70,18 +70,20 @@ for i, log_path in enumerate(log_paths):
 
     if task_type == "basic":
         if_success = evaluator.basic_evaluate()
-    llm_evaluation["success_status"] = "success" if if_success else "failure"
+        llm_evaluation["success_status"] = "success" if if_success else "failure"
 
-    # elif task_type == "ambiguous":
-    #     return ambiguous_evaluator.evaluate(parsed, start_state, end_state, trajectories)
-    # elif task_type == "trajectory":
-    #     return trajectory_evaluator.evaluate(parsed, start_state, end_state, trajectories)
-
-    print(f"sucess: {if_success}")
+    elif task_type == "ambiguous":
+        if_success = evaluator.ambiguous_evaluate()
+        llm_evaluation["success_status"] = "success" if if_success else "failure"
+    elif task_type == "trajectory":
+        if_success = evaluator.trajectory_evaluate()
+        llm_evaluation["success_status"] = "success" if if_success else "failure"
+    else:
+        raise ValueError(f"Unknown task type: {task_type}")
 
     # Save the response
     response_save_path = response_save_dir / f"{log_name}_evaluated.json"
     with open(response_save_path, "w") as f:
         json.dump(llm_evaluation, f, indent=4)
     
-    print(f"Finished {i+1}/{len(log_paths)}!\nResponse saved to {response_save_path}")
+    print(f"Finished {i+1}/{len(log_paths)}!\n  Response saved to {response_save_path}\n")
