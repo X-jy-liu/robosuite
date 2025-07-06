@@ -1,0 +1,25 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "red cube",
+    "interested_waypoints_in_order": [
+        "point_5",
+        "point_2"
+    ],
+    "success_criteria": [
+        [
+            -0.083,
+            0.187
+        ],
+        [
+            0.247,
+            -0.097
+        ],
+        [
+            -0.04,
+            -0.218
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, the red cube needs to move to point 2 after passing through point 5. The success criteria list the coordinates (x, y) for the initial position of the red cube, followed by the coordinates for point 5 and point 2 in order.",
+    "success_status": "success"
+}

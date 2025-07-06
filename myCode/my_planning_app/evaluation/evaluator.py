@@ -46,7 +46,7 @@ class Evaluator:
 
         obj_pos = interested_pos[obj_name][-1]
 
-        if self.action == "deliver":
+        if self.action in ["deliver", "stack"]:
             return self._position_check(obj_pos=obj_pos, target_pos=self.success_criteria)
 
         elif self.action == "lift":
@@ -59,8 +59,6 @@ class Evaluator:
         """
         Evaluation logic for ambiguous
         """
-        print("debugging")
-        print(f"type of self.interested_obj: {type(self.interested_obj)}")
         lst_interested_obj = [part.strip() for part in self.interested_obj.split(",")]
         assert len(lst_interested_obj) == 2, f"For ambiguous evaluation, interested_obj should contain exactly two objects. But found: {self.interested_obj} of length {len(self.interested_obj)}."
         interested_pos = self._track_object_positions(self.obj_specs_history, lst_interested_obj)
@@ -114,7 +112,7 @@ class Evaluator:
         print(f"Success! All checkpoints matched in order for {self.interested_obj}.")
         return True
 
-    def _position_check(self, obj_pos, target_pos, threshold=0.0125):
+    def _position_check(self, obj_pos, target_pos, threshold=0.025):
         """
         Check if the object position is within a certain threshold of the target position.
 
@@ -139,8 +137,6 @@ class Evaluator:
         Returns:
             dict: A dictionary mapping object names (obj0, obj1, ...) to a list of positions across time steps.
         """
-        print("Debugging ...")
-        print(f"Type of queries: {type(queries)}\nQueries: {queries}")
 
         if isinstance(queries, str):
             queries = [queries]  # Wrap single string into a list
@@ -210,31 +206,3 @@ class Evaluator:
             return final_distance > init_distance
         else:
             raise ValueError(f"Invalid mode '{mode}'. Expected 'closer' or 'further'.")
-
-
-if __name__ == "__main__":
-    # test the _track_object_positions method
-    obj_pos_history = [
-        {
-            "obj0": {"color": "red", "shape": "cube", "position": [0.1, 0.2, 0.3]},
-            "obj1": {"color": "blue", "shape": "cylinder", "position": [0.4, 0.5, 0.6]}
-        },
-        {
-            "obj0": {"color": "red", "shape": "cube", "position": [0.2, 0.3, 0.4]},
-            "obj1": {"color": "blue", "shape": "cylinder", "position": [0.5, 0.6, 0.7]}
-        }
-    ]
-
-    evaluator = Evaluator(
-        task_type="simple",
-        action="deliver",
-        interested_obj=["red cube", "blue cylinder"],
-        success_criteria=[0.2, 0.3, 0.4],
-        init_obj_specs={},
-        obj_specs_history=obj_pos_history,
-        obj_mapping={"obj0": "red cube", "obj1": "blue cylinder"},
-        ref_pnt_mapping={}
-    )
-    # tracked_positions = evaluator._track_object_positions(obj_pos_history, ["red cube", "blue cylinder"])
-    tracked_positions = evaluator._track_object_positions(obj_pos_history, "blue cylinder")
-    print(tracked_positions)  # Should print positions of the red cube across time steps

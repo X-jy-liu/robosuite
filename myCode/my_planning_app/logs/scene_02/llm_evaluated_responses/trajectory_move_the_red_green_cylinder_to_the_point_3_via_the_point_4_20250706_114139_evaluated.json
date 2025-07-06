@@ -1,0 +1,25 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "red cylinder",
+    "interested_waypoints_in_order": [
+        "point_3",
+        "point_4"
+    ],
+    "success_criteria": [
+        [
+            0.036,
+            0.009
+        ],
+        [
+            -0.226,
+            0.193
+        ],
+        [
+            0.143,
+            -0.061
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, the red cylinder needs to move to point 3 via point 4. The success criteria are defined by the waypoints in order, starting from the initial position of the red cylinder [0.036, 0.009], then moving to point 3 [-0.226, 0.193], and finally passing through point 4 [0.143, -0.061]. The list of coordinates (only x, y coordinates are considered) represents the waypoints the red cylinder must pass through.",
+    "success_status": "failure"
+}

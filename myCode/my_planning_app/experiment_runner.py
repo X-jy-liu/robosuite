@@ -1,68 +1,9 @@
 import requests
 import time
-from datetime import datetime
+import argparse
+import importlib
 
 BASE_URL = "http://localhost:8000"
-
-EXPERIMENTS = [
-    {
-        "name": "Scene1_basic_1",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "basic",
-        "commands": ["Lift the blue cube"],
-        "mode": "override"
-    },
-    {
-        "name": "Scene1_basic_2",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "basic",
-        "commands": ["Move the green cube to [0.1,-0.1,0.825]"],
-        "mode": "override"
-    },
-    {
-        "name": "Scene1_basic_3",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "basic",
-        "commands": ["Lift the red cylinder"],
-        "mode": "override"
-    },
-    {
-        "name": "scene1_ambiguous_1",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "ambiguous",
-        "commands": ["put the red cubes together"],
-        "mode": "override"
-    },
-    {
-        "name": "scene1_ambiguous_2",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "ambiguous",
-        "commands": ["increase the distance between the green cube and the blue cube"],
-        "mode": "override"
-    },
-    {
-        "name": "Scene1_trajectory_1",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "trajectory",
-        "commands": ["move the blue cube to point 3, then point 1, then point 2"],
-        "mode": "override"
-    },
-    {
-        "name": "Scene1_trajectory_2",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "trajectory",
-        "commands": ["move the red cylinder to point 2, then return to its original position"],
-        "mode": "override"
-    }
-    # Add more experiment configs here
-]
 
 def run_experiment(exp_config):
     print(f"\n🚀 Starting experiment: {exp_config['name']}")
@@ -71,18 +12,41 @@ def run_experiment(exp_config):
         "regenerate_dots": exp_config["regenerate_dots"],
         "task_type": exp_config["task_type"],
         "commands": exp_config["commands"],
-        "mode": exp_config["mode"]
+        "mode": "none"
     }
 
-    # Run full experiment pipeline
     res = requests.post(f"{BASE_URL}/run_full_experiment", json=payload)
     if res.status_code != 200:
         print(f"❌ Error: {res.text}")
     else:
         print(f"✅ Finished: {exp_config['name']}")
 
-    time.sleep(1)  # optional cooldown between runs
+    time.sleep(1)
+
+def build_config_path(scene_idx: str) -> str:
+    """
+    Given a scene index like '01', return the full module path.
+    """
+    return f"logs.scene_{scene_idx}.scene_{scene_idx}_experiments_config"
+
+def load_experiments(config_path: str):
+    try:
+        module = importlib.import_module(config_path)
+        return getattr(module, 'EXPERIMENTS')
+    except (ModuleNotFoundError, AttributeError) as e:
+        raise ImportError(f"Cannot load EXPERIMENTS from '{config_path}': {e}")
 
 if __name__ == "__main__":
-    for exp in EXPERIMENTS:
+    parser = argparse.ArgumentParser(description="Run experiments for a given scene index.")
+    parser.add_argument(
+        "--scene",
+        required=True,
+        help="Scene index, e.g., '01', '02', ..., which maps to logs.scene_XX.scene_XX_experiments_config"
+    )
+    args = parser.parse_args()
+
+    config_path = build_config_path(args.scene)
+    experiments = load_experiments(config_path)
+
+    for exp in experiments:
         run_experiment(exp)

@@ -1,0 +1,21 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "green cube",
+    "interested_waypoints_in_order": [
+        "point_1",
+        "point_4"
+    ],
+    "success_criteria": [
+        [
+            -0.092,
+            0.153
+        ],
+        [
+            -0.226,
+            -0.035
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, the green cube needs to move to point_4 after passing through point_1. The success criteria are the coordinates (only x, y coordinates are considered) for the waypoints in the specified order.",
+    "success_status": "success"
+}

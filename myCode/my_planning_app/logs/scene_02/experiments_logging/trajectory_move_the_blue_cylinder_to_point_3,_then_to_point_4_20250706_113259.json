@@ -1,0 +1,1230 @@
+{
+  "initial_command": "move_the_blue_cylinder_to_point_3,_then_to_point_4",
+  "timestamp": "2025-07-06T11:32:59.555261",
+  "steps": [
+    {
+      "timestamp": "2025-07-06T11:32:59.555140",
+      "mode": "override",
+      "task_type": "trajectory",
+      "task_command": "move the blue cylinder to point 3, then to point 4",
+      "symbolic_plan": [
+        [
+          "gripper_move",
+          [
+            -0.078,
+            -0.068,
+            0.875
+          ]
+        ],
+        [
+          "gripper_open"
+        ],
+        [
+          "gripper_move",
+          [
+            -0.078,
+            -0.068,
+            0.825
+          ]
+        ],
+        [
+          "gripper_close"
+        ],
+        [
+          "gripper_move",
+          [
+            -0.078,
+            -0.068,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            0.01,
+            -0.117,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.021,
+            -0.165,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.078,
+            -0.181,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.17,
+            -0.135,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.192,
+            0.024,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.226,
+            0.193,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.192,
+            0.024,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.17,
+            -0.135,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.078,
+            -0.181,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            -0.065,
+            -0.174,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            0.109,
+            -0.087,
+            0.85
+          ]
+        ],
+        [
+          "gripper_move",
+          [
+            0.143,
+            -0.061,
+            0.85
+          ]
+        ],
+        [
+          "gripper_open"
+        ]
+      ],
+      "explanation": "explanation: The task requires moving the blue cylinder (obj2) to point 3 and then to point 4. The initial position of the blue cylinder is at [-0.078, -0.068]. The first target location is point 3 at [-0.226, 0.193] and the final target location is point 4 at [0.143, -0.061]. The path is direct and does not specify any intermediate points. The waypoints are chosen as the initial position of the object, the first target location, and the final target location.\ntrajectory_points:[[-0.078, -0.068], [-0.226, 0.193], [0.143, -0.061]]",
+      "llm_interpretation_time_sec": 6.277,
+      "init_obj": {
+        "obj0": {
+          "name": "obj0",
+          "shape": "cylinder",
+          "color": "red",
+          "position": [
+            0.208,
+            0.026,
+            0.8250000000000001
+          ],
+          "size": 0.025
+        },
+        "obj1": {
+          "name": "obj1",
+          "shape": "cube",
+          "color": "red",
+          "position": [
+            -0.083,
+            0.187,
+            0.8250000000000001
+          ],
+          "size": 0.025
+        },
+        "obj2": {
+          "name": "obj2",
+          "shape": "cylinder",
+          "color": "blue",
+          "position": [
+            -0.078,
+            -0.068,
+            0.8250000000000001
+          ],
+          "size": 0.025
+        },
+        "obj3": {
+          "name": "obj3",
+          "shape": "cylinder",
+          "color": "green",
+          "position": [
+            0.124,
+            0.153,
+            0.8250000000000001
+          ],
+          "size": 0.025
+        },
+        "obj4": {
+          "name": "obj4",
+          "shape": "cylinder",
+          "color": "red",
+          "position": [
+            0.036,
+            0.009,
+            0.8250000000000001
+          ],
+          "size": 0.025
+        }
+      },
+      "obj_pos_history": [
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20800802747741073,
+              0.025987771049001417,
+              0.8253126341537251
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.07798704888062855,
+              -0.06799986192999527,
+              0.8253089496701799
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12399040747381737,
+              0.1530121784382394,
+              0.8253098450678336
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599509036874441,
+              0.009063239883234422,
+              0.8253650067491228
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20801446561830453,
+              0.025985879323078224,
+              0.8253115089680262
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.07801249919677668,
+              -0.06799999211386817,
+              0.8253089485055765
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12398606177176762,
+              0.1530162630063023,
+              0.8253067116649667
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599347749094566,
+              0.0090618719451388,
+              0.825365147227411
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20800153316196549,
+              0.026033558911972947,
+              0.825311353794523
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.07798718351034443,
+              -0.06799991163764658,
+              0.8253089496807775
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.1240227107851696,
+              0.15298001348146786,
+              0.8253084069853178
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599427611178175,
+              0.009063203502069987,
+              0.8253649987256776
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20799812627101522,
+              0.025989680867426666,
+              0.8253100691259677
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.07793120801020159,
+              -0.06733781928471942,
+              0.8258851582871485
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12398989260431055,
+              0.15301183724554518,
+              0.8253098375123755
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.035992604759505345,
+              0.009061838356547511,
+              0.8253651515742463
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20799787413067097,
+              0.025983521212807795,
+              0.8253069025833514
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.07918961252815811,
+              -0.06715918086512675,
+              0.8317548875575678
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12398633885361274,
+              0.15301655117078036,
+              0.8253067096227727
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.0359919266166771,
+              0.009062096852416995,
+              0.8253657993241895
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20799983733704205,
+              0.026034378804967683,
+              0.8253085731325109
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              0.001871211341820496,
+              -0.11336676404402823,
+              0.8372339094992574
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12402125671348106,
+              0.1529785966991007,
+              0.8253084107425563
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.035994060485056156,
+              0.009061804762787241,
+              0.825364764229727
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20799865208685517,
+              0.02598234134952826,
+              0.8253068999986504
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.01832238278406888,
+              -0.15632241125658253,
+              0.8383685175605343
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12398659255598139,
+              0.1530168193072458,
+              0.8253067063310746
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599209548900513,
+              0.009061691084288956,
+              0.8253648685467322
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20799894683705583,
+              0.025981893317604445,
+              0.8253068999986831
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.0698759450720985,
+              -0.1771200249816104,
+              0.8389066948426669
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12398743973853717,
+              0.15301769670856114,
+              0.8253067085069443
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.035993389493546545,
+              0.009061766192282966,
+              0.825364681920072
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20799916647200015,
+              0.025972205229414975,
+              0.8253086041743802
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.1625714493441387,
+              -0.14022039929012958,
+              0.8390783868332204
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12398054047139681,
+              0.1530236609990981,
+              0.8253084090302256
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.035999383817570764,
+              0.008938082428607084,
+              0.825364997086337
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20800054485997393,
+              0.02601720033931436,
+              0.8253100133102993
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.1905080383119062,
+              0.014820705545192069,
+              0.8392824340064519
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12401407947342981,
+              0.1529926419363625,
+              0.8253098356758882
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599897654143439,
+              0.008938087481523428,
+              0.8253650469109457
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20800116786966186,
+              0.026022481645033384,
+              0.8253068824119699
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.2260786415702519,
+              0.1834082943829724,
+              0.838910740992131
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12401839394132984,
+              0.15298859602258405,
+              0.8253067078471901
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599724650574645,
+              0.0089380097157108,
+              0.8253649892677235
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.2080004560180851,
+              0.025970245097473272,
+              0.8253086041745255
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.19506457201097424,
+              0.03272175726886592,
+              0.8387883667984313
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12398168858021816,
+              0.15302485496141893,
+              0.8253084064748613
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.035997046270217825,
+              0.00893802802611097,
+              0.8253650559453477
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20800183440528788,
+              0.026015240207703502,
+              0.8253100133104229
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.17414461606228357,
+              -0.12693155356948208,
+              0.8379871730139598
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12401648759823326,
+              0.15299519797683134,
+              0.8253098679551533
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.035995077575950364,
+              0.008937935746024087,
+              0.8253649788514487
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.208001698105998,
+              0.025983943282780073,
+              0.82531002608588
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.08596820723320524,
+              -0.17768347321373298,
+              0.8362762646803075
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12399378887367395,
+              0.15301565049484087,
+              0.8253098427850847
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03598299443591175,
+              0.009061675181574904,
+              0.8253654942583795
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20800249760565784,
+              0.02601423213614262,
+              0.8253100133104865
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              -0.07358980211914734,
+              -0.17440666013286787,
+              0.8357379863856372
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12401682017691429,
+              0.15299552354179882,
+              0.8253098416870313
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599495747725932,
+              0.008937330871765084,
+              0.8253659115122429
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20800215087215587,
+              0.025967668914801605,
+              0.8253086041747149
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              0.10167540893158229,
+              -0.08963531209888073,
+              0.8338031840766246
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12398332193299914,
+              0.15302656235017492,
+              0.8253084265161247
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599280163155932,
+              0.008937879334172212,
+              0.825365040443101
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.20800352925833093,
+              0.026012664025211733,
+              0.8253100133105852
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              0.1367248043523356,
+              -0.064865220022985,
+              0.8329924940152866
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12401810365706253,
+              0.1529970232275607,
+              0.8253098349688976
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599130547111704,
+              0.008937819340221111,
+              0.8253649993644588
+            ],
+            "size": 0.025
+          }
+        },
+        {
+          "obj0": {
+            "name": "obj0",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.2080037838258262,
+              0.0260185053717341,
+              0.8253068824120884
+            ],
+            "size": 0.025
+          },
+          "obj1": {
+            "name": "obj1",
+            "shape": "cube",
+            "color": "red",
+            "position": [
+              -0.083,
+              0.187,
+              0.8247844891595695
+            ],
+            "size": 0.025
+          },
+          "obj2": {
+            "name": "obj2",
+            "shape": "cylinder",
+            "color": "blue",
+            "position": [
+              0.13396577819463834,
+              -0.06469114505682173,
+              0.8254395144661764
+            ],
+            "size": 0.025
+          },
+          "obj3": {
+            "name": "obj3",
+            "shape": "cylinder",
+            "color": "green",
+            "position": [
+              0.12402238674288453,
+              0.15299291789852096,
+              0.8253067050581272
+            ],
+            "size": 0.025
+          },
+          "obj4": {
+            "name": "obj4",
+            "shape": "cylinder",
+            "color": "red",
+            "position": [
+              0.03599219156859547,
+              0.008937354031882666,
+              0.8253657814694613
+            ],
+            "size": 0.025
+          }
+        }
+      ]
+    }
+  ]
+}
