@@ -13,6 +13,9 @@ json_paths = [
     p for p in log_dir.rglob("*.json")
     if p.name.startswith(valid_prefixes) and p.stem.endswith(target_suffix)
 ]
+for path in json_paths:
+    if path.name.startswith('basic_') and path.stem.endswith('evaluated'):
+        print(f"Processing {path}...")
 
 # Extract task_type and success_status
 for path in json_paths:
