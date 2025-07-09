@@ -202,7 +202,7 @@ class RPMGenerator:
 
             # Plot objects
             for obj in obj_specs:
-                x, y = obj["position"]
+                y, x = obj["position"]
                 r = obj["size"] / 2
                 circle = plt.Circle((x, y), r, color='red', alpha=0.5)
                 ax.add_patch(circle)
@@ -211,7 +211,7 @@ class RPMGenerator:
 
             # Plot reference points
             for name, pos in pnt_specs.items():
-                y,  x= pos
+                x,y = pos
                 ax.plot(x, y, 'go')
                 ax.text(x, y - 0.02, name, fontsize=8, ha='center', color='green', zorder=4)
 

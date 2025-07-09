@@ -52,6 +52,6 @@ plt.grid(True, axis='y')
 plt.tight_layout()
 
 # Save plot
-# plot_path = log_dir / "llm_success_rate_by_task.png"
-# plt.savefig(plot_path, dpi=300)
+plot_path = log_dir / "llm_success_rate_by_task.png"
+plt.savefig(plot_path, dpi=300)
 plt.show()
