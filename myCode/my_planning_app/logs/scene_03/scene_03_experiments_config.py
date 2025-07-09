@@ -4,35 +4,35 @@ EXPERIMENTS = [
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "basic",
-        "commands": ["Lift the red cube"]
+        "commands": ["lift the green cylinder"]
     },
     {
         "name": "Scene1_basic_2",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "basic",
-        "commands": ["Move the green cylinder to [0.1,-0.2,0.825]"]
+        "commands": ["Move the blue cube to [0.0,0.0,0.825]"]
     },
     {
         "name": "Scene1_basic_3",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "basic",
-        "commands": ["stack the blue cylinder on the red cube"]
+        "commands": ["lift the blue cube to [-0.1, -0.1, 0.825]"]
     },
     {
         "name": "Scene1_basic_4",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "basic",
-        "commands": ["stack the green cylinder on the blue cylinder"]
+        "commands": ["lift the red cylinder (obj3)"]
     },
     {
         "name": "Scene1_basic_5",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "basic",
-        "commands": ["move the red cube to [0.2, -0.15, 0.825]"]
+        "commands": ["move the blue cube to [0.2,-0.2,0.825]"]
     },
     {
         "name": "scene1_ambiguous_1",
@@ -46,14 +46,14 @@ EXPERIMENTS = [
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "ambiguous",
-        "commands": ["increase the distance between the green cylinder and the red cube"]
+        "commands": ["increase the distance between the green cylinder and the blue cube"]
     },
     {
         "name": "scene1_ambiguous_3",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "ambiguous",
-        "commands": ["move the blue cylinder closer to the red cube"]
+        "commands": ["move the blue cylinder closer to the blue cube"]
     },
     {
         "name": "scene1_ambiguous_4",
@@ -67,42 +67,42 @@ EXPERIMENTS = [
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "ambiguous",
-        "commands": ["move the green cylinder closer to the red cube"]
+        "commands": ["move the green cylinder closer to the red cyliner (obj3)"]
     },
     {
         "name": "Scene1_trajectory_1",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "trajectory",
-        "commands": ["move the blue cylinder to point 3, then to point 4"]
+        "commands": ["move the blue cylinder to point 3, then to point 2"]
     },
     {
         "name": "Scene1_trajectory_2",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "trajectory",
-        "commands": ["move the red cylinder to point 1, then return to its original position"]
+        "commands": ["move the blue cylinder to point 4 via point 1"]
     },
     {
         "name": "Scene1_trajectory_3",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "trajectory",
-        "commands": ["move the green cylinder to the opposite side of the red cylinder (obj4)"]
+        "commands": ["move the green cylinder to the opposite side of the blue cube"]
     },
     {
         "name": "Scene1_trajectory_4",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "trajectory",
-        "commands": ["move the red cube to point 2 via point 5"]
+        "commands": ["move the blue cylinder to point 1 then return to its original position"]
     },
     {
         "name": "Scene1_trajectory_5",
         "regenerate_scene": False,
         "regenerate_dots": False,
         "task_type": "trajectory",
-        "commands": ["move the red green cylinder to the point 3 via the point 4"]
+        "commands": ["move the green cylinder to the point 3, then to point 1."]
     }
     # Add more experiment configs here
 ]

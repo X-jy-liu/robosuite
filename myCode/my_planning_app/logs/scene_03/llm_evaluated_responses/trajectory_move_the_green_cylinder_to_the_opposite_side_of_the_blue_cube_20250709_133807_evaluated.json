@@ -1,0 +1,17 @@
+{
+    "task_type": "trajectory",
+    "action": "move_opposite",
+    "interested_object": "green cylinder",
+    "success_criteria": [
+        [
+            -0.076,
+            0.121
+        ],
+        [
+            0.242,
+            0.251
+        ]
+    ],
+    "explanation": "For the trajectory task - move_opposite action, the green cylinder is initially at position [-0.076, 0.121]. The target reference object, the blue cube, is at position [-0.159, 0.048]. To find the opposite position, we calculate the vector from the blue cube to the green cylinder and then extend this vector in the opposite direction from the blue cube. The resulting position is calculated as [-0.159, 0.048] + ([-0.159, 0.048] - [-0.076, 0.121]) = [0.242, 0.251].",
+    "success_status": "failure"
+}

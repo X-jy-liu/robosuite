@@ -1,0 +1,25 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "green cylinder",
+    "interested_waypoints_in_order": [
+        "point_3",
+        "point_1"
+    ],
+    "success_criteria": [
+        [
+            -0.076,
+            0.121
+        ],
+        [
+            0.09,
+            -0.061
+        ],
+        [
+            -0.108,
+            -0.095
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, we need to ensure the green cylinder reaches point 1 after passing through point 3. The success criteria is defined by passing the waypoints in order, so it is a list of coordinates (only x, y coordinates are cared in this case) for the waypoints.",
+    "success_status": "success"
+}

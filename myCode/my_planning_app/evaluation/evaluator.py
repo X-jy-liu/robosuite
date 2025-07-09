@@ -60,17 +60,22 @@ class Evaluator:
         Evaluation logic for ambiguous
         """
         lst_interested_obj = [part.strip() for part in self.interested_obj.split(",")]
-        assert len(lst_interested_obj) == 2, f"For ambiguous evaluation, interested_obj should contain exactly two objects. But found: {self.interested_obj} of length {len(self.interested_obj)}."
+        if len(lst_interested_obj) != 2:
+            print(f"[Warning] For ambiguous evaluation, interested_obj should contain exactly two objects. But found: {self.interested_obj} of length {len(lst_interested_obj)}.")
+            return False
+
         interested_pos = self._track_object_positions(self.obj_specs_history, lst_interested_obj)
-        obj_names = [k for k, v in self.obj_mapping.items() if v in self.interested_obj] # 2 elements list
-        assert len(obj_names) == 2, f"Expected two objects for ambiguous evaluation, but found {len(obj_names)}: {obj_names}"
+        obj_names = [k for k, v in self.obj_mapping.items() if v in self.interested_obj]
+        if len(obj_names) != 2:
+            print(f"[Warning] Expected two objects for ambiguous evaluation, but found {len(obj_names)}: {obj_names}")
+            return False
 
         init_pos = []
         final_pos = []
         for name in obj_names:
             init_pos.append(interested_pos[name][0])  # initial position
             final_pos.append(interested_pos[name][-1])  # final position
-        
+
         return self._distance_change_check(init_pos=init_pos, final_pos=final_pos, mode=self.action)
     
     def trajectory_evaluate(self):
