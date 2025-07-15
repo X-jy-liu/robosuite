@@ -8,6 +8,8 @@ class SkillExecutor:
         self.obj_specs_history = [] # will store the history of object positions in a list of dictionaries
 
     def execute_plan(self, plan):
+        # clear the history before executing a new plan
+        self.obj_specs_history = []
         if plan is None:
             print("[ERROR] Received None as the symbolic plan. Skipping execution.")
             return

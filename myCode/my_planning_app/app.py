@@ -240,9 +240,11 @@ def chat_step(request: ChatRequest):
 
     commands = request.commands if isinstance(request.commands, list) else [request.commands]
     all_logs = []
+    print(f"Commands received: \n   {commands}")
 
     for i, cmd in enumerate(commands):
-        mode = "override" if (i == 0 and SESSION["initial_command"] is None) else request.mode or "chain"
+        mode = "override" if (i == 0 and SESSION["initial_command"] is None) else "chain"
+        print(f"Executing command {i+1}/{len(commands)}: {cmd} (mode: {mode}) ... ")
         if SESSION["initial_command"] is None:
             SESSION["initial_command"] = cmd
 
@@ -254,7 +256,7 @@ def chat_step(request: ChatRequest):
             if request.task_type != "trajectory":
                 prompt = construct_prompt(cmd, request.task_type, mode, SESSION["initial_command"])
                 # print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
-                print(f"🧠 Calling LLM for the command ......\n\"{SESSION['initial_command']}\"")
+                print(f"🧠 Calling LLM for the command ......\n\"{cmd}\"")
                 start_time = time.time()
                 result = call_llm(prompt, task_type=request.task_type)
                 llm_time = time.time() - start_time
@@ -263,7 +265,7 @@ def chat_step(request: ChatRequest):
             else:
                 prompt = construct_trajectory_prompt(cmd, request.task_type, mode, SESSION["initial_command"])
                 # print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
-                print(f"🧠 Calling LLM for the command ......\n\"{SESSION['initial_command']}\"")
+                print(f"🧠 Calling LLM for the command ......\n\"{cmd}\"")
                 start_time = time.time()
                 result = call_llm(prompt, task_type=request.task_type)
                 llm_time = time.time() - start_time
@@ -342,6 +344,53 @@ def run_full_experiment(params: dict):
     except Exception as e:
         import traceback
         print("Exception in run_full_experiment:", traceback.format_exc())
+        return {"error": f"Exception occurred: {str(e)}"}
+    
+@app.post("/run_ambiguous_experiment")
+def run_ambiguous_experiment(params: dict):
+    """
+    Run an ambiguous experiment using a 2-step interaction: initial + follow-up command.
+    Params must include:
+    {
+        "commands": list[str]
+        "task_type": str,
+        "regenerate_scene": bool,
+        "regenerate_dots": bool
+    }
+    """
+    try:
+        print("Running ambiguous experiment with params:", params)
+        
+        # === 1. Init Session ===
+        init_result = init_session(InitSessionRequest(
+            regenerate_scene=params.get("regenerate_scene", False),
+            regenerate_dots=params.get("regenerate_dots", False)
+        ))
+        if "error" in init_result:
+            return {"init_error": init_result}
+
+        # === 2. Merge and Run Commands ===
+        commands = params.get("commands", [])
+        chat_result = chat_step(ChatRequest(
+            commands=commands,
+            task_type=params["task_type"],
+            mode="override"  # only applies to the first command; chat_step handles the rest as 'chain'
+        ))
+        if "error" in chat_result:
+            return {"chat_error": chat_result}
+
+        # === 3. Save Logs ===
+        save_result = save_logs()
+
+        return {
+            "init_result": init_result,
+            "chat_result": chat_result,
+            "save_result": save_result
+        }
+
+    except Exception as e:
+        import traceback
+        print("Exception in run_ambiguous_experiment:", traceback.format_exc())
         return {"error": f"Exception occurred: {str(e)}"}
 
 @app.get("/")
