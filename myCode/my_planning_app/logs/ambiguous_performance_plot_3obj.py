@@ -52,7 +52,7 @@ def plot_smoothed_distances_aligned(dist_lst, steps_per_segment=5, noise_std = 0
     plt.axhline(0, color='black', linewidth=0.8)
     plt.ylabel("Distance (Green ↑, Red ↓)")
     plt.xlabel("Normalized Time")
-    plt.title("Smoothed Distances from Blue Cube to Red/Green Cylinders")
+    # plt.title("Smoothed Distances from Blue Cube to Red/Green Cylinders")
     plt.grid(True, linestyle='--', alpha=0.5)
 
     yticks = np.arange(-0.4, 0.45, 0.05)
@@ -92,7 +92,7 @@ def plot_smoothed_ratios_aligned(ratio_lst, steps_per_segment=5, if_save=False):
 
     plt.ylabel("Green : Red Distance Ratio")
     plt.xlabel("Normalized Time")
-    plt.title("Smoothed Ratio of Distances (Green / Red)")
+    # plt.title("Smoothed Ratio of Distances (Green / Red)")
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.axhline(1.0, linestyle='--', color='black', linewidth=0.8)  # Reference line: equal distance
     plt.tight_layout()
@@ -129,7 +129,7 @@ def plot_smoothed_ratios_aligned_with_failures(ratio_lst, success_flags, steps_p
     plt.axhline(1.0, linestyle='--', color='gray', linewidth=0.8)
     plt.ylabel("Green : Red Distance Ratio")
     plt.xlabel("Normalized Time")
-    plt.title("Smoothed Ratio of Distances (Green / Red) with Failure Highlighting")
+    # plt.title("Smoothed Ratio of Distances (Green / Red) with Failure Highlighting")
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.tight_layout()
     if if_save:
