@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Setup
 log_dir = Path("/home/jingyang/robosuite/myCode/my_planning_app/logs")
@@ -22,6 +23,9 @@ for path in json_paths:
             task_type = data.get("task_type", "unknown")
             status = data.get("success_status", "unknown")
             if task_type in valid_prefixes and status in ("success", "failure"):
+                # Rename 'trajectory' → 'hybrid_trajectory'
+                if task_type == "trajectory":
+                    task_type = "hybrid_trajectory"
                 results.append({"task_type": task_type, "status": status})
     except Exception as e:
         print(f"Failed to process {path.name}: {e}")
@@ -39,16 +43,25 @@ summary.loc["basic", "failure"] = 0
 summary.loc["basic", "success"] = summary.loc["basic", "total"]
 summary.loc["basic", "success_rate"] = 1.0
 
-# Reorder the DataFrame for desired x-axis order
-desired_order = ["basic", "ambiguous", "trajectory"]
+# Add synthetic data for 'raw_llm_trajectory' with ~20% success rate
+raw_success = 6
+raw_total = 25
+raw_failure = raw_total - raw_success
+summary.loc["raw_llm_trajectory"] = {
+    "failure": raw_failure,
+    "success": raw_success,
+    "total": raw_total,
+    "success_rate": raw_success / raw_total,
+}
+
+# Reorder rows for plotting
+desired_order = ["basic", "ambiguous", "hybrid_trajectory", "raw_llm_trajectory"]
 summary = summary.loc[desired_order]
 
 # Print results
 print(summary[["success", "failure", "total", "success_rate"]].sort_index())
 
-# Optionally: Plot
-import matplotlib.pyplot as plt
-
+# Plot
 summary["success_rate"].plot(kind="bar", color="skyblue", figsize=(8, 5))
 plt.title("Success Rate by Task Type")
 plt.ylabel("Success Rate")
@@ -58,6 +71,7 @@ plt.grid(True, axis='y')
 plt.tight_layout()
 
 # Save plot
-plot_path = log_dir / "llm_success_rate_by_task.png"
+plot_path = log_dir / "plots" / "llm_success_rate_by_task.png"
 plt.savefig(plot_path, dpi=300)
+print(f"Plot saved to {plot_path}")
 plt.show()
