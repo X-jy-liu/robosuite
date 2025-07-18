@@ -20,11 +20,18 @@ class SceneGenerator:
         min_distance: float,
         object_size: float = OBJECT_SIZE,
     ):
-        self.table_bounds = obj_bounds
+        self.obj_bounds = obj_bounds
         self.min_distance = min_distance
         self.object_size = object_size
 
-    def _is_valid_position(self, pos: Tuple[float, float], used_positions: List[Tuple[float, float]]) -> bool:
+    def _is_valid_position(self, 
+                           pos: Tuple[float, float], 
+                           used_positions: List[Tuple[float, float]],
+                           x_bounds: List[float],
+                           y_bounds: List[float]) -> bool:
+        if pos[0] < x_bounds[0] or pos[0] > x_bounds[1] or \
+           pos[1] < y_bounds[0] or pos[1] > y_bounds[1]:
+            return False
         for p in used_positions:
             if np.linalg.norm(np.array(p) - np.array(pos)) < self.min_distance:
                 return False
@@ -39,15 +46,15 @@ class SceneGenerator:
         attempts = 0
         max_attempts = 100
 
-        x_min, x_max = self.table_bounds
-        y_min, y_max = self.table_bounds
+        x_min, x_max = self.obj_bounds
+        y_min, y_max = self.obj_bounds
 
         while len(scene) < num_objects and attempts < max_attempts:
             shape = random.choice(SHAPES)
             color = random.choice(COLORS)
             x, y = round(random.uniform(x_min, x_max), 3), round(random.uniform(y_min, y_max), 3)
 
-            if not self._is_valid_position((x, y), used_positions):
+            if not self._is_valid_position((x, y), used_positions, self.obj_bounds, self.obj_bounds):
                 attempts += 1
                 continue
 
@@ -132,8 +139,134 @@ class SceneGenerator:
 
         print(f"✅ Scene saved with compact one-line-per-object format to {save_path}")
 
+class ThreeObjGenerator(SceneGenerator):
+    def __init__(
+            self,
+            obj_bounds: List[float],
+            object_size: float = OBJECT_SIZE,
+            ):
+        super().__init__(obj_bounds, min_distance=0.11, object_size=object_size)
+
+    def generate_three_objects_with_ratio(self, ratio: float = 2.0, seed: Optional[int] = None) -> List[Tuple[str, str, str, List[float]]]:
+        max_attempts = 100
+        for attempt in range(max_attempts):
+            print(f"Attempt {attempt + 1} to generate a valid scene with 3 objects...")
+            used_positions = []
+
+            if seed is not None:
+                random.seed(seed + attempt)  # slightly vary seed each try
+
+            x_min, x_max = self.obj_bounds
+            y_min, y_max = self.obj_bounds
+            base_distance = random.uniform(0.1, 0.15)
+
+            # 1. Blue cube (obj0)
+            x_blue = np.random.uniform(x_min + 0.1, x_max - 0.1)
+            y_blue = np.random.uniform(y_min + 0.1, y_max - 0.1)
+            blue_pos = np.array([x_blue, y_blue])
+            if not self._is_valid_position(blue_pos, used_positions, self.obj_bounds, self.obj_bounds):
+                continue
+            used_positions.append(tuple(blue_pos))
+
+            # 2. Red cylinder (closer)
+            angle = np.random.uniform(0, 2 * np.pi)
+            offset_red = np.array([np.cos(angle), np.sin(angle)]) * base_distance
+            red_pos = blue_pos + offset_red
+            if not self._is_valid_position(red_pos, used_positions, self.obj_bounds, self.obj_bounds):
+                continue
+            used_positions.append(tuple(red_pos))
+
+            # 3. Green cylinder (farther)
+            angle = np.random.uniform(0, 2 * np.pi)
+            offset_green = np.array([np.cos(angle), np.sin(angle)]) * base_distance * ratio
+            green_pos = blue_pos + offset_green
+            if not self._is_valid_position(green_pos, used_positions, self.obj_bounds, self.obj_bounds):
+                continue
+            used_positions.append(tuple(green_pos))
+
+            # ✅ Success: return the scene immediately
+            scene = [
+                ("obj0", "cube", "blue", [round(blue_pos[0], 3), round(blue_pos[1], 3), TABLE_Z + HALF_HEIGHT]),
+                ("obj1", "cylinder", "red", [round(red_pos[0], 3), round(red_pos[1], 3), TABLE_Z + HALF_HEIGHT + CYLINDER_CALIBRATION]),
+                ("obj2", "cylinder", "green", [round(green_pos[0], 3), round(green_pos[1], 3), TABLE_Z + HALF_HEIGHT + CYLINDER_CALIBRATION]),
+            ]
+            print(f"✅ Successfully generated scene at attempt {attempt + 1} with base distance {base_distance} and ratio {ratio}.")
+            return scene
+
+        # ❌ All attempts failed
+        raise ValueError(f"❌ Failed to generate a valid scene after {max_attempts} attempts.")
+
+    
+    def generate_and_save(self, ratio: float = 2.0):
+        scene = self.generate_three_objects_with_ratio(ratio)
+        HOME_DIR = Path.home()
+        save_path = HOME_DIR / 'robosuite' / 'myCode' / 'my_planning_app' / 'prompts' / 'env_and_func.json'
+        save_path = Path(save_path).resolve()
+        # Format each object as a one-liner
+        formatted_objects = [
+            f'{{ "name": "{name}", "shape": "{shape}", "color": "{color}", '
+            f'"position": {json.dumps([round(c, 3) for c in position[:2]])}, '
+            f'"size": {self.object_size} }}'
+            for name, shape, color, position in scene
+        ]
+
+        # Join object lines
+        objects_str = ",\n      ".join(formatted_objects)
+
+        shape_details_str = (
+            '  "shape_details": {\n'
+            '    "cube": {\n'
+            '      "size": [0.05, 0.05, 0.05],\n'
+            '      "description": "Each cube has equal dimensions of 0.05 meters."\n'
+            '    },\n'
+            '    "cylinder": {\n'
+            '      "height": 0.05,\n'
+            '      "diameter": 0.05,\n'
+            '      "description": "Each cylinder is 0.05 meters tall and 0.05 meters in diameter."\n'
+            '    }\n'
+            '  },\n'
+        )
 
 
+        # Wrap the full JSON content as string
+        json_str = (
+            '{\n'
+            '  "environment": {\n'
+            '    "objects": [\n'
+            f'      {objects_str}\n'
+            '    ]\n'
+            '  },\n'
+            f'{shape_details_str}'
+            '  "available_functions": {\n'
+            '    "move": {\n'
+            '      "params": ["target"],\n'
+            '      "description": "Target can be one of \'obj0\', \'obj1\', \'obj2\', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters.",\n'
+            '      "examples": [["move", "obj1"], ["move", [0.1, 0.1, 0.835]]]\n'
+            '    },\n'
+            '    "grip_and_pickup": {\n'
+            '      "params": ["object"],\n'
+            '      "description": "It can only follow the \'move\' function. The object is one of \'obj0\', \'obj1\', \'obj2\'. It grabs it to the above position",\n'
+            '      "examples": [["grip_and_pickup", "obj2"]]\n'
+            '    },\n'
+            '    "gripper_close": {\n'
+            '      "params": [],\n'
+            '      "description": "Close the gripper.",\n'
+            '      "examples": [["gripper_close"]]\n'
+            '    },\n'
+            '    "gripper_open": {\n'
+            '      "params": [],\n'
+            '      "description": "Open the gripper.",\n'
+            '      "examples": [["gripper_open"]]\n'
+            '    }\n'
+            '  }\n'
+            '}'
+        )
+
+        # Save to file
+        with open(save_path, "w") as f:
+            f.write(json_str)
+
+        print(f"Scene of 3 objects is saved to {save_path} with ratio {ratio}")
 
 if __name__ == "__main__":
     generator = SceneGenerator()

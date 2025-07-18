@@ -12,7 +12,8 @@ def run_ambiguous_experiment(exp_config):
         "commands": exp_config["commands"],
         "task_type": exp_config["task_type"],
         "regenerate_scene": exp_config["regenerate_scene"],
-        "regenerate_dots": exp_config["regenerate_dots"]
+        "regenerate_dots": exp_config["regenerate_dots"],
+        "ambiguous_effects": exp_config.get("ambiguous_effects", False),
     }
     res = requests.post(f"{BASE_URL}/run_ambiguous_experiment", json=payload)
     if res.status_code != 200:

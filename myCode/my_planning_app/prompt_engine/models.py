@@ -48,3 +48,5 @@ class InitSessionRequest(BaseModel):
                             example=False)
     regenerate_dots: bool = Field(False, description="Whether to regenerate the dots in the scene",
                             example=False)
+    ambiguous_effects: bool = Field(False, description="whether to conduct ambigous experiments containing only 3 objects to exmanine the effectiveness of the robot's actions",
+                                    example=False)

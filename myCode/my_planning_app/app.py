@@ -9,7 +9,7 @@ from prompt_engine.scene_checker import check_scene_consistency
 from pathlib import Path
 from contextlib import asynccontextmanager
 from prompt_engine.utils import log_task_summary
-from prompt_engine.scene_generator import SceneGenerator
+from prompt_engine.scene_generator import SceneGenerator, ThreeObjGenerator
 from prompt_engine.dots_generator import DotGenerator
 import time
 from datetime import datetime
@@ -56,48 +56,55 @@ def init_session(req: InitSessionRequest):
 
         SESSION["scene_config_path"] = str(scene_path)
         # === Scene Generation ===
-        if req.regenerate_scene or not scene_path.exists():
-            print("Generating new scene ...")
-            generator = SceneGenerator(obj_bounds=[-0.22, 0.22], min_distance=0.11, object_size=0.05)
-            scene = generator.generate_scene(num_objects=5, seed=random.randint(0, 10000))
+        if req.ambiguous_effects:
+            print("Generating scene with 3 objects for ambiguous effects experiment ...")
+            generator = ThreeObjGenerator(obj_bounds=[-0.22, 0.22], object_size=0.05)
+            scene = generator.generate_three_objects_with_ratio(ratio=2.0, seed=random.randint(0, 10000))
             generator.save_to_json(scene, scene_path)
-            print(f"New scene generated and saved at {scene_path}.")
+            print(f"Ambiguous effects scene generated and saved at {scene_path}.")
         else:
-            print(f"Reusing existing scene ...")
-            print(f"Loaded from {scene_path}...")
+            if req.regenerate_scene or not scene_path.exists():
+                print("Generating new scene ...")
+                generator = SceneGenerator(obj_bounds=[-0.22, 0.22], min_distance=0.11, object_size=0.05)
+                scene = generator.generate_scene(num_objects=5, seed=random.randint(0, 10000))
+                generator.save_to_json(scene, scene_path)
+                print(f"New scene generated and saved at {scene_path}.")
+            else:
+                print(f"Reusing existing scene ...")
+                print(f"Loaded from {scene_path}...")
 
-        # === Dots Generation ===
-        dots_generator = DotGenerator(env_and_func_path = scene_path, dots_bounds = [-0.25, 0.25])
-        if req.regenerate_dots or not dots_path.exists():
-            print("Generating reference dots ...")
-            valid_dots = dots_generator.generate_valid_dots(num_dots=5, 
-                                                            buffer=0.05, 
-                                                            min_dot_distance=0.05, 
-                                                            seed=random.randint(0, 10000))
-            dots_generator.save_dots_to_json(valid_dots, dots_path)
-            print("New dots generated and saved.")
-        else:
-            print("Reusing existing dots ...")
-            valid_dots = dots_generator.load_dots_from_json(dots_path)
-            print(f"Reference dots loaded from {dots_path}.")
+            # === Dots Generation ===
+            dots_generator = DotGenerator(env_and_func_path = scene_path, dots_bounds = [-0.25, 0.25])
+            if req.regenerate_dots or not dots_path.exists():
+                print("Generating reference dots ...")
+                valid_dots = dots_generator.generate_valid_dots(num_dots=5, 
+                                                                buffer=0.05, 
+                                                                min_dot_distance=0.05, 
+                                                                seed=random.randint(0, 10000))
+                dots_generator.save_dots_to_json(valid_dots, dots_path)
+                print("New dots generated and saved.")
+            else:
+                print("Reusing existing dots ...")
+                valid_dots = dots_generator.load_dots_from_json(dots_path)
+                print(f"Reference dots loaded from {dots_path}.")
+            SESSION["reference_dots"] = valid_dots
+
+            # === Generate RPM ===
+            print("Generating roadmap PRM ...")
+            obj_specs = load_objects_from_json(scene_path)
+            pnt_specs = load_dots_from_json(dots_path)
+            rpm_generator = RPMGenerator(obj_specs, pnt_specs, roadmap_buffer=0.05, max_rpm=200)
+            graph, nodes = rpm_generator.build(roadmap_bounds=[-0.28, 0.28])
+            print("Roadmap PRM generated successfully.")
+            print(f"Number of nodes in graph: {len(nodes)}")
+            print(f"Number of edges in graph: {len(graph.edges)}")
+            
+            SESSION["roadmap_graph"] = graph
+            SESSION["roadmap_nodes"] = nodes
+            SESSION["obj_specs"] = obj_specs
+            SESSION["pnt_specs"] = pnt_specs
         
-        SESSION["reference_dots"] = valid_dots
-
-        # === Generate RPM ===
-        print("Generating roadmap PRM ...")
-        obj_specs = load_objects_from_json(scene_path)
-        pnt_specs = load_dots_from_json(dots_path)
-        rpm_generator = RPMGenerator(obj_specs, pnt_specs, roadmap_buffer=0.05, max_rpm=200)
-        graph, nodes = rpm_generator.build(roadmap_bounds=[-0.28, 0.28])
-        print("Roadmap PRM generated successfully.")
-        print(f"Number of nodes in graph: {len(nodes)}")
-        print(f"Number of edges in graph: {len(graph.edges)}")
-        
-        SESSION["roadmap_graph"] = graph
-        SESSION["roadmap_nodes"] = nodes
-        SESSION["obj_specs"] = obj_specs
-        SESSION["pnt_specs"] = pnt_specs
-
+        # ambiguous effects experiment won't have a roadmap, so we skip this part
         # === Sim & Prompt Setup ===
         print("Initializing simulation environment...")
         global sim
@@ -133,8 +140,19 @@ def init_session(req: InitSessionRequest):
 def show_scene():
     try:
         raw_objects = SESSION["base_prompt"].environment.get("objects", []) if SESSION["base_prompt"] else []
-        objects = [obj if isinstance(obj, dict) else obj.__dict__ for obj in raw_objects]
+        objects = [
+            {
+                "name": obj.name,
+                "shape": obj.shape,
+                "color": obj.color,
+                "position": obj.position,
+                "size": obj.size
+            }
+            for obj in raw_objects
+        ]
+        print(f"debugging show_scene: {objects}")
         dots = SESSION.get("reference_dots", [])
+        print(f"debugging show_scene: {dots}")
 
         return f"""
         <html>
@@ -356,6 +374,7 @@ def run_ambiguous_experiment(params: dict):
         "task_type": str,
         "regenerate_scene": bool,
         "regenerate_dots": bool
+        "ambiguous_effects": bool
     }
     """
     try:
@@ -364,7 +383,8 @@ def run_ambiguous_experiment(params: dict):
         # === 1. Init Session ===
         init_result = init_session(InitSessionRequest(
             regenerate_scene=params.get("regenerate_scene", False),
-            regenerate_dots=params.get("regenerate_dots", False)
+            regenerate_dots=params.get("regenerate_dots", False),
+            ambiguous_effects=params.get("ambiguous_effects", False)
         ))
         if "error" in init_result:
             return {"init_error": init_result}

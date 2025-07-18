@@ -1,9 +1,9 @@
 {
   "environment": {
     "objects": [
-      { "name": "obj0", "shape": "cube", "color": "blue", "position": [-0.104, 0.041], "size": 0.05 },
-      { "name": "obj1", "shape": "cylinder", "color": "red", "position": [-0.18, 0.127], "size": 0.05 },
-      { "name": "obj2", "shape": "cylinder", "color": "green", "position": [0.019, -0.153], "size": 0.05 }
+      { "name": "obj0", "shape": "cube", "color": "blue", "position": [-0.009, 0.041], "size": 0.05 },
+      { "name": "obj1", "shape": "cylinder", "color": "red", "position": [0.011, 0.167], "size": 0.05 },
+      { "name": "obj2", "shape": "cylinder", "color": "green", "position": [0.202, -0.102], "size": 0.05 }
     ]
   },
   "shape_details": {
