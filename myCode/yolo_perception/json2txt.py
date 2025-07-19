@@ -3,8 +3,8 @@ import os
 from tqdm import tqdm
 
 # Configuration
-BOX_WIDTH = 0.025
-BOX_HEIGHT = 0.025
+BOX_WIDTH = 0.05 / 0.8  # Normalized width for YOLO
+BOX_HEIGHT = 0.05 / 0.8  # Normalized height for YOLO
 
 classes = {
     "red_cube": 0,
@@ -31,9 +31,9 @@ def convert_label(json_path, output_txt_path):
             print(f"Unknown class: {key}")
             continue
 
-        # Convert from [-0.35, 0.35] (assuming your sim uses world coords) to [0, 1]
-        x_center = (pos_x + 0.35) / 0.7
-        y_center = (pos_y + 0.35) / 0.7
+        # Convert from [-0.4, 0.4] to [0, 1] because the table size is 0.8x0.8 and the center is at (0, 0)
+        x_center = (pos_x + 0.4) / 0.8
+        y_center = (pos_y + 0.4) / 0.8
 
         line = f"{class_id} {x_center:.6f} {y_center:.6f} {BOX_WIDTH:.6f} {BOX_HEIGHT:.6f}"
         lines.append(line)
@@ -43,14 +43,14 @@ def convert_label(json_path, output_txt_path):
         f.write("\n".join(lines))
 
 if __name__ == "__main__":
-    # json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels_json/train"
-    # output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels/train"
+    json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels_json/train"
+    output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels/train"
 
     # json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels_json/val"
     # output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/labels/val"
 
-    json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels_json"
-    output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels"
+    # json_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels_json"
+    # output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels"
 
     os.makedirs(output_dir, exist_ok=True)
 
