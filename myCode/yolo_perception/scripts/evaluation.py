@@ -11,9 +11,9 @@ pred_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/t
 plots_save_path = Path("/home/s2644572/robosuite/myCode/yolo_perception/plots/")
 os.makedirs(plots_save_path, exist_ok=True)
 
-threshold = 0.00125  # meters
+threshold = 0.0025  # meters - the distance threshold for position accuracy
 table_size_m = 0.8  # meters
-norm_threshold = threshold / table_size_m  # normalize threshold
+norm_threshold = threshold / table_size_m  # normalize threshold as the pred and gt are normalized by table size
 print("threshold in meters:", threshold)
 print(f"Normalized threshold: {norm_threshold:.6f} over table size {table_size_m}m")
 
@@ -35,9 +35,9 @@ class_names = [
     "blue_cylinder",
 ]
 
-if_break = False  # Set to True to stop on first misclassification
-
-for ref_file in tqdm(ref_dir.glob("*.txt"), desc="Evaluating predictions"):
+mismatch_files = []
+ref_txt_files = list(ref_dir.glob("*.txt"))
+for ref_file in tqdm(ref_txt_files, desc="Evaluating predictions"):
     pred_file = pred_dir / ref_file.name
     if not pred_file.exists():
         print(f"Missing prediction: {pred_file.name}")
@@ -46,7 +46,20 @@ for ref_file in tqdm(ref_dir.glob("*.txt"), desc="Evaluating predictions"):
     with open(ref_file) as f1, open(pred_file) as f2:
         ref_lines = [line.strip().split() for line in f1.readlines()]
         pred_lines = [line.strip().split() for line in f2.readlines()]
+    
+    # Extract (x, y) positions only
+    ref_xy = np.array([[float(x), float(y)] for _, x, y, _, _ in ref_lines])
+    pred_xy = np.array([[float(x), float(y)] for _, x, y, _, _ in pred_lines])
+    # Compute pairwise Euclidean distances
+    dists = np.linalg.norm(ref_xy[:, None, :] - pred_xy[None, :, :], axis=2)
 
+    # Hungarian algorithm to find best match
+    row_ind, col_ind = linear_sum_assignment(dists)
+
+    # Reorder ref_lines and pred_lines based on Hungarian matching
+    ref_lines = [ref_lines[i] for i in row_ind]
+    pred_lines = [pred_lines[j] for j in col_ind]
+    
     for r_line, p_line in zip(ref_lines, pred_lines):
         class_r, x_r, y_r = int(r_line[0]), float(r_line[1]), float(r_line[2])
         class_p, x_p, y_p = int(p_line[0]), float(p_line[1]), float(p_line[2])
@@ -60,12 +73,13 @@ for ref_file in tqdm(ref_dir.glob("*.txt"), desc="Evaluating predictions"):
             correct_position_pred_per_class[class_r] += dist <= norm_threshold
             position_errors_per_class[class_r].append(dist)
         else:
-            print(f"Misclassification: {ref_file.name} | GT: {class_names[class_r]} | Pred: {class_names[class_p]}")
-            if_break = True
-        if if_break:
-            break
-    if if_break:
-        break
+            mismatch_files.append({
+                "file": ref_file.name,
+                "gt_class": class_names[class_r],
+                "pred_class": class_names[class_p]
+            })
+
+print(f"Processed {len(mismatch_files)} mismatches out of {len(ref_txt_files)} files.")
 # ==== Final Report ====
 print("\n📊 Class-wise Evaluation Report:")
 for i in range(num_classes):
@@ -86,8 +100,8 @@ for i in range(num_classes):
 print("\n📈 Plotting Position Error Distributions:")
 use_density = True  # Set to False if you want raw counts
 for i in range(num_classes):
-    errors = position_errors_per_class[i]
-    if not errors:
+    errors = np.array(position_errors_per_class[i])*table_size_m  # Convert normalized errors back to meters
+    if errors is None or len(errors) == 0:
         print(f"Skipping empty class: {class_names[i]}")
         continue
 
