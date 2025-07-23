@@ -29,7 +29,7 @@ SESSION = {
     "base_prompt": None,
     "initial_command": None,
     "task_type": None,
-    "scene_config_path": None,
+    "scene_dir": None,
     "reference_dots": None,
     "obj_specs": None,
     "pnt_specs": None,
@@ -51,10 +51,19 @@ app = FastAPI(lifespan=lifespan)
 def init_session(req: InitSessionRequest):
     try:
         HOME_DIR = Path.home()
-        scene_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "env_and_func.json"
-        dots_path = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts" / "generated_dots.json"
+        if req.scene_number is not None:
+            print(f"Initializing session for predefined scene {req.scene_number} ...")
+            scene_dir = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "logs" / f"scene_{req.scene_number:02d}"
+        else:
+            print("Initializing session from the prompt directory ...")
+            scene_dir = HOME_DIR / "robosuite" / "myCode" / "my_planning_app" / "prompts"
+        SESSION["scene_dir"] = scene_dir
+        if req.phase is None:
+            raise ValueError("Phase must be provided for session initialization.")
+        SESSION["phase"] = req.phase
+        scene_path = scene_dir / "env_and_func.json"
+        dots_path = scene_dir / "generated_dots.json"
 
-        SESSION["scene_config_path"] = str(scene_path)
         # === Scene Generation ===
         if req.ambiguous_effects:
             print("Generating scene with 3 objects for ambiguous effects experiment ...")
@@ -183,8 +192,8 @@ def show_scene():
                 }};
 
                 const dotTrace = {{
-                    x: dots.map(d => d[0]),
-                    y: dots.map(d => d[1]),
+                    x: dots.map(d => d[1]),
+                    y: dots.map(d => d[0]),
                     text: dots.map((_, i) => "Point " + (i + 1)),
                     mode: 'markers+text',
                     type: 'scatter',
@@ -272,7 +281,7 @@ def chat_step(request: ChatRequest):
 
         try:
             if request.task_type != "trajectory":
-                prompt = construct_prompt(cmd, request.task_type, mode, SESSION["initial_command"])
+                prompt = construct_prompt(cmd, request.task_type, mode, SESSION["scene_dir"], SESSION["initial_command"])
                 # print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
                 print(f"🧠 Calling LLM for the command ......\n\"{cmd}\"")
                 start_time = time.time()
@@ -281,7 +290,7 @@ def chat_step(request: ChatRequest):
                 symbolic_plan = result["symbolic_plan"]
                 # print("---------- symbolic plan ----------\n", symbolic_plan)
             else:
-                prompt = construct_trajectory_prompt(cmd, request.task_type, mode, SESSION["initial_command"])
+                prompt = construct_trajectory_prompt(cmd, request.task_type, mode, SESSION["scene_dir"])
                 # print("---------- prompt start ----------\n", prompt, "\n---------- prompt end ----------")
                 print(f"🧠 Calling LLM for the command ......\n\"{cmd}\"")
                 start_time = time.time()
@@ -328,7 +337,7 @@ def save_logs():
     try:
         if not SESSION["current_task_logs"]:
             return {"status": "Nothing to save. No active task steps."}
-        log_task_summary(SESSION)
+        log_task_summary(SESSION, save_dir=SESSION["scene_dir"], phase=SESSION["phase"])
         return {"status": "Current task logs saved successfully."}
     except Exception as e:
         return {"error": str(e)}
@@ -340,7 +349,9 @@ def run_full_experiment(params: dict):
 
         init_result = init_session(InitSessionRequest(
             regenerate_scene=params.get("regenerate_scene", False),
-            regenerate_dots=params.get("regenerate_dots", False)
+            regenerate_dots=params.get("regenerate_dots", False),
+            scene_number=params.get("scene_number", None),
+            phase=params.get("phase", None)
         ))
         if "error" in init_result:
             return {"init_error": init_result}

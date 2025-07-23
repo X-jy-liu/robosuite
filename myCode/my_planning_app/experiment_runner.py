@@ -12,6 +12,8 @@ def run_experiment(exp_config):
         "regenerate_dots": exp_config["regenerate_dots"],
         "task_type": exp_config["task_type"],
         "commands": exp_config["commands"],
+        "scene_number": exp_config["scene_number"],
+        "phase": exp_config["phase"],
         "mode": "none"
     }
 
@@ -20,8 +22,6 @@ def run_experiment(exp_config):
         print(f"❌ Error: {res.text}")
     else:
         print(f"✅ Finished: {exp_config['name']}")
-
-    time.sleep(1)
 
 def build_config_path(scene_idx: str) -> str:
     """

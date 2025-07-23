@@ -110,8 +110,8 @@ def format_trajectory_examples(example_list):
 
     return "\n\n" + "\n\n".join(formatted)
 
-def log_experiment_entry(entry: dict, filename_prefix: str = "log"):
-    LOG_DIR = Path.home() / "robosuite" / "myCode" / "my_planning_app" / "logs"
+def log_experiment_entry(entry: dict, save_dir: Path, phase: int, filename_prefix: str = "log"):
+    LOG_DIR = save_dir / 'experiment_logs' / f"phase_{phase}"
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     initial_command = entry.get("initial_command", "unknown")
@@ -123,21 +123,25 @@ def log_experiment_entry(entry: dict, filename_prefix: str = "log"):
 
     print(f"✅ Experiment log saved to: {file_path}")
 
-def log_task_summary(SESSION: dict):
+def log_task_summary(SESSION: dict, save_dir: Path, phase: int):
     if not SESSION["current_task_logs"]:
         print("No task logs to summarize.")
         return
 
     initial_cmd = SESSION["initial_command"]
+    phase = SESSION.get("phase", None)
+    if phase is None:
+        raise ValueError("Phase must be set in the session to log task summary.")
     initial_cmd_save_format = '_'.join(initial_cmd.split())
     task_type = SESSION.get("task_type", "unknown")
     full_log = {
         "initial_command": initial_cmd_save_format,
+        "phase": phase,
         "timestamp": datetime.now().isoformat(),
         "steps": SESSION["current_task_logs"]
     }
 
-    log_experiment_entry(full_log, filename_prefix=task_type)
+    log_experiment_entry(full_log, save_dir=save_dir, phase=phase, filename_prefix=task_type)
 
     # reset task buffer
     SESSION["current_task_logs"] = []

@@ -9,12 +9,15 @@ from mapping_generator import obj_name_mapping
 import argparse
 
 
-def process_scene(scene_index: str):
+def process_scene(scene_index: str, phase_number: str):
     base_path = Path.home() / "robosuite" / "myCode" / "my_planning_app"
 
     # Load environment and dots
-    env_path = base_path / "prompts" / "env_and_func.json"
-    dots_path = base_path / "prompts" / "generated_dots.json"
+    scene_dir = base_path / "logs" / f"scene_{scene_index}"
+    if not scene_dir.exists():
+        raise FileNotFoundError(f"Scene directory {scene_dir} does not exist.")
+    env_path = scene_dir / "env_and_func.json"
+    dots_path = scene_dir / "generated_dots.json"
     with open(env_path, "r") as f:
         env_data = json.load(f)
     with open(dots_path, "r") as f:
@@ -27,11 +30,12 @@ def process_scene(scene_index: str):
     ref_pnt_mapping = dots_data["reference_points"]
 
     # Construct log and save paths
-    log_dir = base_path / "logs" / f"scene_{scene_index}" / "experiments_logging"
-    response_save_dir = base_path / "logs" / f"scene_{scene_index}" / "llm_evaluated_responses"
+    log_dir = base_path / "logs" / f"scene_{scene_index}" / "experiment_logs" / f"phase_{phase_number}"
+    response_save_dir = base_path / "logs" / f"scene_{scene_index}" / "evaluation_logs" / f"phase_{phase_number}"
     os.makedirs(response_save_dir, exist_ok=True)
 
     assert log_dir.exists(), f"Log directory {log_dir} does not exist."
+    print(f"Processing logs from {log_dir}...")
     log_paths = sorted(list(log_dir.glob("*.json")))
 
     objects = env_data["environment"]["objects"]
@@ -88,12 +92,15 @@ def process_scene(scene_index: str):
         with open(response_save_path, "w") as f:
             json.dump(llm_evaluation, f, indent=4)
 
-        print(f"Finished {i + 1}/{len(log_paths)}!\n  Response saved to {response_save_path}\n")
+        print(f"Finished {i + 1}/{len(log_paths)} ...")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate logs from a given scene.")
     parser.add_argument("--scene", type=str, required=True, help="Scene index, e.g., 01 or 02")
+    parser.add_argument("--phase", type=str, required=True, help="Phase of the scene, e.g., 1, 2, 3")
     args = parser.parse_args()
+    if args.phase not in ["1", "2", "3"]:
+        raise ValueError(f"Invalid phase: {args.phase}. Expected one of: 1, 2, 3")
 
-    process_scene(args.scene)
+    process_scene(args.scene, args.phase)

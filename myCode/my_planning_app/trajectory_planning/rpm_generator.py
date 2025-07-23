@@ -195,10 +195,10 @@ class RPMGenerator:
             # Plot edges
             for (i, j) in graph.edges():
                 p1, p2 = nodes[i], nodes[j]
-                ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'gray', linewidth=0.3, alpha=0.2, zorder=1)
+                ax.plot([p1[1], p2[1]], [p1[0], p2[0]], 'gray', linewidth=0.3, alpha=0.2, zorder=1)
 
             # Plot roadmap nodes
-            ax.scatter(nodes[:, 0], nodes[:, 1], s=10, c='blue', label='Sampled Nodes', zorder=3)
+            ax.scatter(nodes[:, 1], nodes[:, 0], s=10, c='blue', label='Sampled Nodes', zorder=3)
 
             # Plot objects
             for obj in obj_specs:
@@ -211,7 +211,7 @@ class RPMGenerator:
 
             # Plot reference points
             for name, pos in pnt_specs.items():
-                x,y = pos
+                y, x = pos
                 ax.plot(x, y, 'go')
                 ax.text(x, y - 0.02, name, fontsize=8, ha='center', color='green', zorder=4)
 
@@ -221,7 +221,9 @@ class RPMGenerator:
                 for (i, j) in graph.edges():
                     if np.allclose(nodes[i], obj_pos) or np.allclose(nodes[j], obj_pos):
                         other = j if np.allclose(nodes[i], obj_pos) else i
-                        ax.plot([obj_pos[0], nodes[other][0]], [obj_pos[1], nodes[other][1]], 'r--', linewidth=1.0)
+                        ax.plot(
+                            [obj_pos[1], nodes[other][1]], 
+                            [obj_pos[0], nodes[other][0]], 'r--', linewidth=1.0)
 
             # Final layout
             ax.set_title("PRM with Objects and Reference Points")

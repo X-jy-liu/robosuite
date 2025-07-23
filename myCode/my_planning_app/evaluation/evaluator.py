@@ -76,6 +76,10 @@ class Evaluator:
             init_pos.append(interested_pos[name][0])  # initial position
             final_pos.append(interested_pos[name][-1])  # final position
 
+        if not self._on_table_check(final_pos):
+            print(f"[Warning] Final positions of objects {obj_names} are not on the table: {final_pos}")
+            return False
+
         return self._distance_change_check(init_pos=init_pos, final_pos=final_pos, mode=self.action)
     
     def trajectory_evaluate(self):
@@ -211,3 +215,29 @@ class Evaluator:
             return final_distance > init_distance
         else:
             raise ValueError(f"Invalid mode '{mode}'. Expected 'closer' or 'further'.")
+
+    def _on_table_check(final_pos, 
+                      x_bounds=(-0.4, 0.4), 
+                      y_bounds=(-0.4, 0.4), 
+                      z_min=0.8):
+        """
+        Check if all objects are within the table bounds.
+        
+        Parameters:
+        - final_pos (list of list): Final positions of the objects as [[x1, y1, z1], ...].
+        - x_bounds (tuple): Min/max allowable X range.
+        - y_bounds (tuple): Min/max allowable Y range.
+        - z_min (float): Minimum allowable Z height (i.e., table height).
+        
+        Returns:
+        - bool: True if all objects are within bounds, False otherwise.
+        """
+        for pos in final_pos:
+            x, y, z = pos
+            if not (x_bounds[0] <= x <= x_bounds[1]):
+                return False
+            if not (y_bounds[0] <= y <= y_bounds[1]):
+                return False
+            if z < z_min:
+                return False
+        return True
