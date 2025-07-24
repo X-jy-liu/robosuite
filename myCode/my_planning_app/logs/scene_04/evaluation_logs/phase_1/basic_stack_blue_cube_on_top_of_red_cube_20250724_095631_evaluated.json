@@ -1,0 +1,13 @@
+{
+    "task_type": "basic",
+    "action": "stack",
+    "interested_object": "blue cube",
+    "target_reference_object": "red cube",
+    "success_criteria": [
+        -0.108,
+        -0.149,
+        0.875
+    ],
+    "explanation": "For the basic task - stack action the evaluation criteria is a specific 3-element vector. The blue cube is stacked on top of the red cube at its center position where the red cube is the target reference object. So the x, y coordinates are the same as the red cube's [-0.108, -0.149], and the z coordinate is 0.875 for all stack actions. So the success criteria is a coordinate, 3-element vector.",
+    "success_status": "success"
+}

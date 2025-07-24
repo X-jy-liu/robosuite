@@ -192,6 +192,7 @@ class RPMGenerator:
             fig, ax = plt.subplots(figsize=(6, 6))
 
         try:
+            print(f"checking the keys in objects: {obj_specs[0].keys()}")
             # Plot edges
             for (i, j) in graph.edges():
                 p1, p2 = nodes[i], nodes[j]
@@ -204,11 +205,29 @@ class RPMGenerator:
             for obj in obj_specs:
                 y, x = obj["position"]
                 r = obj["size"] / 2
-                circle = plt.Circle((x, y), r, color='red', alpha=0.5)
-                ax.add_patch(circle)
-                ax.plot(x, y, 'rx')
-                ax.text(x, y + 0.02, obj["name"], fontsize=8, ha='center')
+                shape = obj.get("shape", None)
+                color = obj.get("color", None)
+                if shape is None or color is None:
+                    print(f"Object {obj['name']} is missing 'shape' or 'color', skipping.")
+                    continue
+                name = obj["name"]
 
+                if shape == "cube":
+                    # Plot as square (Rectangle with center at (x, y))
+                    square = plt.Rectangle((x - r, y - r), 2*r, 2*r,
+                                        color=color, alpha=0.5)
+                    ax.add_patch(square)
+                elif shape == "cylinder":
+                    # Plot as circle
+                    circle = plt.Circle((x, y), r, color=color, alpha=0.5)
+                    ax.add_patch(circle)
+                else:
+                    print(f"Unknown shape '{shape}' for object '{name}', skipping.")
+                    continue
+
+                ax.plot(x, y, 'rx')
+                ax.text(x, y + 0.02, name, fontsize=8, ha='center')
+            
             # Plot reference points
             for name, pos in pnt_specs.items():
                 y, x = pos

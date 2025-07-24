@@ -1,0 +1,17 @@
+{
+    "task_type": "trajectory",
+    "action": "move_opposite",
+    "interested_object": "green cylinder",
+    "success_criteria": [
+        [
+            -0.076,
+            0.121
+        ],
+        [
+            0.242,
+            0.251
+        ]
+    ],
+    "explanation": "For the trajectory task - move_opposite action, the green cylinder is moved to the opposite side of the blue cube. Step 1: Find the center position of the blue cube, which is [-0.159, 0.048]. Step 2: Calculate the opposite position by reflecting the green cylinder's position across the blue cube's position. This results in a new position of [0.242, 0.251]. The success criteria are the initial and final positions of the green cylinder.",
+    "success_status": "failure"
+}

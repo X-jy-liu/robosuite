@@ -121,7 +121,7 @@ class Evaluator:
         print(f"Success! All checkpoints matched in order for {self.interested_obj}.")
         return True
 
-    def _position_check(self, obj_pos, target_pos, threshold=0.025):
+    def _position_check(self, obj_pos, target_pos, threshold=0.05):
         """
         Check if the object position is within a certain threshold of the target position.
 
@@ -129,7 +129,7 @@ class Evaluator:
         ----------
         obj_pos (list): The current position of the object as [x, y, z] or [x,y].
         target_pos (list): The target position as [x, y, z] or [x,y].
-        threhold (float): The threshold distance to check against.
+        threhold (float): The threshold distance to check against. Use the length of the cube (diameter of the cylinder).
         """
         # calculate the norm of the difference vector
         distance = np.linalg.norm(np.array(obj_pos) - np.array(target_pos))
@@ -216,10 +216,11 @@ class Evaluator:
         else:
             raise ValueError(f"Invalid mode '{mode}'. Expected 'closer' or 'further'.")
 
-    def _on_table_check(final_pos, 
-                      x_bounds=(-0.4, 0.4), 
-                      y_bounds=(-0.4, 0.4), 
-                      z_min=0.8):
+    def _on_table_check(self,
+                        final_pos, 
+                        x_bounds=(-0.4, 0.4), 
+                        y_bounds=(-0.4, 0.4), 
+                        z_min=0.8):
         """
         Check if all objects are within the table bounds.
         

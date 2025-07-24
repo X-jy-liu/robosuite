@@ -1,0 +1,25 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "blue cylinder",
+    "interested_waypoints_in_order": [
+        "point_3",
+        "point_4"
+    ],
+    "success_criteria": [
+        [
+            -0.078,
+            -0.068
+        ],
+        [
+            -0.226,
+            0.193
+        ],
+        [
+            0.143,
+            -0.061
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, the blue cylinder needs to move to point 3 and then to point 4. The success criteria are defined by the sequence of coordinates the blue cylinder must pass through, starting from its initial position and then moving through the specified waypoints in order.",
+    "success_status": "success"
+}
