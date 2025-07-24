@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from ultralytics import YOLO
 import json
+from typing import List, Dict, Tuple
 
 class SimWrapper:
     def __init__(self, scene_config_path=None, robot_offset=False):
@@ -120,75 +121,137 @@ class SimWrapper:
             with open(gt_env_and_func_path, "r") as f:
                 gt_data = json.load(f)
 
-            gt_data["environment"]["objects"] = new_objects
+            gt_objects = gt_data["environment"]["objects"]
+
+            new_objects = self._match_yolo_to_gt_objects(gt_objects, new_objects)
 
             # === Save updated JSON with a suffix like "_predicted.json" ===
             output_path = gt_env_and_func_path.with_name(gt_env_and_func_path.stem + "_predicted.json")
-            # === Manually format and write JSON in compact one-line-per-object format ===
-            formatted_objects = [
-                f'{{ "name": "{obj["name"]}", "shape": "{obj["shape"]}", "color": "{obj["color"]}", '
-                f'"position": {json.dumps([round(c, 3) for c in obj["position"]])}, "size": {obj["size"]} }}'
-                for obj in new_objects
-            ]
-
-            # Join object lines
-            objects_str = ",\n      ".join(formatted_objects)
-
-            shape_details_str = (
-                '  "shape_details": {\n'
-                '    "cube": {\n'
-                '      "size": [0.05, 0.05, 0.05],\n'
-                '      "description": "Each cube has equal dimensions of 0.05 meters."\n'
-                '    },\n'
-                '    "cylinder": {\n'
-                '      "height": 0.05,\n'
-                '      "diameter": 0.05,\n'
-                '      "description": "Each cylinder is 0.05 meters tall and 0.05 meters in diameter."\n'
-                '    }\n'
-                '  },\n'
-            )
-
-
-            # Wrap the full JSON content as string
-            json_str = (
-                '{\n'
-                '  "environment": {\n'
-                '    "objects": [\n'
-                f'      {objects_str}\n'
-                '    ]\n'
-                '  },\n'
-                f'{shape_details_str}'
-                '  "available_functions": {\n'
-                '    "move": {\n'
-                '      "params": ["target"],\n'
-                '      "description": "Target can be one of \'obj0\', \'obj1\', \'obj2\', \'obj3\', or \'obj4\', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters.",\n'
-                '      "examples": [["move", "obj1"], ["move", [0.1, 0.1, 0.835]]]\n'
-                '    },\n'
-                '    "grip_and_pickup": {\n'
-                '      "params": ["object"],\n'
-                '      "description": "It can only follow the \'move\' function. The object is one of \'obj0\', \'obj1\', \'obj2\', \'obj3\', \'obj4\'. It grabs it to the above position",\n'
-                '      "examples": [["grip_and_pickup", "obj2"]]\n'
-                '    },\n'
-                '    "gripper_close": {\n'
-                '      "params": [],\n'
-                '      "description": "Close the gripper.",\n'
-                '      "examples": [["gripper_close"]]\n'
-                '    },\n'
-                '    "gripper_open": {\n'
-                '      "params": [],\n'
-                '      "description": "Open the gripper.",\n'
-                '      "examples": [["gripper_open"]]\n'
-                '    }\n'
-                '  }\n'
-                '}'
-            )
-            with open(output_path, "w") as f:
-                f.write(json_str)
-
-            print(f"Saved updated env_and_func JSON to {output_path}")
+            self._save_pred_json(new_objects, output_path)
 
         except Exception as e:
             print(f"Error during YOLO perception: {e}")
+
+    def _save_pred_json(self, new_objects: List[Dict], output_path: Path):
+        """
+        Save predicted objects into a formatted JSON file for testing, preserving structure.
+
+        Args:
+            output_path (Path): Where to save the JSON file.
+            new_objects (List[Dict]): List of predicted and matched objects.
+        """
+        # Format each object as a compact one-line JSON string
+        formatted_objects = [
+            f'{{ "name": "{obj["name"]}", "shape": "{obj["shape"]}", "color": "{obj["color"]}", '
+            f'"position": {json.dumps([round(c, 3) for c in obj["position"]])}, "size": {obj["size"]} }}'
+            for obj in new_objects
+        ]
+        objects_str = ",\n      ".join(formatted_objects)
+
+        shape_details_str = (
+            '  "shape_details": {\n'
+            '    "cube": {\n'
+            '      "size": [0.05, 0.05, 0.05],\n'
+            '      "description": "Each cube has equal dimensions of 0.05 meters."\n'
+            '    },\n'
+            '    "cylinder": {\n'
+            '      "height": 0.05,\n'
+            '      "diameter": 0.05,\n'
+            '      "description": "Each cylinder is 0.05 meters tall and 0.05 meters in diameter."\n'
+            '    }\n'
+            '  },\n'
+        )
+
+        # Wrap full JSON
+        json_str = (
+            '{\n'
+            '  "environment": {\n'
+            '    "objects": [\n'
+            f'      {objects_str}\n'
+            '    ]\n'
+            '  },\n'
+            f'{shape_details_str}'
+            '  "available_functions": {\n'
+            '    "move": {\n'
+            '      "params": ["target"],\n'
+            '      "description": "Target can be one of \'obj0\', \'obj1\', \'obj2\', \'obj3\', or \'obj4\', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters.",\n'
+            '      "examples": [["move", "obj1"], ["move", [0.1, 0.1, 0.835]]]\n'
+            '    },\n'
+            '    "grip_and_pickup": {\n'
+            '      "params": ["object"],\n'
+            '      "description": "It can only follow the \'move\' function. The object is one of \'obj0\', \'obj1\', \'obj2\', \'obj3\', \'obj4\'. It grabs it to the above position",\n'
+            '      "examples": [["grip_and_pickup", "obj2"]]\n'
+            '    },\n'
+            '    "gripper_close": {\n'
+            '      "params": [],\n'
+            '      "description": "Close the gripper.",\n'
+            '      "examples": [["gripper_close"]]\n'
+            '    },\n'
+            '    "gripper_open": {\n'
+            '      "params": [],\n'
+            '      "description": "Open the gripper.",\n'
+            '      "examples": [["gripper_open"]]\n'
+            '    }\n'
+            '  }\n'
+            '}'
+        )
+
+        # Write to file
+        with open(output_path, "w") as f:
+            f.write(json_str)
+        print(f"Saved updated env_and_func JSON to {output_path}")
+
+    def _match_yolo_to_gt_objects(
+        self,
+        gt_objects: List[Dict],
+        pred_objects: List[Dict]
+    ) -> List[Dict]:
+        """
+        Match YOLO-predicted objects to GT objects using greedy nearest-neighbor
+        strategy based on shape+color type and spatial distance.
+
+        Args:
+            gt_objects (List[Dict]): Original ground truth object list (with 'name', 'color', 'shape', 'position').
+            pred_objects (List[Dict]): YOLO-inferred object list (with 'color', 'shape', 'position').
+
+        Returns:
+            List[Dict]: Matched object list in same order and naming as GT.
+        """
+        matched_objects = []
+        used_indices = set()
+
+        for gt in gt_objects:
+            gt_type = (gt["color"], gt["shape"])
+            gt_pos = gt["position"]
+
+            best_idx = None
+            best_dist = float("inf")
+
+            for i, pred in enumerate(pred_objects):
+                if i in used_indices:
+                    continue
+                pred_type = (pred["color"], pred["shape"])
+                if pred_type != gt_type:
+                    continue
+                # Compute Euclidean distance
+                dist = ((pred["position"][0] - gt_pos[0]) ** 2 + 
+                        (pred["position"][1] - gt_pos[1]) ** 2) ** 0.5
+                if dist < best_dist:
+                    best_dist = dist
+                    best_idx = i
+
+            if best_idx is not None:
+                used_indices.add(best_idx)
+                matched_obj = pred_objects[best_idx].copy()
+            else:
+                # If no match of same type found, copy GT and optionally set placeholder?
+                matched_obj = gt.copy()  # or raise warning
+
+            matched_obj["name"] = gt["name"]  # Preserve GT order and naming
+            matched_objects.append(matched_obj)
+
+        return matched_objects
+
 
     # def set_object_pose(self, object_name, position, orientation = None):
     #     """
