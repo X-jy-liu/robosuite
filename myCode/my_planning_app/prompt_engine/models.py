@@ -51,4 +51,4 @@ class InitSessionRequest(BaseModel):
     ambiguous_effects: bool = Field(False, description="whether to conduct ambigous experiments containing only 3 objects to exmanine the effectiveness of the robot's actions",
                                     example=False)
     scene_number: int = Field(..., description="The scene number to initialize", example=1)
-    phase: int = Field(1, description="The phase of the experiment, e.g., 1 for initial setup, 2 for follow-up tasks", example=1)
+    phase: int = Field(1, description="The phase of the experiment to be chosen from 1, 2, 3. 1 for fully described env, 2 for perception based env, 3 for reality env", example=1)

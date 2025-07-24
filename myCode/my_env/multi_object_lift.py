@@ -9,13 +9,16 @@ from pathlib import Path
 import json
 
 class MultiObjectLift(Lift):
-    def __init__(self, scene_config_path=None, **kwargs):
+    def __init__(self, scene_config_path=None, robot_offset=False, **kwargs):
         self.scene_config_path = scene_config_path
+        self.robot_offset = robot_offset
         super().__init__(**kwargs)
 
     def _load_model(self):
         super()._load_model()
         table_z = self.table_offset[2]
+        if self.robot_offset:
+            self.robots[0].robot_model.set_base_xpos([-2, 0, 0])
         half_height = 0.025  # Half height for objects
         cylinder_calibration = 0.0 # Calibration offset for cylinder height
         # checking the height of the table

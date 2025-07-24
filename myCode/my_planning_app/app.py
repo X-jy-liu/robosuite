@@ -60,9 +60,34 @@ def init_session(req: InitSessionRequest):
         SESSION["scene_dir"] = scene_dir
         if req.phase is None:
             raise ValueError("Phase must be provided for session initialization.")
-        SESSION["phase"] = req.phase
-        scene_path = scene_dir / "env_and_func.json"
+        # assign the dot path
         dots_path = scene_dir / "generated_dots.json"
+
+        # assign the scene path based on the phase
+        SESSION["phase"] = req.phase
+        if SESSION["phase"] == 1:
+            print("Phase 1: loading fully described scene from JSON ...")
+            scene_path = scene_dir / "env_and_func.json"
+        elif SESSION["phase"] == 2:
+            print("Phase 2: Rendering scene and running perception ...")
+            gt_scene_path = scene_dir / "env_and_func.json"
+            # instantiate the simulation environment
+            #  1. initialize the class with the gt scene path
+            #  2. save the scene as a rendered image
+            render_sim = SimWrapper(scene_config_path=gt_scene_path, robot_offset=True)
+            render_sim.scene_render(scene_dir)
+            #  3. percept objects and save the rendered image
+            render_sim.yolo_perception_and_save(
+                gt_env_and_func_path= gt_scene_path,
+                rendered_img_path = scene_dir / "env_and_func_rendered.png",
+                checkpoint_path= HOME_DIR / "robosuite" / "myCode" / "yolo_perception" / "runs" / "detect" / "mini_train_debug" / "weights" / "best.pt"
+                )
+            # hardcode the file name for the predicted scene path
+            scene_path = scene_dir / "env_and_func_predicted.json"
+        elif SESSION["phase"] == 3:
+            pass
+        else:
+            raise ValueError(f"Invalid phase: {SESSION['phase']}. Must be 1, 2, or 3.")
 
         # === Scene Generation ===
         if req.ambiguous_effects:
@@ -149,6 +174,7 @@ def init_session(req: InitSessionRequest):
 def show_scene():
     try:
         raw_objects = SESSION["base_prompt"].environment.get("objects", []) if SESSION["base_prompt"] else []
+        # load the objects from the session
         objects = [
             {
                 "name": obj.name,
@@ -159,9 +185,8 @@ def show_scene():
             }
             for obj in raw_objects
         ]
-        print(f"debugging show_scene: {objects}")
+        # Load reference dots from session
         dots = SESSION.get("reference_dots", [])
-        print(f"debugging show_scene: {dots}")
 
         return f"""
         <html>

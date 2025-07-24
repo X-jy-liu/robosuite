@@ -5,17 +5,23 @@ from myCode.my_env.multi_object_lift import MultiObjectLift
 from myCode.config_controller import controller
 from myCode.my_planning_app.prompt_engine.prompt_loader import load_default_prompt
 from myCode.my_planning_app.prompt_engine.models import ObjectSpec
+import matplotlib.pyplot as plt
+from pathlib import Path
+from ultralytics import YOLO
+import json
 
 class SimWrapper:
-    def __init__(self, scene_config_path=None):
+    def __init__(self, scene_config_path=None, robot_offset=False):
         # Initialize the environment with the controller configuration
         self.scene_config_path = scene_config_path
+        self.robot_offset = robot_offset  # keep robot at the default position
         self.env = MultiObjectLift(
             robots="Panda",
             controller_configs=controller,
             has_renderer=True,
-            scene_config_path = self.scene_config_path,
-            ignore_done = True
+            scene_config_path=self.scene_config_path,
+            ignore_done=True,
+            robot_offset=self.robot_offset,
         )
         self.env.reset()
 
@@ -37,6 +43,152 @@ class SimWrapper:
         obj_specs_history = self.executor.execute_plan(plan)
 
         return obj_specs_history
+    
+    def scene_render(self, save_dir:Path):
+        """
+        Renders the scene json into a RGB top down view image.
+        Inputs:
+            save_dir (Path): directory to save the rendered image.
+        """
+        save_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Load the scene
+        self.env.reset()  # Make sure this reloads from `scene_config_path`
+
+        self.env._setup_camera()
+        self.env.sim.forward()
+
+        # Render RGB image
+        image = self.env.sim.render(camera_name="birdview", width=512, height=512)
+        print(f"Rendered image shape: {image.shape}")
+        
+        # Use filename prefix from scene_path
+        base_name = self.scene_config_path.stem + "_rendered"
+        image_path = save_dir / f"{base_name}.png"
+        
+        # Save image
+        plt.imsave(image_path, image)
+        print(f"Scene rendered and saved to {image_path}")
+    
+    def yolo_perception_and_save(self, gt_env_and_func_path: Path, rendered_img_path: Path, checkpoint_path: Path):
+        """
+        Perform YOLO perception on the rendered image and update the GT scene JSON.
+
+        Args:
+            gt_env_and_func_path (Path): path to the original GT env_and_func.json file.
+            rendered_img_path (Path): path to the corresponding top-down image.
+            checkpoint_path (Path): path to the YOLOv8 model checkpoint (.pt).
+        """
+        table_size_m = 0.8
+        image_size_px = 512
+        
+        try:
+            # === Load model ===
+            model = YOLO(str(checkpoint_path))
+            print(f"Loaded YOLO model from {checkpoint_path}")
+
+            # === Run inference on the rendered image ===
+            results = model(str(rendered_img_path))
+            detections = results[0].to_json()
+            parsed = json.loads(detections)
+
+            # === Convert YOLO detections to new object specs ===
+            meters_per_pixel = table_size_m / image_size_px  # 0.8 / 512
+            new_objects = []
+            for i, det in enumerate(parsed):
+                box = det["box"]
+                center_x = (box['x1'] + box['x2']) / 2
+                center_y = (box['y1'] + box['y2']) / 2
+
+                # Convert pixel to sim coordinates (x: left→right, y: top→bottom flipped)
+                sim_x = round((center_x - 256) * meters_per_pixel, 3)
+                sim_y = -round((256 - center_y) * meters_per_pixel, 3)
+
+                color, shape = det["name"].split("_", 1)
+                obj = {
+                    "name": f"obj{i}",
+                    "shape": shape,
+                    "color": color,
+                    "position": [sim_x, sim_y],
+                    "size": 0.05
+                }
+                new_objects.append(obj)
+
+            print(f"Detected {len(new_objects)} objects. Replacing environment.objects in GT JSON.")
+
+            # === Load GT JSON and replace the objects list ===
+            with open(gt_env_and_func_path, "r") as f:
+                gt_data = json.load(f)
+
+            gt_data["environment"]["objects"] = new_objects
+
+            # === Save updated JSON with a suffix like "_predicted.json" ===
+            output_path = gt_env_and_func_path.with_name(gt_env_and_func_path.stem + "_predicted.json")
+            # === Manually format and write JSON in compact one-line-per-object format ===
+            formatted_objects = [
+                f'{{ "name": "{obj["name"]}", "shape": "{obj["shape"]}", "color": "{obj["color"]}", '
+                f'"position": {json.dumps([round(c, 3) for c in obj["position"]])}, "size": {obj["size"]} }}'
+                for obj in new_objects
+            ]
+
+            # Join object lines
+            objects_str = ",\n      ".join(formatted_objects)
+
+            shape_details_str = (
+                '  "shape_details": {\n'
+                '    "cube": {\n'
+                '      "size": [0.05, 0.05, 0.05],\n'
+                '      "description": "Each cube has equal dimensions of 0.05 meters."\n'
+                '    },\n'
+                '    "cylinder": {\n'
+                '      "height": 0.05,\n'
+                '      "diameter": 0.05,\n'
+                '      "description": "Each cylinder is 0.05 meters tall and 0.05 meters in diameter."\n'
+                '    }\n'
+                '  },\n'
+            )
+
+
+            # Wrap the full JSON content as string
+            json_str = (
+                '{\n'
+                '  "environment": {\n'
+                '    "objects": [\n'
+                f'      {objects_str}\n'
+                '    ]\n'
+                '  },\n'
+                f'{shape_details_str}'
+                '  "available_functions": {\n'
+                '    "move": {\n'
+                '      "params": ["target"],\n'
+                '      "description": "Target can be one of \'obj0\', \'obj1\', \'obj2\', \'obj3\', or \'obj4\', or a specific 3D Cartesian coordinate in the form [x, y, z], such as [0.1, 0.2, 0.8], representing the position in meters.",\n'
+                '      "examples": [["move", "obj1"], ["move", [0.1, 0.1, 0.835]]]\n'
+                '    },\n'
+                '    "grip_and_pickup": {\n'
+                '      "params": ["object"],\n'
+                '      "description": "It can only follow the \'move\' function. The object is one of \'obj0\', \'obj1\', \'obj2\', \'obj3\', \'obj4\'. It grabs it to the above position",\n'
+                '      "examples": [["grip_and_pickup", "obj2"]]\n'
+                '    },\n'
+                '    "gripper_close": {\n'
+                '      "params": [],\n'
+                '      "description": "Close the gripper.",\n'
+                '      "examples": [["gripper_close"]]\n'
+                '    },\n'
+                '    "gripper_open": {\n'
+                '      "params": [],\n'
+                '      "description": "Open the gripper.",\n'
+                '      "examples": [["gripper_open"]]\n'
+                '    }\n'
+                '  }\n'
+                '}'
+            )
+            with open(output_path, "w") as f:
+                f.write(json_str)
+
+            print(f"Saved updated env_and_func JSON to {output_path}")
+
+        except Exception as e:
+            print(f"Error during YOLO perception: {e}")
 
     # def set_object_pose(self, object_name, position, orientation = None):
     #     """

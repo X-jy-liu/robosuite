@@ -106,12 +106,12 @@ class RPMGenerator:
 
     def build(self, roadmap_bounds=[-0.28, 0.28], k_radius=0.2, max_retries=10):
         retries = 0
-        sample_attempts = 0
         max_sample_attempts = 1000  # Limit to avoid infinite loops
         while retries < max_retries:
             print(f"[Attempt {retries + 1}] Building PRM with max_rpm={self.max_rpm}, roadmap_bounds={roadmap_bounds}, k_radius={k_radius}")
             self.nodes = []
             self.graph = nx.Graph()
+            sample_attempts = 0 # reset the sample attempts for each retry
 
             while len(self.nodes) < self.max_rpm and sample_attempts < max_sample_attempts:
                 sample = np.random.uniform(roadmap_bounds[0], roadmap_bounds[1], size=2)
