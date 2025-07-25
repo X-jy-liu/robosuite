@@ -1,0 +1,25 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "blue cube",
+    "interested_waypoints_in_order": [
+        "point_1",
+        "point_2"
+    ],
+    "success_criteria": [
+        [
+            0.174,
+            0.068
+        ],
+        [
+            -0.036,
+            0.136
+        ],
+        [
+            0.021,
+            -0.093
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, the blue cube needs to move to point_1 and then to point_2. The success criteria are defined by the sequence of coordinates the blue cube must pass through, starting from its initial position and then moving through the specified waypoints in order.",
+    "success_status": "success"
+}

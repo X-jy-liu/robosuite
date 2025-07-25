@@ -1,0 +1,25 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "blue cube",
+    "interested_waypoints_in_order": [
+        "point_3",
+        "original position"
+    ],
+    "success_criteria": [
+        [
+            0.089,
+            0.043
+        ],
+        [
+            -0.009,
+            -0.103
+        ],
+        [
+            0.089,
+            0.043
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, the blue cube is moved to point_3 and then returns to its original position. The success criteria list the coordinates for each waypoint in order, starting from the original position, moving to point_3, and returning to the original position. The coordinates are only x, y as z-coordinates are not considered in trajectory tasks.",
+    "success_status": "success"
+}

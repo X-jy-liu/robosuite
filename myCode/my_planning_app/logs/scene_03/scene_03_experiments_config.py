@@ -89,15 +89,15 @@ EXPERIMENTS = [
     #     "scene_number": 3,
     #     "phase": 1
     # },
-    {
-        "name": "Scene1_trajectory_1",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "trajectory",
-        "commands": ["move the blue cylinder to point 3, then to point 2"],
-        "scene_number": 3,
-        "phase": 1
-    },
+    # {
+    #     "name": "Scene1_trajectory_1",
+    #     "regenerate_scene": False,
+    #     "regenerate_dots": False,
+    #     "task_type": "trajectory",
+    #     "commands": ["move the blue cylinder to point 3, then to point 2"],
+    #     "scene_number": 3,
+    #     "phase": 1
+    # },
     {
         "name": "Scene1_trajectory_2",
         "regenerate_scene": False,

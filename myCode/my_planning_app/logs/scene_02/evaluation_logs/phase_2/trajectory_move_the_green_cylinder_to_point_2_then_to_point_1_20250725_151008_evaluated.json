@@ -1,0 +1,25 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "green cylinder",
+    "interested_waypoints_in_order": [
+        "point_2",
+        "point_1"
+    ],
+    "success_criteria": [
+        [
+            0.124,
+            0.153
+        ],
+        [
+            -0.04,
+            -0.218
+        ],
+        [
+            -0.181,
+            -0.079
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, the green cylinder needs to move to point 2 and then to point 1. The success criteria are defined by the waypoints in order, starting from the initial position of the green cylinder [0.124, 0.153], moving through point 2 [-0.04, -0.218], and finally reaching point 1 [-0.181, -0.079]. This ensures the trajectory is followed as specified.",
+    "success_status": "success"
+}

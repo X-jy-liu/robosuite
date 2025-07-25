@@ -1,0 +1,8 @@
+{
+    "task_type": "ambiguous",
+    "action": "move_closer",
+    "interested_object": "red cylinder, red cylinder",
+    "success_criteria": "distance between the red cylinders at the final state is less than the distance at the start state",
+    "explanation": "For the ambiguous task - move_closer action, we need to ensure the red cylinders are closer together than they were at the start. The success criteria is based on the distance between the two red cylinders.",
+    "success_status": "success"
+}

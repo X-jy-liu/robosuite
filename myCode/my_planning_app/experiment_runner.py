@@ -43,10 +43,17 @@ if __name__ == "__main__":
         required=True,
         help="Scene index, e.g., '01', '02', ..., which maps to logs.scene_XX.scene_XX_experiments_config"
     )
+    parser.add_argument(
+        "--phase",
+        required=True,
+        help="Phase of the experiment, e.g., 1, 2, 3"
+    )
     args = parser.parse_args()
 
     config_path = build_config_path(args.scene)
     experiments = load_experiments(config_path)
-
+    # pass the args.phase to each experiment
     for exp in experiments:
+        # replace the phase setting in the experiment config
+        exp["phase"] = int(args.phase)
         run_experiment(exp)

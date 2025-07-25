@@ -71,15 +71,15 @@ EXPERIMENTS = [
     #     "scene_number": 5,
     #     "phase": 1
     # },
-    {
-        "name": "scene1_ambiguous_4",
-        "regenerate_scene": False,
-        "regenerate_dots": False,
-        "task_type": "ambiguous",
-        "commands": ["put the two red cubes closer together"],
-        "scene_number": 5,
-        "phase": 1
-    },
+    # {
+    #     "name": "scene1_ambiguous_4",
+    #     "regenerate_scene": False,
+    #     "regenerate_dots": False,
+    #     "task_type": "ambiguous",
+    #     "commands": ["put the two red cubes closer together"],
+    #     "scene_number": 5,
+    #     "phase": 1
+    # },
     # {
     #     "name": "scene1_ambiguous_5",
     #     "regenerate_scene": False,
@@ -89,15 +89,15 @@ EXPERIMENTS = [
     #     "scene_number": 5,
     #     "phase": 1
     # },
-    # {
-    #     "name": "Scene1_trajectory_1",
-    #     "regenerate_scene": False,
-    #     "regenerate_dots": False,
-    #     "task_type": "trajectory",
-    #     "commands": ["move the blue cube to point 1, then to point 2"],
-    #     "scene_number": 5,
-    #     "phase": 1
-    # },
+    {
+        "name": "Scene1_trajectory_1",
+        "regenerate_scene": False,
+        "regenerate_dots": False,
+        "task_type": "trajectory",
+        "commands": ["move the blue cube to point 1, then to point 2"],
+        "scene_number": 5,
+        "phase": 1
+    },
     {
         "name": "Scene1_trajectory_2",
         "regenerate_scene": False,
@@ -107,32 +107,32 @@ EXPERIMENTS = [
         "scene_number": 5,
         "phase": 1
     },
-    # {
-    #     "name": "Scene1_trajectory_3",
-    #     "regenerate_scene": False,
-    #     "regenerate_dots": False,
-    #     "task_type": "trajectory",
-    #     "commands": ["move the green cylinder to point 5 via point 3"],
-    #     "scene_number": 5,
-    #     "phase": 1
-    # },
-    # {
-    #     "name": "Scene1_trajectory_4",
-    #     "regenerate_scene": False,
-    #     "regenerate_dots": False,
-    #     "task_type": "trajectory",
-    #     "commands": ["move the red cylinder to point 2, then return to its original position"],
-    #     "scene_number": 5,
-    #     "phase": 1
-    # },
-    # {
-    #     "name": "Scene1_trajectory_5",
-    #     "regenerate_scene": False,
-    #     "regenerate_dots": False,
-    #     "task_type": "trajectory",
-    #     "commands": ["move the green cylinder to point 1 then to point 3."],
-    #     "scene_number": 5,
-    #     "phase": 1
-    # }
+    {
+        "name": "Scene1_trajectory_3",
+        "regenerate_scene": False,
+        "regenerate_dots": False,
+        "task_type": "trajectory",
+        "commands": ["move the green cylinder to point 5 via point 3"],
+        "scene_number": 5,
+        "phase": 1
+    },
+    {
+        "name": "Scene1_trajectory_4",
+        "regenerate_scene": False,
+        "regenerate_dots": False,
+        "task_type": "trajectory",
+        "commands": ["move the red cylinder to point 2, then return to its original position"],
+        "scene_number": 5,
+        "phase": 1
+    },
+    {
+        "name": "Scene1_trajectory_5",
+        "regenerate_scene": False,
+        "regenerate_dots": False,
+        "task_type": "trajectory",
+        "commands": ["move the green cylinder to point 1 then to point 3."],
+        "scene_number": 5,
+        "phase": 1
+    }
     # Add more experiment configs here
 ]

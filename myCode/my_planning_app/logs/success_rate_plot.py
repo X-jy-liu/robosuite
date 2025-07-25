@@ -38,11 +38,6 @@ summary = df.groupby("task_type")["status"].value_counts().unstack().fillna(0)
 summary["total"] = summary.sum(axis=1)
 summary["success_rate"] = summary["success"] / summary["total"]
 
-# Override success rate for 'basic' to 100%
-summary.loc["basic", "failure"] = 0
-summary.loc["basic", "success"] = summary.loc["basic", "total"]
-summary.loc["basic", "success_rate"] = 1.0
-
 # Add synthetic data for 'raw_llm_trajectory' with ~20% success rate
 raw_success = 6
 raw_total = 25
@@ -71,7 +66,7 @@ plt.grid(True, axis='y')
 plt.tight_layout()
 
 # Save plot
-plot_path = log_dir / "plots" / "llm_success_rate_by_task.png"
+plot_path = log_dir / "plots" / "phase" / "llm_success_rate_by_task.png"
 plt.savefig(plot_path, dpi=300)
 print(f"Plot saved to {plot_path}")
 plt.show()

@@ -1,0 +1,17 @@
+{
+    "task_type": "trajectory",
+    "action": "move_opposite",
+    "interested_object": "red cube",
+    "success_criteria": [
+        [
+            -0.108,
+            -0.149
+        ],
+        [
+            0.108,
+            0.149
+        ]
+    ],
+    "explanation": "For the trajectory task - move_opposite action, Step 1: Find the center position of the red cube and reference point 3, [-0.108, -0.149] and [-0.009, -0.103] respectively. Step 2: Calculate the opposite position of the red cube with respect to point 3, which is [-0.108, -0.149] + ([-0.108, -0.149] - [-0.009, -0.103]) = [0.108, 0.149]. Step 3: Move the red cube to this new position.",
+    "success_status": "failure"
+}

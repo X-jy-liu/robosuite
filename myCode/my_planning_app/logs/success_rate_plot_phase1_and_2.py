@@ -1,0 +1,70 @@
+from pathlib import Path
+import json
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Setup
+log_dir = Path("/home/jingyang/robosuite/myCode/my_planning_app/logs")
+valid_prefixes = ("ambiguous", "basic", "trajectory")
+target_suffix = "evaluated"
+results = []
+
+# Iterate through all scene folders
+for scene_dir in log_dir.rglob("phase_*"):
+    if not scene_dir.is_dir():
+        continue
+    phase = scene_dir.name  # phase_1 or phase_2
+    for path in scene_dir.rglob("*.json"):
+        if path.name.startswith(valid_prefixes) and path.stem.endswith(target_suffix):
+            try:
+                with open(path, "r") as f:
+                    data = json.load(f)
+                    task_type = data.get("task_type", "unknown")
+                    status = data.get("success_status", "unknown")
+                    if task_type in valid_prefixes and status in ("success", "failure"):
+                        if task_type == "trajectory":
+                            task_type = "hybrid_trajectory"
+                        results.append({
+                            "phase": phase,
+                            "task_type": task_type,
+                            "status": status
+                        })
+            except Exception as e:
+                print(f"Failed to process {path.name}: {e}")
+
+# Convert to DataFrame
+df = pd.DataFrame(results)
+
+# Compute success rates per phase and task_type
+summary = df.groupby(["phase", "task_type"])["status"].value_counts().unstack().fillna(0)
+summary["total"] = summary.sum(axis=1)
+summary["success_rate"] = summary["success"] / summary["total"]
+
+# Reset index for plotting
+summary = summary.reset_index()
+
+# Reorder task types
+desired_order = ["basic", "ambiguous", "hybrid_trajectory"]
+summary["task_type"] = pd.Categorical(summary["task_type"], categories=desired_order, ordered=True)
+summary = summary.sort_values(by=["phase", "task_type"])
+
+# Print results
+print(summary[["phase", "task_type", "success", "failure", "total", "success_rate"]])
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=summary, x="task_type", y="success_rate", hue="phase")
+plt.title("Success Rate by Task Type and Phase")
+plt.ylabel("Success Rate")
+plt.ylim(0, 1)
+plt.xticks(rotation=0)
+plt.grid(True, axis='y')
+plt.tight_layout()
+
+# Save plot
+plot_path = log_dir / "plots" / "phase_2" / "llm_success_rate_by_task_and_phase.png"
+plot_path.parent.mkdir(parents=True, exist_ok=True)
+plt.savefig(plot_path, dpi=300)
+print(f"Plot saved to {plot_path}")
+plt.show()
