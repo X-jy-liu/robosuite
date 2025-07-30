@@ -142,7 +142,7 @@ def init_session(req: InitSessionRequest):
         # === Sim & Prompt Setup ===
         print("Initializing simulation environment...")
         global sim
-        sim = SimWrapper(scene_config_path=scene_path)
+        sim = SimWrapper(scene_config_path=scene_path, record_video=req.record_video, video_path=scene_dir / "execution_video.mp4")
         base_prompt = load_default_prompt(scene_path)
 
         SESSION["base_prompt"] = base_prompt

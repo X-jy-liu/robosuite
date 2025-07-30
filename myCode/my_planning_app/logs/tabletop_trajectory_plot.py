@@ -34,7 +34,7 @@ def plot_trajectory(init_objects, generated_dots_path, file_name, interested_pos
 
     # Plot initial positions of all objects
     for obj_id, props in init_objects.items():
-        x, y, _ = props['position']
+        y, x, _ = props['position']
         color = props['color']
         shape = props['shape']
         label = f"{color} {shape}"
@@ -47,20 +47,20 @@ def plot_trajectory(init_objects, generated_dots_path, file_name, interested_pos
     generated_dots = json.load(open(generated_dots_path, "r"))
     reference_points = generated_dots.get("reference_points", {})
     for point_name, pos in reference_points.items():
-        ax.scatter(pos[0], pos[1], c='orange', marker='x', s=20, label=point_name)
-        ax.text(pos[0] + 0.01, pos[1] + 0.01, point_name, fontsize=10, color='pink')
+        ax.scatter(pos[1], pos[0], c='orange', marker='x', s=20, label=point_name)
+        ax.text(pos[1] + 0.01, pos[0] + 0.01, point_name, fontsize=10, color='pink')
     # Plot trajectories
     for obj_id, positions in interested_pos_history.items():
         if not positions:
             continue
-        xs = [pos[0] for pos in positions]
-        ys = [pos[1] for pos in positions]
+        xs = [pos[1] for pos in positions]
+        ys = [pos[0] for pos in positions]
         ax.plot(xs, ys, label=f"{obj_id} trajectory", linewidth=2, color='yellow')
         ax.scatter(xs[-1], ys[-1], c='black', marker='x')  # Mark end point
 
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
-    ax.set_ylim((-0.35, 0.35))
+    ax.set_ylim((0.35, -0.35))
     ax.set_xlim((-0.35, 0.35))
     ax.set_title("Object Trajectories")
     # ax.legend()

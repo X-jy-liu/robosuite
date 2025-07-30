@@ -12,10 +12,12 @@ import json
 from typing import List, Dict, Tuple
 
 class SimWrapper:
-    def __init__(self, scene_config_path=None, robot_offset=False):
+    def __init__(self, scene_config_path=None, record_video=False, video_path="execution_video.mp4", robot_offset=False):
         # Initialize the environment with the controller configuration
         self.scene_config_path = scene_config_path
         self.robot_offset = robot_offset  # keep robot at the default position
+        self.record_video = record_video  # whether to record video
+        self.video_path = video_path  # video path
         self.env = MultiObjectLift(
             robots="Panda",
             controller_configs=controller,
@@ -23,13 +25,15 @@ class SimWrapper:
             scene_config_path=self.scene_config_path,
             ignore_done=True,
             robot_offset=self.robot_offset,
+            render_visual_mesh=True,
+            has_offscreen_renderer=True,
         )
         self.env.reset()
 
         for body_name in self.env.sim.model.body_names:
             if "cube_main" in body_name:
                 raise ValueError(f"The default cube '{body_name}' still exists in the environment.")
-        self.executor = SkillExecutor(self.env)
+        self.executor = SkillExecutor(self.env, record_video=self.record_video, video_path=self.video_path)
 
     def get_current_state(self):
         return self.executor.get_all_object_descriptions()

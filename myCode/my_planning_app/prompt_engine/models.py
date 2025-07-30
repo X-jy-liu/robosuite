@@ -52,3 +52,5 @@ class InitSessionRequest(BaseModel):
                                     example=False)
     scene_number: int = Field(..., description="The scene number to initialize", example=1)
     phase: int = Field(1, description="The phase of the experiment to be chosen from 1, 2, 3. 1 for fully described env, 2 for perception based env, 3 for reality env", example=1)
+    record_video: bool = Field(False, description="Whether to record the execution video", example=False)
+    

@@ -1,11 +1,16 @@
 import numpy as np
 import time
+import cv2
 
 class SkillExecutor:
-    def __init__(self, env):
+    def __init__(self, env, record_video=False, video_path="execution_video.mp4"):
         self.env = env
         self.initial_pos = env._get_observations()["robot0_eef_pos"]
         self.obj_specs_history = [] # will store the history of object positions in a list of dictionaries
+        self.record_video = record_video
+        self.video_path = video_path
+        self.frames = []
+        self.render_gpu_device_id = getattr(env, "render_gpu_device_id", -1)
 
     def execute_plan(self, plan):
         # clear the history before executing a new plan
@@ -23,6 +28,15 @@ class SkillExecutor:
             curr_obj_specs = self.get_all_object_descriptions()
             self.obj_specs_history.append(curr_obj_specs)
         
+        if self.record_video and self.frames:
+            height, width, _ = self.frames[0].shape
+            out = cv2.VideoWriter(self.video_path, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
+            for frame in self.frames:
+                bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                out.write(bgr)
+            out.release()
+            print(f"[INFO] Saved video to {self.video_path}")
+
         return self.obj_specs_history
 
     def do_move(self, target):
@@ -144,6 +158,17 @@ class SkillExecutor:
 
             action = np.concatenate([error * 3, [0, 0, 0], [grip_action]])
             self.env.step(action)
+            # Render the environment if viewer is available
+            if self.record_video:
+                frame = self.env.sim.render(
+                    width=512,
+                    height=512,
+                    camera_name="frontview",
+                    device_id=self.render_gpu_device_id if self.render_gpu_device_id >= 0 else 0
+                )
+                frame = np.flipud(frame)  # ← Flip vertically
+                self.frames.append(frame)
+            
             if self.env.viewer is not None:
                 self.env.render()
 
@@ -156,6 +181,17 @@ class SkillExecutor:
         action = np.array([0, 0, 0, 0, 0, 0, state])
         for _ in range(10):
             self.env.step(action)
+            # Render the environment if viewer is available
+            if self.record_video:
+                frame = self.env.sim.render(
+                    width=512,
+                    height=512,
+                    camera_name="frontview",
+                    device_id=self.render_gpu_device_id if self.render_gpu_device_id >= 0 else 0
+                )
+                frame = np.flipud(frame)  # ← Flip vertically
+                self.frames.append(frame)
+
             if self.env.viewer is not None:
                 self.env.render()
         time.sleep(1)
