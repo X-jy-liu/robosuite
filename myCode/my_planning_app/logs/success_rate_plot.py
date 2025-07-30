@@ -26,7 +26,7 @@ def plot_success_rate(phase: str = "phase_1"):
                 if task_type in valid_prefixes and status in ("success", "failure"):
                     # Rename 'trajectory' → 'hybrid_trajectory'
                     if task_type == "trajectory":
-                        task_type = "hybrid_trajectory"
+                        task_type = "trajectory\n- hybrid approach"
                     results.append({"task_type": task_type, "status": status})
         except Exception as e:
             print(f"Failed to process {path.name}: {e}")
@@ -43,7 +43,7 @@ def plot_success_rate(phase: str = "phase_1"):
     raw_success = 6
     raw_total = 25
     raw_failure = raw_total - raw_success
-    summary.loc["raw_llm_trajectory"] = {
+    summary.loc["trajectory\n- purely prompt based approach"] = {
         "failure": raw_failure,
         "success": raw_success,
         "total": raw_total,
@@ -51,7 +51,7 @@ def plot_success_rate(phase: str = "phase_1"):
     }
 
     # Reorder rows for plotting
-    desired_order = ["basic", "ambiguous", "raw_llm_trajectory", "hybrid_trajectory"]
+    desired_order = ["basic", "ambiguous", "trajectory\n- purely prompt based approach", "trajectory\n- hybrid approach"]
     summary = summary.loc[desired_order]
 
     # Print results

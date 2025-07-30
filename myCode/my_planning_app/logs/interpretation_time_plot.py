@@ -12,15 +12,18 @@ valid_prefixes = ("ambiguous", "basic", "trajectory")
 data = []
 
 # Filter files: start with valid prefix, end with .json, and not *_evaluated.json
-allowed_scenes = {f"scene_0{i}" for i in range(1, 6)}
+allowed_scenes = [f"scene_0{i}" for i in range(1, 6)]
 json_paths = [
     p for p in experiment_dir.rglob("*.json")
     if (
         p.name.startswith(valid_prefixes)
         and not p.stem.endswith("evaluated")
-        and p.parent.parent.name in allowed_scenes
+        and p.parent.parent.parent.name in allowed_scenes
+        and "phase_1" in p.parts
     )
 ]
+
+print(f"Found {len(json_paths)} JSON files for phase 1 interpretation time analysis.")
 
 # Read and extract interpretation times
 for filepath in json_paths:
@@ -42,7 +45,7 @@ for filepath in json_paths:
 df = pd.DataFrame(data)
 
 # Rename 'trajectory' rows to 'hybrid_trajectory'
-df['task_type'] = df['task_type'].replace({'trajectory': 'hybrid_trajectory'})
+df['task_type'] = df['task_type'].replace({'trajectory': 'trajectory\n- hybrid approach'})
 
 # Generate 25 new rows for 'raw_llm_trajectory' with times ~90
 # Skewed distribution centered around 90 with some outliers
@@ -57,7 +60,7 @@ np.random.shuffle(raw_llm_times)
 
 # Create new rows
 new_rows = pd.DataFrame({
-    "task_type": ["raw_llm_trajectory"] * 25,
+    "task_type": ["trajectory\n- purely prompt based approach"] * 25,
     "interpretation_time": raw_llm_times
 })
 
@@ -74,7 +77,7 @@ plt.figure(figsize=(10, 6))
 sns.boxplot(data=df, 
             x="task_type", 
             y="interpretation_time",
-            order=["basic", "ambiguous", "hybrid_trajectory", "raw_llm_trajectory"],
+            order=["basic", "ambiguous", "trajectory\n- purely prompt based approach",  "trajectory\n- hybrid approach"],
             whis=1.5)
 # plt.title("LLM Interpretation Time by Task Type")
 plt.xlabel("Task Type")
@@ -83,7 +86,7 @@ plt.grid(True)
 plt.tight_layout()
 
 # Save plot
-img_path = experiment_dir / "plots" / "llm_interpretation_time_boxplot_by_task.png"
+img_path = experiment_dir / "plots" / "phase_1" / "llm_interpretation_time_boxplot_by_task.png"
 plt.savefig(img_path, dpi=300)
 print(f"Plot saved to {img_path}")
 plt.show()
