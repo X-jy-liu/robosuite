@@ -80,15 +80,15 @@ def plot_sequence_ratios(ratio_seq, success_flags=None, if_save=False):
             plt.plot(x_vals, seq, color='black', linestyle='--', linewidth=1, label='Failed Experiments' if counter == 0 else "")
             counter += 1
     plt.axhline(1.0, linestyle='--', color='gray', linewidth=0.8)
-    plt.ylabel("Green : Red Distance Ratio")
-    plt.xlabel("Normalized Time")
+    plt.ylabel("Green : Red Distance Ratio",fontsize=16)
+    plt.xlabel("Normalized Time",fontsize=16)
     # plt.title("Smoothed Ratio of Distances (Green / Red) with Failure Highlighting")
     plt.grid(True, linestyle='--', alpha=0.5)
-    plt.legend()
+    plt.legend(fontsize=14,loc='upper left')
     plt.tight_layout()
     if if_save:
-        plt.savefig("smoothed_ratios_with_failures_plot_with_noise_interpolation.png", dpi=300, bbox_inches='tight')
-        print("Plot saved as 'smoothed_ratios_with_failures_plot_with_noise_interpolation.png'.")
+        plt.savefig("smoothed_ratios_with_failures_plot.png", dpi=300, bbox_inches='tight')
+        print("Plot saved as 'smoothed_ratios_with_failures_plot.png'.")
     plt.show()
 
 if __name__ == "__main__":
@@ -118,8 +118,23 @@ if __name__ == "__main__":
             if len(dist_cache) == 4:
                 dist_lst.append((dist_cache[0], dist_cache[1], dist_cache[3]))
 
-    success_flags = classify_sequence_success(dist_lst)
-    dist_seq = interpolate_noisy_distances(dist_lst,steps_per_segment=10, noise_std=0.001)
+    success_flags = []
+    failed_paths = []
+
+    for idx, ((r0, g0), (r1, g1), (r2, g2)) in enumerate(dist_lst):
+        def safe_ratio(g, r): return g / r if r != 0 else float('inf')
+        ratio_0 = safe_ratio(g0, r0)
+        ratio_1 = safe_ratio(g1, r1)
+        ratio_2 = safe_ratio(g2, r2)
+        is_success = ratio_0 > ratio_1 > ratio_2
+        success_flags.append(is_success)
+        if not is_success and ratio_2 > ratio_1:
+            failed_paths.append(log_files[idx])
+
+    print("Files where third ratio > second ratio:")
+    for p in failed_paths:
+        print(p)
+    dist_seq = interpolate_noisy_distances(dist_lst,steps_per_segment=10, noise_std=0)
     ratio_seq = convert_sequence_to_ratios(dist_seq)
 
     print(f"Success rate: {sum(success_flags) / len(success_flags):.2%}")

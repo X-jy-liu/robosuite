@@ -45,6 +45,13 @@ basic_tokens = get_token_counts(basic_plans)
 ambiguous_tokens = get_token_counts(ambiguous_plans)
 trajectory_tokens = get_token_counts(trajectory_plans)
 
+mean_basic = sum(basic_tokens) / len(basic_tokens) if basic_tokens else 0
+mean_ambiguous = sum(ambiguous_tokens) / len(ambiguous_tokens) if ambiguous_tokens else 0
+mean_trajectory = sum(trajectory_tokens) / len(trajectory_tokens) if trajectory_tokens else 0
+print(f"Basic Plans Token Mean Counts: {mean_basic}")
+print(f"Ambiguous Plans Token Mean Counts: {mean_ambiguous}")
+print(f"Trajectory Plans Token Mean Counts: {mean_trajectory}")
+
 # Assign fixed x positions
 x_positions = {
     "Basic": 1,
@@ -76,6 +83,6 @@ plt.legend()
 plt.tight_layout()
 # save the plot
 save_dir = Path("/home/jingyang/robosuite/myCode/my_planning_app/logs/")
-output_path = save_dir / "symbolic_plan_token_counts.png"
-plt.savefig(output_path, dpi=300, bbox_inches='tight')
+# output_path = save_dir / "symbolic_plan_token_counts.png"
+# plt.savefig(output_path, dpi=300, bbox_inches='tight')
 plt.show()
