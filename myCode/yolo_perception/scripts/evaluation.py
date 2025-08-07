@@ -7,8 +7,8 @@ import os
 from scipy.optimize import linear_sum_assignment
 
 ref_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels")
-pred_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/inference_from_mini_train/labels")
-plots_save_path = Path("/home/s2644572/robosuite/myCode/yolo_perception/plots/")
+pred_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/inference_from_mini_train_1/labels")
+plots_save_path = Path("/home/s2644572/robosuite/myCode/yolo_perception/plots_3_calibrated/")
 os.makedirs(plots_save_path, exist_ok=True)
 
 threshold = 0.0025  # meters - the distance threshold for position accuracy
@@ -24,6 +24,8 @@ total_gt_per_class = np.zeros(num_classes, dtype=int)
 correct_class_pred_per_class = np.zeros(num_classes, dtype=int)
 correct_position_pred_per_class = np.zeros(num_classes, dtype=int)
 position_errors_per_class = defaultdict(list)  # class_id → list of distances
+dx_mis_class_file_lst = defaultdict(list)  # class_id → list of misclassified files
+dy_mis_class_file_lst = defaultdict(list)  # class_id → list of misclassified files
 mis_class_file_lst = defaultdict(list)  # class_id → list of misclassified files
 
 class_names = [
@@ -36,13 +38,16 @@ class_names = [
 ]
 
 mismatch_files = []
-ref_txt_files = list(ref_dir.glob("*.txt"))
+file_counter = 0
+ref_txt_files = list(ref_dir.glob("*.txt")) # Limit to first 500 files for testing
+print(f"Found {len(ref_txt_files)} reference files.")
 for ref_file in tqdm(ref_txt_files, desc="Evaluating predictions"):
     pred_file = pred_dir / ref_file.name
     if not pred_file.exists():
-        print(f"Missing prediction: {pred_file.name}")
+        # print(f"Missing prediction: {pred_file.name}")
         continue
-
+    else:
+        file_counter += 1
     with open(ref_file) as f1, open(pred_file) as f2:
         ref_lines = [line.strip().split() for line in f1.readlines()]
         pred_lines = [line.strip().split() for line in f2.readlines()]
@@ -59,10 +64,33 @@ for ref_file in tqdm(ref_txt_files, desc="Evaluating predictions"):
     # Reorder ref_lines and pred_lines based on Hungarian matching
     ref_lines = [ref_lines[i] for i in row_ind]
     pred_lines = [pred_lines[j] for j in col_ind]
+
+    # calculate the systematic mismatch
+    ref_xy_matched = np.array([[float(x), float(y)] for _, x, y, _, _ in ref_lines])
+    pred_xy_matched = np.array([[float(x), float(y)] for _, x, y, _, _ in pred_lines])
+
+    # Compute shift vector for each pair: ref - pred
+    shifts = ref_xy_matched - pred_xy_matched  # shape: (N, 2)
+
+    # Accumulate shifts
+    if 'all_shifts' not in locals():
+        all_shifts = []
+
+    all_shifts.extend(shifts.tolist())
+
+    # assign the x and y shift calibration
+    norm_mean_shift = [0.000023167200, 0.000012317200]
     
     for r_line, p_line in zip(ref_lines, pred_lines):
         class_r, x_r, y_r = int(r_line[0]), float(r_line[1]), float(r_line[2])
         class_p, x_p, y_p = int(p_line[0]), float(p_line[1]), float(p_line[2])
+
+        # calibrate the x and y coordinates
+        x_p += norm_mean_shift[0]
+        y_p += norm_mean_shift[1]
+        # clip the coordinates to [0, 1] range
+        x_p = np.clip(x_p, 0, 1)
+        y_p = np.clip(y_p, 0, 1)
 
         # Update stats
         total_gt_per_class[class_r] += 1
@@ -70,14 +98,28 @@ for ref_file in tqdm(ref_txt_files, desc="Evaluating predictions"):
         if class_r == class_p:
             correct_class_pred_per_class[class_r] += 1
             dist = np.sqrt((x_r - x_p)**2 + (y_r - y_p)**2)
+            dx = x_r - x_p
+            dy = y_r - y_p
             correct_position_pred_per_class[class_r] += dist <= norm_threshold
             position_errors_per_class[class_r].append(dist)
+            dx_mis_class_file_lst[class_r].append(dx)
+            dy_mis_class_file_lst[class_r].append(dy)
         else:
             mismatch_files.append({
                 "file": ref_file.name,
                 "gt_class": class_names[class_r],
                 "pred_class": class_names[class_p]
             })
+
+print(f"Processed {file_counter} files.")
+
+# Convert to numpy and calculate mean shift
+all_shifts = np.array(all_shifts)
+print(f"shape of all_shifts: {all_shifts.shape}")
+mean_shift = all_shifts.mean(axis=0)  # [dx, dy] in normalized coordinates
+
+print(f"\n📐 Estimated Mean Shift (normalized): dx = {mean_shift[0]:.12f}, dy = {mean_shift[1]:.12f}")
+print(f"➡️ In meters (table size = {table_size_m}m): dx = {mean_shift[0]*table_size_m:.8f}m, dy = {mean_shift[1]*table_size_m:.8f}m")
 
 print(f"Processed {len(mismatch_files)} mismatches out of {len(ref_txt_files)} files.")
 # ==== Final Report ====
@@ -94,6 +136,9 @@ for i in range(num_classes):
     print(f"Class: {name}")
     print(f"  Classification Accuracy: {class_acc:.2%} ({class_correct}/{total})")
     print(f"  Position Accuracy (within {threshold}m): {pos_acc:.2%} ({pos_correct}/{class_correct})\n")
+    print(f"  Mean Position Error: {np.mean(position_errors_per_class[i])*table_size_m:.8f}m")
+    print(f"  dx mean error: {np.mean(dx_mis_class_file_lst[i]):.12f} (normalized)")
+    print(f"  dy mean error: {np.mean(dy_mis_class_file_lst[i]):.12f} (normalized)\n")
 
 # ==== plot position errors ====
 
