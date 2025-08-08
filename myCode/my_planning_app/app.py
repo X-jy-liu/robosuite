@@ -80,12 +80,24 @@ def init_session(req: InitSessionRequest):
             render_sim.yolo_perception_and_save(
                 gt_env_and_func_path= gt_scene_path,
                 rendered_img_path = scene_dir / "env_and_func_rendered.png",
-                checkpoint_path= HOME_DIR / "robosuite" / "myCode" / "yolo_perception" / "runs" / "detect" / "mini_train_debug" / "weights" / "best.pt"
+                json_output_name = "_predicted.json",  # save the predicted scene with a suffix
+                checkpoint_path= HOME_DIR / "robosuite" / "myCode" / "yolo_perception" / "runs" / "detect" / "mini_tabletop_train_1" / "weights" / "best.pt"
                 )
             # hardcode the file name for the predicted scene path
             scene_path = scene_dir / "env_and_func_predicted.json"
         elif SESSION["phase"] == 3:
-            pass
+            print("Phase 3: Running ambiguous effects experiment ...")
+            # here we apply the same pipeline on noised input images
+            gt_scene_path = scene_dir / "env_and_func.json"
+            render_sim = SimWrapper(scene_config_path=gt_scene_path, robot_offset=True)
+            # render_sim.scene_render(scene_dir)
+            render_sim.yolo_perception_and_save(
+                gt_env_and_func_path= gt_scene_path,
+                rendered_img_path = scene_dir / "env_and_func_noised_rendered.png",
+                json_output_name = "_noised_predicted.json",
+                checkpoint_path= HOME_DIR / "robosuite" / "myCode" / "yolo_perception" / "runs" / "detect" / "mini_tabletop_train_1" / "weights" / "best.pt"
+            )
+            scene_path = scene_dir / "env_and_func_noised_predicted.json"
         else:
             raise ValueError(f"Invalid phase: {SESSION['phase']}. Must be 1, 2, or 3.")
 
@@ -142,7 +154,8 @@ def init_session(req: InitSessionRequest):
         # === Sim & Prompt Setup ===
         print("Initializing simulation environment...")
         global sim
-        sim = SimWrapper(scene_config_path=scene_path, record_video=req.record_video, video_path=scene_dir / "execution_video.mp4")
+        datetime_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+        sim = SimWrapper(scene_config_path=scene_path, has_render=req.has_render, record_video=req.record_video, video_path=scene_dir / f"{datetime_str}_execution_video.mp4")
         base_prompt = load_default_prompt(scene_path)
 
         SESSION["base_prompt"] = base_prompt

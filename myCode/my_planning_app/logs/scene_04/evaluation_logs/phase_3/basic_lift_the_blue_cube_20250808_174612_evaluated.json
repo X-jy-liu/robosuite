@@ -1,0 +1,12 @@
+{
+    "task_type": "basic",
+    "action": "lift",
+    "interested_object": "blue cube",
+    "success_criteria": [
+        0.089,
+        0.043,
+        0.85
+    ],
+    "explanation": "For the basic task - lift action, we raise the blue cube vertically so the x,y coordinates remain the same as the blue cube's initial position. For all lift actions, we set the z coordinate of the success criteria to be 0.85, which is the height of the table plus the object's size. So the success criteria is a coordinate, 3-element vector.",
+    "success_status": "success"
+}

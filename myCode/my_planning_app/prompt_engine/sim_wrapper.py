@@ -12,16 +12,17 @@ import json
 from typing import List, Dict, Tuple
 
 class SimWrapper:
-    def __init__(self, scene_config_path=None, record_video=False, video_path="execution_video.mp4", robot_offset=False):
+    def __init__(self, scene_config_path=None, has_render=False, record_video=False, video_path="execution_video.mp4", robot_offset=False):
         # Initialize the environment with the controller configuration
         self.scene_config_path = scene_config_path
+        self.has_render = has_render  # whether to render the scene
         self.robot_offset = robot_offset  # keep robot at the default position
         self.record_video = record_video  # whether to record video
         self.video_path = video_path  # video path
         self.env = MultiObjectLift(
             robots="Panda",
             controller_configs=controller,
-            has_renderer=True,
+            has_renderer=self.has_render,
             scene_config_path=self.scene_config_path,
             ignore_done=True,
             robot_offset=self.robot_offset,
@@ -75,7 +76,7 @@ class SimWrapper:
         plt.imsave(image_path, image)
         print(f"Scene rendered and saved to {image_path}")
     
-    def yolo_perception_and_save(self, gt_env_and_func_path: Path, rendered_img_path: Path, checkpoint_path: Path):
+    def yolo_perception_and_save(self, gt_env_and_func_path: Path, rendered_img_path: Path, json_output_name: str, checkpoint_path: Path):
         """
         Perform YOLO perception on the rendered image and update the GT scene JSON.
 
@@ -129,8 +130,7 @@ class SimWrapper:
 
             new_objects = self._match_yolo_to_gt_objects(gt_objects, new_objects)
 
-            # === Save updated JSON with a suffix like "_predicted.json" ===
-            output_path = gt_env_and_func_path.with_name(gt_env_and_func_path.stem + "_predicted.json")
+            output_path = gt_env_and_func_path.with_name(gt_env_and_func_path.stem + json_output_name)
             self._save_pred_json(new_objects, output_path)
 
         except Exception as e:

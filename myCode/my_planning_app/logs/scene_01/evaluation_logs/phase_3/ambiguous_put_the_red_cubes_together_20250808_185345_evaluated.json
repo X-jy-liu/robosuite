@@ -1,0 +1,8 @@
+{
+    "task_type": "ambiguous",
+    "action": "move_closer",
+    "interested_object": "red cube, red cube",
+    "success_criteria": "distance between the two red cubes at the final state is less than the distance at the start state",
+    "explanation": "For the ambiguous task - move_closer action, the command 'put the red cubes together' implies moving the two red cubes closer to each other. The success criteria is based on the reduction of distance between these two cubes compared to their initial state.",
+    "success_status": "success"
+}
