@@ -8,7 +8,7 @@ from scipy.optimize import linear_sum_assignment
 
 ref_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels")
 pred_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/inference_from_mini_train_1/labels")
-plots_save_path = Path("/home/s2644572/robosuite/myCode/yolo_perception/plots_3_calibrated/")
+plots_save_path = Path("/home/s2644572/robosuite/myCode/yolo_perception/plots_2/")
 os.makedirs(plots_save_path, exist_ok=True)
 
 threshold = 0.0025  # meters - the distance threshold for position accuracy
@@ -64,33 +64,10 @@ for ref_file in tqdm(ref_txt_files, desc="Evaluating predictions"):
     # Reorder ref_lines and pred_lines based on Hungarian matching
     ref_lines = [ref_lines[i] for i in row_ind]
     pred_lines = [pred_lines[j] for j in col_ind]
-
-    # calculate the systematic mismatch
-    ref_xy_matched = np.array([[float(x), float(y)] for _, x, y, _, _ in ref_lines])
-    pred_xy_matched = np.array([[float(x), float(y)] for _, x, y, _, _ in pred_lines])
-
-    # Compute shift vector for each pair: ref - pred
-    shifts = ref_xy_matched - pred_xy_matched  # shape: (N, 2)
-
-    # Accumulate shifts
-    if 'all_shifts' not in locals():
-        all_shifts = []
-
-    all_shifts.extend(shifts.tolist())
-
-    # assign the x and y shift calibration
-    norm_mean_shift = [0.000023167200, 0.000012317200]
     
     for r_line, p_line in zip(ref_lines, pred_lines):
         class_r, x_r, y_r = int(r_line[0]), float(r_line[1]), float(r_line[2])
         class_p, x_p, y_p = int(p_line[0]), float(p_line[1]), float(p_line[2])
-
-        # calibrate the x and y coordinates
-        x_p += norm_mean_shift[0]
-        y_p += norm_mean_shift[1]
-        # clip the coordinates to [0, 1] range
-        x_p = np.clip(x_p, 0, 1)
-        y_p = np.clip(y_p, 0, 1)
 
         # Update stats
         total_gt_per_class[class_r] += 1
@@ -113,17 +90,10 @@ for ref_file in tqdm(ref_txt_files, desc="Evaluating predictions"):
 
 print(f"Processed {file_counter} files.")
 
-# Convert to numpy and calculate mean shift
-all_shifts = np.array(all_shifts)
-print(f"shape of all_shifts: {all_shifts.shape}")
-mean_shift = all_shifts.mean(axis=0)  # [dx, dy] in normalized coordinates
-
-print(f"\n📐 Estimated Mean Shift (normalized): dx = {mean_shift[0]:.12f}, dy = {mean_shift[1]:.12f}")
-print(f"➡️ In meters (table size = {table_size_m}m): dx = {mean_shift[0]*table_size_m:.8f}m, dy = {mean_shift[1]*table_size_m:.8f}m")
-
 print(f"Processed {len(mismatch_files)} mismatches out of {len(ref_txt_files)} files.")
 # ==== Final Report ====
 print("\n📊 Class-wise Evaluation Report:")
+class_dst_errors = []
 for i in range(num_classes):
     name = class_names[i]
     total = total_gt_per_class[i]
@@ -139,7 +109,9 @@ for i in range(num_classes):
     print(f"  Mean Position Error: {np.mean(position_errors_per_class[i])*table_size_m:.8f}m")
     print(f"  dx mean error: {np.mean(dx_mis_class_file_lst[i]):.12f} (normalized)")
     print(f"  dy mean error: {np.mean(dy_mis_class_file_lst[i]):.12f} (normalized)\n")
+    class_dst_errors.append(np.mean(position_errors_per_class[i]) * table_size_m)
 
+print("Overall Euclidean Distance Error (m):", np.mean(class_dst_errors))
 # ==== plot position errors ====
 
 print("\n📈 Plotting Position Error Distributions:")
