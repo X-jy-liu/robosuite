@@ -4,11 +4,11 @@ from pathlib import Path
 
 # Paths
 model_path = "/home/s2644572/robosuite/myCode/yolo_perception/runs/detect/mini_tabletop_train_1/weights/best.pt"
-test_img_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/images")
+test_img_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/realistic_noise")
 # ref_txt_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/labels")
 # Output directories for predictions
-output_img_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/inference_from_mini_train_1/images")
-pred_txt_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/inference_from_mini_train_1/labels")
+output_img_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/inference_from_mini_train_realistic_noise/images")
+pred_txt_dir = Path("/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/inference_from_mini_train_realistic_noise/labels")
 # Create output directories
 output_img_dir.mkdir(parents=True, exist_ok=True)
 pred_txt_dir.mkdir(parents=True, exist_ok=True)

@@ -115,9 +115,9 @@ print("Overall Euclidean Distance Error (m):", np.mean(class_dst_errors))
 # ==== plot position errors ====
 
 print("\n📈 Plotting Position Error Distributions:")
-use_density = True  # Set to False if you want raw counts
+use_density = False  # Set to False if you want raw counts
 for i in range(num_classes):
-    errors = np.array(position_errors_per_class[i])*table_size_m  # Convert normalized errors back to meters
+    errors = np.array(position_errors_per_class[i])*table_size_m*1000  # Convert normalized errors back to millimeters
     if errors is None or len(errors) == 0:
         print(f"Skipping empty class: {class_names[i]}")
         continue
@@ -133,9 +133,11 @@ for i in range(num_classes):
     )
 
     ylabel = "Density" if use_density else "Frequency"
-    plt.xlabel("Euclidean Distance Error (m)")
-    plt.ylabel(ylabel)
-    plt.title(f"Position Error Distribution: {class_names[i]}")
+    plt.xlabel("Euclidean Distance Error (mm)", fontsize=16)
+    plt.ylabel(ylabel, fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    # plt.title(f"Position Error Distribution: {class_names[i]}", fontsize=18)
     plt.grid(True)
 
     # Save plot

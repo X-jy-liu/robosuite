@@ -42,13 +42,13 @@ def plot_trajectory(init_objects, generated_dots_path, file_name, interested_pos
         # Use different markers for shape
         marker = 's' if shape == 'cube' else 'o'
         ax.scatter(x, y, c=color, marker=marker, s=200, edgecolors='k', label=label, alpha=0.4)
-        ax.text(x + 0.015, y + 0.015, obj_id, fontsize=12)
+        ax.text(x + 0.015, y + 0.015, obj_id, fontsize=18)
     # plot reference points
     generated_dots = json.load(open(generated_dots_path, "r"))
     reference_points = generated_dots.get("reference_points", {})
     for point_name, pos in reference_points.items():
         ax.scatter(pos[1], pos[0], c='orange', marker='x', s=20, label=point_name)
-        ax.text(pos[1] + 0.01, pos[0] + 0.01, point_name, fontsize=10, color='pink')
+        ax.text(pos[1] + 0.01, pos[0] + 0.01, point_name, fontsize=16, color='black')
     # Plot trajectories
     for obj_id, positions in interested_pos_history.items():
         if not positions:
@@ -58,8 +58,9 @@ def plot_trajectory(init_objects, generated_dots_path, file_name, interested_pos
         ax.plot(xs, ys, label=f"{obj_id} trajectory", linewidth=2, color='yellow')
         ax.scatter(xs[-1], ys[-1], c='black', marker='x')  # Mark end point
 
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
+    # ax.set_xlabel("X")
+    # ax.set_ylabel("Y")
+    ax.tick_params(axis='both', which='major', labelsize=14)
     ax.set_ylim((0.35, -0.35))
     ax.set_xlim((-0.35, 0.35))
     ax.set_title("Object Trajectories")
@@ -68,7 +69,7 @@ def plot_trajectory(init_objects, generated_dots_path, file_name, interested_pos
     ax.set_aspect('equal')
     # save plot
     plt.tight_layout()
-    save_dir = "/home/jingyang/robosuite/myCode/my_planning_app/logs/plots/phase_1"
+    save_dir = "/home/s2644572/robosuite/myCode/my_planning_app/logs/plots/phase_1"
     save_path = Path(save_dir) / file_name
     plt.savefig(save_path, dpi=300)
     print(f"Plot saved to {save_path}")
@@ -89,12 +90,12 @@ def _build_object_description_mapping(objects_dict):
 
 if __name__ == "__main__":
     # Example usage
-    log_path = ["/home/jingyang/robosuite/myCode/my_planning_app/logs/scene_01/experiment_logs/phase_1/basic_stack_the_blue_cube_on_the_green_cube_20250723_165206.json",
-                "/home/jingyang/robosuite/myCode/my_planning_app/logs/scene_01/experiment_logs/phase_1/ambiguous_move_the_red_cylinder_closer_to_the_green_cube_20250723_165807.json",
-                "/home/jingyang/robosuite/myCode/my_planning_app/logs/scene_01/experiment_logs/phase_1/trajectory_move_the_red_cylinder_to_point_4,_then_to_point_1_20250723_172453.json"]
+    log_path = ["/home/s2644572/robosuite/myCode/my_planning_app/logs/scene_01/experiment_logs/phase_1/basic_stack_the_blue_cube_on_the_green_cube_20250723_165206.json",
+                "/home/s2644572/robosuite/myCode/my_planning_app/logs/scene_01/experiment_logs/phase_1/ambiguous_move_the_red_cylinder_closer_to_the_green_cube_20250723_165807.json",
+                "/home/s2644572/robosuite/myCode/my_planning_app/logs/scene_01/experiment_logs/phase_1/trajectory_move_the_red_cylinder_to_point_4,_then_to_point_1_20250723_172453.json"]
     interested_objs = [["blue cube"],["red cylinder"],["red cylinder"]]  # Replace with your actual object IDs
     file_names = ["basic_trajectory_plot.png", "ambiguous_trajectory_plot.png", "trajectory_plot.png"]
-    generated_dots_path = "/home/jingyang/robosuite/myCode/my_planning_app/logs/scene_01/generated_dots.json"
+    generated_dots_path = "/home/s2644572/robosuite/myCode/my_planning_app/logs/scene_01/generated_dots.json"
     for path, interested_objs, file_name in zip(log_path, interested_objs, file_names):
         print(f"Processing log: {path}")
         init_objs, interested_pos_history = trajecotry_extractor(path, interested_objs)

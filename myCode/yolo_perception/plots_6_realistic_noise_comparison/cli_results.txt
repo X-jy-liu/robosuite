@@ -1,0 +1,303 @@
+Evaluating level: easy
+threshold in meters: 0.015
+Normalized threshold: 0.018750 over table size 0.8m
+Found 13215 reference files.
+Processed 500 files.
+Processed 0 mismatches out of 13215 files.
+
+📊 Class-wise Evaluation Report:
+Class: red_cube
+  Classification Accuracy: 100.00% (426/426)
+  Position Accuracy (within 0.015m): 100.00% (426/426)
+  Mean Position Error: 0.00026299m
+  dx mean error: -0.000010201878 (normalized)
+  dy mean error: -0.000011281690 (normalized)
+
+Class: green_cube
+  Classification Accuracy: 100.00% (432/432)
+  Position Accuracy (within 0.015m): 100.00% (432/432)
+  Mean Position Error: 0.00027204m
+  dx mean error: -0.000038532407 (normalized)
+  dy mean error: 0.000016451389 (normalized)
+
+Class: blue_cube
+  Classification Accuracy: 100.00% (408/408)
+  Position Accuracy (within 0.015m): 100.00% (408/408)
+  Mean Position Error: 0.00025323m
+  dx mean error: -0.000009137255 (normalized)
+  dy mean error: 0.000016901961 (normalized)
+
+Class: red_cylinder
+  Classification Accuracy: 100.00% (406/406)
+  Position Accuracy (within 0.015m): 100.00% (406/406)
+  Mean Position Error: 0.00020081m
+  dx mean error: 0.000003830049 (normalized)
+  dy mean error: -0.000030440887 (normalized)
+
+Class: green_cylinder
+  Classification Accuracy: 100.00% (416/416)
+  Position Accuracy (within 0.015m): 100.00% (416/416)
+  Mean Position Error: 0.00024228m
+  dx mean error: 0.000006504808 (normalized)
+  dy mean error: -0.000013927885 (normalized)
+
+Class: blue_cylinder
+  Classification Accuracy: 100.00% (412/412)
+  Position Accuracy (within 0.015m): 100.00% (412/412)
+  Mean Position Error: 0.00018925m
+  dx mean error: 0.000019742718 (normalized)
+  dy mean error: 0.000003019417 (normalized)
+
+Overall Euclidean Distance Error (m): 0.0002367658937573894
+
+📈 Creating Combined Position Error Distribution Plot:
+Class red_cube: 426 total, 7 outliers removed, 419 kept
+  Original range: 0.000013 - 0.000848m
+  Filtered range: 0.000013 - 0.000628m
+Class green_cube: 432 total, 10 outliers removed, 422 kept
+  Original range: 0.000007 - 0.000938m
+  Filtered range: 0.000007 - 0.000631m
+Class blue_cube: 408 total, 6 outliers removed, 402 kept
+  Original range: 0.000006 - 0.000905m
+  Filtered range: 0.000006 - 0.000605m
+Class red_cylinder: 406 total, 3 outliers removed, 403 kept
+  Original range: 0.000004 - 0.000622m
+  Filtered range: 0.000004 - 0.000506m
+Class green_cylinder: 416 total, 10 outliers removed, 406 kept
+  Original range: 0.000006 - 0.000894m
+  Filtered range: 0.000006 - 0.000595m
+Class blue_cylinder: 412 total, 10 outliers removed, 402 kept
+  Original range: 0.000010 - 0.000730m
+  Filtered range: 0.000010 - 0.000427m
+
+Setting x-axis limit to: 0.000694m
+Class red_cube: mean=0.00026m, std=0.00013m
+Class green_cube: mean=0.00026m, std=0.00013m
+Class blue_cube: mean=0.00025m, std=0.00013m
+Class red_cylinder: mean=0.00020m, std=0.00011m
+Class green_cylinder: mean=0.00023m, std=0.00012m
+Class blue_cylinder: mean=0.00018m, std=0.00009m
+✅ Saved combined step plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/easy/position_error_all_classes_combined_step.png
+
+📈 Creating Smooth Density Plot:
+✅ Saved smooth density plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/easy/position_error_all_classes_smooth_density.png
+
+📈 Creating Violin Plot:
+✅ Saved violin plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/easy/position_error_all_classes_violin.png
+
+📈 Creating Zoomed Subplot Version:
+✅ Saved subplot version (zoomed): /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/easy/position_error_all_classes_subplots_zoomed.png
+
+📈 Creating Subplot Version:
+✅ Saved subplot version: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/easy/position_error_all_classes_subplots.png
+
+📈 Creating Box Plot Version:
+✅ Saved box plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/easy/position_error_all_classes_boxplot.png
+
+🎯 All plots saved to: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/easy
+📊 Generated plots:
+  1. Combined histogram: position_error_all_classes_combined_step.png
+  2. Subplot version: position_error_all_classes_subplots.png
+  3. Box plot comparison: position_error_all_classes_boxplot.png
+Evaluating level: medium
+threshold in meters: 0.015
+Normalized threshold: 0.018750 over table size 0.8m
+Found 13215 reference files.
+Processed 500 files.
+Processed 0 mismatches out of 13215 files.
+
+📊 Class-wise Evaluation Report:
+Class: red_cube
+  Classification Accuracy: 100.00% (426/426)
+  Position Accuracy (within 0.015m): 100.00% (426/426)
+  Mean Position Error: 0.00043268m
+  dx mean error: -0.000074553991 (normalized)
+  dy mean error: -0.000010586854 (normalized)
+
+Class: green_cube
+  Classification Accuracy: 100.00% (432/432)
+  Position Accuracy (within 0.015m): 100.00% (432/432)
+  Mean Position Error: 0.00044379m
+  dx mean error: -0.000079349537 (normalized)
+  dy mean error: 0.000068493056 (normalized)
+
+Class: blue_cube
+  Classification Accuracy: 100.00% (408/408)
+  Position Accuracy (within 0.015m): 100.00% (408/408)
+  Mean Position Error: 0.00039406m
+  dx mean error: -0.000025568627 (normalized)
+  dy mean error: 0.000084507353 (normalized)
+
+Class: red_cylinder
+  Classification Accuracy: 100.00% (406/406)
+  Position Accuracy (within 0.015m): 100.00% (406/406)
+  Mean Position Error: 0.00030735m
+  dx mean error: -0.000023967980 (normalized)
+  dy mean error: -0.000029334975 (normalized)
+
+Class: green_cylinder
+  Classification Accuracy: 100.00% (416/416)
+  Position Accuracy (within 0.015m): 100.00% (416/416)
+  Mean Position Error: 0.00032018m
+  dx mean error: 0.000013336538 (normalized)
+  dy mean error: 0.000010403846 (normalized)
+
+Class: blue_cylinder
+  Classification Accuracy: 100.00% (412/412)
+  Position Accuracy (within 0.015m): 100.00% (412/412)
+  Mean Position Error: 0.00029507m
+  dx mean error: 0.000030291262 (normalized)
+  dy mean error: 0.000066927184 (normalized)
+
+Overall Euclidean Distance Error (m): 0.0003655204215806035
+
+📈 Creating Combined Position Error Distribution Plot:
+Class red_cube: 426 total, 10 outliers removed, 416 kept
+  Original range: 0.000016 - 0.001676m
+  Filtered range: 0.000016 - 0.001019m
+Class green_cube: 432 total, 6 outliers removed, 426 kept
+  Original range: 0.000027 - 0.001599m
+  Filtered range: 0.000027 - 0.001060m
+Class blue_cube: 408 total, 8 outliers removed, 400 kept
+  Original range: 0.000014 - 0.001157m
+  Filtered range: 0.000014 - 0.000937m
+Class red_cylinder: 406 total, 19 outliers removed, 387 kept
+  Original range: 0.000014 - 0.001291m
+  Filtered range: 0.000014 - 0.000689m
+Class green_cylinder: 416 total, 8 outliers removed, 408 kept
+  Original range: 0.000017 - 0.001540m
+  Filtered range: 0.000017 - 0.000748m
+Class blue_cylinder: 412 total, 13 outliers removed, 399 kept
+  Original range: 0.000007 - 0.001219m
+  Filtered range: 0.000007 - 0.000715m
+
+Setting x-axis limit to: 0.001166m
+Class red_cube: mean=0.00042m, std=0.00021m
+Class green_cube: mean=0.00043m, std=0.00022m
+Class blue_cube: mean=0.00038m, std=0.00020m
+Class red_cylinder: mean=0.00028m, std=0.00014m
+Class green_cylinder: mean=0.00031m, std=0.00016m
+Class blue_cylinder: mean=0.00028m, std=0.00014m
+✅ Saved combined step plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/medium/position_error_all_classes_combined_step.png
+
+📈 Creating Smooth Density Plot:
+✅ Saved smooth density plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/medium/position_error_all_classes_smooth_density.png
+
+📈 Creating Violin Plot:
+✅ Saved violin plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/medium/position_error_all_classes_violin.png
+
+📈 Creating Zoomed Subplot Version:
+✅ Saved subplot version (zoomed): /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/medium/position_error_all_classes_subplots_zoomed.png
+
+📈 Creating Subplot Version:
+✅ Saved subplot version: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/medium/position_error_all_classes_subplots.png
+
+📈 Creating Box Plot Version:
+✅ Saved box plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/medium/position_error_all_classes_boxplot.png
+
+🎯 All plots saved to: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/medium
+📊 Generated plots:
+  1. Combined histogram: position_error_all_classes_combined_step.png
+  2. Subplot version: position_error_all_classes_subplots.png
+  3. Box plot comparison: position_error_all_classes_boxplot.png
+Evaluating level: hard
+threshold in meters: 0.015
+Normalized threshold: 0.018750 over table size 0.8m
+Found 13215 reference files.
+Processed 500 files.
+Processed 51 mismatches out of 13215 files.
+
+📊 Class-wise Evaluation Report:
+Class: red_cube
+  Classification Accuracy: 98.83% (421/426)
+  Position Accuracy (within 0.015m): 100.00% (421/421)
+  Mean Position Error: 0.00095838m
+  dx mean error: -0.000230869359 (normalized)
+  dy mean error: -0.000006277910 (normalized)
+
+Class: green_cube
+  Classification Accuracy: 93.52% (404/432)
+  Position Accuracy (within 0.015m): 100.00% (404/404)
+  Mean Position Error: 0.00104281m
+  dx mean error: -0.000164138614 (normalized)
+  dy mean error: 0.000170502475 (normalized)
+
+Class: blue_cube
+  Classification Accuracy: 97.05% (395/407)
+  Position Accuracy (within 0.015m): 100.00% (395/395)
+  Mean Position Error: 0.00085645m
+  dx mean error: -0.000140802532 (normalized)
+  dy mean error: 0.000282759494 (normalized)
+
+Class: red_cylinder
+  Classification Accuracy: 99.26% (403/406)
+  Position Accuracy (within 0.015m): 100.00% (403/403)
+  Mean Position Error: 0.00087913m
+  dx mean error: -0.000097523573 (normalized)
+  dy mean error: -0.000075682382 (normalized)
+
+Class: green_cylinder
+  Classification Accuracy: 99.76% (415/416)
+  Position Accuracy (within 0.015m): 100.00% (415/415)
+  Mean Position Error: 0.00083951m
+  dx mean error: -0.000005118072 (normalized)
+  dy mean error: 0.000062749398 (normalized)
+
+Class: blue_cylinder
+  Classification Accuracy: 99.51% (409/411)
+  Position Accuracy (within 0.015m): 100.00% (409/409)
+  Mean Position Error: 0.00081558m
+  dx mean error: -0.000074902200 (normalized)
+  dy mean error: 0.000223628362 (normalized)
+
+Overall Euclidean Distance Error (m): 0.0008986428949238548
+
+📈 Creating Combined Position Error Distribution Plot:
+Class red_cube: 421 total, 28 outliers removed, 393 kept
+  Original range: 0.000027 - 0.004548m
+  Filtered range: 0.000027 - 0.002055m
+Class green_cube: 404 total, 17 outliers removed, 387 kept
+  Original range: 0.000053 - 0.005120m
+  Filtered range: 0.000053 - 0.002579m
+Class blue_cube: 395 total, 22 outliers removed, 373 kept
+  Original range: 0.000019 - 0.003451m
+  Filtered range: 0.000019 - 0.002079m
+Class red_cylinder: 403 total, 18 outliers removed, 385 kept
+  Original range: 0.000091 - 0.009480m
+  Filtered range: 0.000091 - 0.002075m
+Class green_cylinder: 415 total, 22 outliers removed, 393 kept
+  Original range: 0.000025 - 0.004608m
+  Filtered range: 0.000025 - 0.001976m
+Class blue_cylinder: 409 total, 31 outliers removed, 378 kept
+  Original range: 0.000023 - 0.006079m
+  Filtered range: 0.000023 - 0.001854m
+
+Setting x-axis limit to: 0.002837m
+Class red_cube: mean=0.00084m, std=0.00042m
+Class green_cube: mean=0.00094m, std=0.00053m
+Class blue_cube: mean=0.00076m, std=0.00047m
+Class red_cylinder: mean=0.00077m, std=0.00046m
+Class green_cylinder: mean=0.00072m, std=0.00041m
+Class blue_cylinder: mean=0.00066m, std=0.00041m
+✅ Saved combined step plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/hard/position_error_all_classes_combined_step.png
+
+📈 Creating Smooth Density Plot:
+✅ Saved smooth density plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/hard/position_error_all_classes_smooth_density.png
+
+📈 Creating Violin Plot:
+✅ Saved violin plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/hard/position_error_all_classes_violin.png
+
+📈 Creating Zoomed Subplot Version:
+✅ Saved subplot version (zoomed): /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/hard/position_error_all_classes_subplots_zoomed.png
+
+📈 Creating Subplot Version:
+✅ Saved subplot version: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/hard/position_error_all_classes_subplots.png
+
+📈 Creating Box Plot Version:
+✅ Saved box plot: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/hard/position_error_all_classes_boxplot.png
+
+🎯 All plots saved to: /home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/hard
+📊 Generated plots:
+  1. Combined histogram: position_error_all_classes_combined_step.png
+  2. Subplot version: position_error_all_classes_subplots.png
+  3. Box plot comparison: position_error_all_classes_boxplot.png

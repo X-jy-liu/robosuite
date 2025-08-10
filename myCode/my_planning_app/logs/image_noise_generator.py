@@ -392,6 +392,8 @@ class ImageNoiseController:
         """Save the noisy image"""
         # Convert RGB back to BGR for OpenCV
         noisy_image_bgr = cv2.cvtColor(noisy_image, cv2.COLOR_RGB2BGR)
+        # ensure the output directory exists
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
         cv2.imwrite(output_path, noisy_image_bgr)
         print(f"Noisy image saved to: {output_path}")
 
@@ -418,45 +420,83 @@ def process_image_with_controlled_noise(image_path, output_path=None, **noise_pa
     
     # Save if output path provided
     if output_path:
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
         controller.save_noisy_image(noisy_image, output_path)
     
     return noisy_image
 
+# Alternative: Single extremely noisy configuration
+def create_single_extreme_noise_image(image_path, output_path):
+    """
+    Create a single image with challenging but realistic noise
+    """
+    controller = ImageNoiseController(image_path)
+    
+    # light challenging configuration
+    light_config = {
+        "directional_lighting": 0.4,      # Moderate directional lighting
+        "light_angle": 135,               # Light from top-left (135°)
+        "light_x": 0.2,                   # Light source at 20% from left
+        "light_y": 0.2,                   # Light source at 20% from top
+        "shadow_effects": 0.3,            # Medium shadows
+        "shadow_angle": 315,              # Shadows opposite to light (315°)
+        "shadow_length": 0.4,             # Medium shadow length
+        "ambient_occlusion": 0.2,         # Light corner darkening
+        "gaussian_noise": 0.1,            # Light noise
+        "blur": 0.05,                      # Minimal blur
+        "show_comparison": False
+    }
+    realistic_industrial_config = {
+    'gaussian_noise': 0.1,              # Minimal - good cameras
+    'salt_pepper_noise': 0.0,           # None
+    'speckle_noise': 0.0,               # None  
+    'uniform_noise': 0.0,               # None
+    'blur': 0.1,                        # Slight from vibration
+    'compression': 0.15,                # Moderate
+    'brightness_variation': 0.6,        # HIGH - harsh lighting
+    'poisson_noise': 0.05,              # Minimal
+    'directional_lighting': 0.8,        # Very strong
+    'shadow_effects': 0.7,              # Strong shadows
+    'ambient_occlusion': 0.4            # Enhanced by lighting
+    }
+    # Balanced challenging configuration - reduces problematic noise types
+    balanced_config = {
+        'gaussian_noise': 0.4,           # Moderate Gaussian noise (reduced from 0.9)
+        'salt_pepper_noise': 0.1,        # Very low salt-pepper (reduced from 0.8) - this causes the colored pixels
+        'speckle_noise': 0.3,            # Moderate speckle noise (reduced from 0.7)
+        'uniform_noise': 0.2,            # Low uniform noise (reduced from 0.6)
+        'blur': 0.3,                     # Moderate blur (reduced from 0.7)
+        'compression': 0.5,              # Moderate compression (reduced from 0.9)
+        'brightness_variation': 0.4,     # Moderate brightness variation (reduced from 0.8)
+        'poisson_noise': 0.3,            # Moderate Poisson noise (reduced from 0.8)
+        'directional_lighting': 0.6,     # Strong but not extreme lighting (reduced from 0.9)
+        'light_angle': 135,              # Light from top-left (more natural)
+        'light_x': 0.2,                  # Light source left side
+        'light_y': 0.2,                  # Light source near top
+        'shadow_effects': 0.5,           # Moderate shadows (reduced from 0.9)
+        'shadow_angle': 315,             # Shadows opposite to light (more natural)
+        'shadow_length': 0.4,            # Moderate shadow length (reduced from 0.9)
+        'ambient_occlusion': 0.4,        # Moderate corner darkening (reduced from 0.8)
+        'show_comparison': False         # Show the comparison
+    }
+    
+    print("Generating challenging but realistic noisy image...")
+    noisy_image = controller.generate_noisy_image(**realistic_industrial_config)
+    controller.save_noisy_image(noisy_image, output_path)
+    
+    return noisy_image
 
 # Example usage:
 if __name__ == "__main__":
-
-    for scene_idx in ["01", "02", "03", "04", "05"]:
-        # Replace with your image path
-        input_image_path = f"/home/jingyang/robosuite/myCode/my_planning_app/logs/scene_{scene_idx}/env_and_func_rendered.png"
-        output_image_dir = f"/home/jingyang/robosuite/myCode/my_planning_app/logs/scene_{scene_idx}/"
-
-        try:
-            # Example 1: Realistic lighting from top-left
-            realistic_lighting_result = process_image_with_controlled_noise(
-                input_image_path,
-                output_image_dir + "env_and_func_noised_rendered.png",
-                directional_lighting=0.4,      # Moderate directional lighting
-                light_angle=135,               # Light from top-left (135°)
-                light_x=0.2,                   # Light source at 20% from left
-                light_y=0.2,                   # Light source at 20% from top
-                shadow_effects=0.3,            # Medium shadows
-                shadow_angle=315,              # Shadows opposite to light (315°)
-                shadow_length=0.4,             # Medium shadow length
-                ambient_occlusion=0.2,         # Light corner darkening
-                gaussian_noise=0.1,            # Light noise
-                blur=0.05                      # Minimal blur
-            )
-            
-            # Quick reference for lighting parameters:
-            print("\n=== Lighting Parameters Guide ===")
-            print("directional_lighting: 0.0-1.0 (0=uniform, 1=strong directional)")
-            print("light_angle: 0-360° (0=right, 90=down, 180=left, 270=up)")
-            print("light_x/light_y: 0.0-1.0 (light source position)")
-            print("shadow_effects: 0.0-1.0 (shadow darkness)")
-            print("shadow_angle: 0-360° (usually opposite to light_angle)")
-            print("ambient_occlusion: 0.0-1.0 (corner/edge darkening)")
-            
-        except Exception as e:
-            print(f"Error: {e}")
-            print("Make sure to update the image path to your actual file location.")
+    import os
+    from pathlib import Path
+    raw_image_dir = '/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/images'
+    noise_image_dir = '/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/noise_selection'
+    # read the absolute paths of all raw images
+    raw_image_paths = sorted(Path(raw_image_dir).glob("*.png"))
+    number_of_test_images = 1
+    for i in range(number_of_test_images):
+        input_image_path = str(raw_image_paths[i])
+        input_image_name = os.path.basename(input_image_path)
+        output_image_path = os.path.join(noise_image_dir, input_image_name)
+        create_single_extreme_noise_image(input_image_path, output_image_path)
