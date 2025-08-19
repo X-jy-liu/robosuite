@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 def plot_success_rate(phase: str = "phase_1"):
     # Setup
-    log_dir = Path("/home/jingyang/robosuite/myCode/my_planning_app/logs")
+    HOME_DIR = Path.home()
+    log_dir = HOME_DIR / "robosuite/myCode/my_planning_app/logs"
     valid_prefixes = ("ambiguous", "basic", "trajectory")
     target_suffix = "evaluated"
     results = []
@@ -43,7 +44,7 @@ def plot_success_rate(phase: str = "phase_1"):
     raw_success = 6
     raw_total = 25
     raw_failure = raw_total - raw_success
-    summary.loc["trajectory\n- purely prompt based approach"] = {
+    summary.loc["trajectory\n- purely prompt\n based approach"] = {
         "failure": raw_failure,
         "success": raw_success,
         "total": raw_total,
@@ -51,18 +52,23 @@ def plot_success_rate(phase: str = "phase_1"):
     }
 
     # Reorder rows for plotting
-    desired_order = ["basic", "ambiguous", "trajectory\n- purely prompt based approach", "trajectory\n- hybrid approach"]
+    desired_order = ["basic", "ambiguous", "trajectory\n- purely prompt\n based approach", "trajectory\n- hybrid approach"]
     summary = summary.loc[desired_order]
 
     # Print results
     print(summary[["success", "failure", "total", "success_rate"]].sort_index())
 
     # Plot
-    summary["success_rate"].plot(kind="bar", color="skyblue", figsize=(8, 5))
-    plt.title("Success Rate by Task Type")
-    plt.ylabel("Success Rate")
+    ax = summary["success_rate"].plot(kind="bar", color="skyblue", figsize=(8, 5))
+    # plt.title("Success Rate by Task Type")
+    plt.ylabel("Success Rate", fontsize=16)
     plt.ylim(0, 1)
-    plt.xticks(rotation=0)
+    plt.xlabel("")
+    # Remove 'task_type' from x-axis labels by setting custom labels
+    current_labels = [label.get_text() for label in ax.get_xticklabels()]
+    new_labels = [label.replace('task_type\n', '') for label in current_labels]
+    ax.set_xticklabels(new_labels, rotation=0, fontsize=15)
+    
     plt.grid(True, axis='y')
     plt.tight_layout()
 

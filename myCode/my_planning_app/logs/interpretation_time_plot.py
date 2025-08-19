@@ -7,7 +7,8 @@ import numpy as np
 np.random.seed(42)  # for reproducibility
 
 # Directory setup
-experiment_dir = Path("/home/jingyang/robosuite/myCode/my_planning_app/logs/")
+HOME_DIR = Path.home()
+experiment_dir = HOME_DIR / "robosuite/myCode/my_planning_app/logs/"
 valid_prefixes = ("ambiguous", "basic", "trajectory")
 data = []
 
@@ -60,7 +61,7 @@ np.random.shuffle(raw_llm_times)
 
 # Create new rows
 new_rows = pd.DataFrame({
-    "task_type": ["trajectory\n- purely prompt based approach"] * 25,
+    "task_type": ["trajectory\n- purely prompt\n based approach"] * 25,
     "interpretation_time": raw_llm_times
 })
 
@@ -77,11 +78,12 @@ plt.figure(figsize=(10, 6))
 sns.boxplot(data=df, 
             x="task_type", 
             y="interpretation_time",
-            order=["basic", "ambiguous", "trajectory\n- purely prompt based approach",  "trajectory\n- hybrid approach"],
+            order=["basic", "ambiguous", "trajectory\n- purely prompt\n based approach",  "trajectory\n- hybrid approach"],
             whis=1.5)
 # plt.title("LLM Interpretation Time by Task Type")
-plt.xlabel("Task Type")
-plt.ylabel("Interpretation Time (sec)")
+plt.xlabel("")
+plt.ylabel("Interpretation Time (sec)", fontsize=16)
+plt.xticks(fontsize=16)
 plt.grid(True)
 plt.tight_layout()
 
