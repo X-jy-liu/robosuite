@@ -12,7 +12,7 @@ def main(level):
     plots_save_path = Path(f"/home/s2644572/robosuite/myCode/yolo_perception/plots_6_realistic_noise_comparison/{level}")
     os.makedirs(plots_save_path, exist_ok=True)
 
-    threshold = 0.015  # meters - the distance threshold for position accuracy because separation distance between the grippers is 0.08. the objects width is 0.05. And we give 0.005 as the tolerance. so the threshold = (0.08-0.05)/2 = 0.015
+    threshold = 0.01  # meters - the distance threshold for position accuracy because separation distance between the grippers is 0.08. the objects width is 0.05. And we leave extra 0.005 as the safety margin. so the threshold = (0.08-0.05)/2 - 0.005 = 0.01
     table_size_m = 0.8  # meters
     norm_threshold = threshold / table_size_m  # normalize threshold as the pred and gt are normalized by table size
     print(f"Evaluating level: {level}")
