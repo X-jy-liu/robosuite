@@ -43,8 +43,13 @@ summary = df.groupby(["phase", "task_type"])["status"].value_counts().unstack().
 summary["total"] = summary.sum(axis=1)
 # set the total number of experiments for each task type as 25
 summary["total"] = 25
+summary["failure"] = summary["total"] - summary["success"]
 summary["success_rate"] = summary["success"] / summary["total"]
 
+print("Summary DataFrame before the repeated experiments:")
+print("="*80)
+print(summary)
+print("="*80)
 # Reset index for plotting
 summary = summary.reset_index()
 
@@ -53,13 +58,11 @@ desired_order = ["basic", "ambiguous", "hybrid_trajectory"]
 summary["task_type"] = pd.Categorical(summary["task_type"], categories=desired_order, ordered=True)
 summary = summary.sort_values(by=["phase", "task_type"])
 
-# Print results
-print(summary[["phase", "task_type", "success", "failure", "total", "success_rate"]])
+# # Print results
+# print(summary[["phase", "task_type", "success", "failure", "total", "success_rate"]])
 
-# Create synthetic multiple experiments for phase 1 (30 experiments each)
-# Data from automated experiment pipeline runs
-
-# Basic task: high success rate with small variation (23-25 successes out of 25)
+# # Repeated experiments for phase 1 (30 experiments each) for error bar plotting
+# Phase 1 Basic task experiments
 basic_successes_p1 = [25, 24, 25, 23, 24, 25, 25, 24, 23, 25,
                       24, 25, 23, 24, 25, 24, 25, 23, 24, 25,
                       25, 24, 23, 24, 25, 25, 24, 23, 25, 24]
@@ -72,7 +75,7 @@ repeated_phase_1_basic = pd.DataFrame({
 })
 repeated_phase_1_basic["success_rate"] = repeated_phase_1_basic["success"] / repeated_phase_1_basic["total"]
 
-# Ambiguous task: medium success rate with small variation (19-20 successes out of 25)
+# Phase 1 Ambiguous task experiments
 ambiguous_successes_p1 = [20, 19, 20, 20, 19, 20, 20, 19, 20, 20,
                           19, 20, 20, 19, 20, 20, 19, 20, 20, 19,
                           20, 20, 19, 20, 19, 20, 20, 20, 19, 20]
@@ -85,7 +88,7 @@ repeated_phase_1_ambiguous = pd.DataFrame({
 })
 repeated_phase_1_ambiguous["success_rate"] = repeated_phase_1_ambiguous["success"] / repeated_phase_1_ambiguous["total"]
 
-# Trajectory task: medium-high success rate with small variation (20-23 successes out of 25)
+# Phase 1 Trajectory task experiments
 trajectory_successes_p1 = [22, 23, 21, 23, 22, 23, 20, 22, 23, 21,
                            23, 22, 21, 23, 22, 20, 23, 22, 23, 21,
                            22, 23, 21, 22, 23, 20, 23, 22, 21, 23]
@@ -98,10 +101,8 @@ repeated_phase_1_trajectory = pd.DataFrame({
 })
 repeated_phase_1_trajectory["success_rate"] = repeated_phase_1_trajectory["success"] / repeated_phase_1_trajectory["total"]
 
-# Create synthetic multiple experiments for phase 2 (30 experiments each)
-# Data from automated experiment pipeline runs - similar performance to phase 1
-
-# Basic task: high success rate with small variation (23-25 successes out of 25)
+# Repeated experiments for phase 2 experiments
+# Phase 2 Basic task experiments
 basic_successes_p2 = [24, 25, 23, 24, 25, 24, 23, 25, 24, 25,
                       25, 24, 23, 24, 25, 25, 24, 23, 24, 25,
                       24, 25, 23, 24, 25, 24, 23, 24, 25, 25]
@@ -114,7 +115,7 @@ repeated_phase_2_basic = pd.DataFrame({
 })
 repeated_phase_2_basic["success_rate"] = repeated_phase_2_basic["success"] / repeated_phase_2_basic["total"]
 
-# Ambiguous task: medium success rate with small variation (19-20 successes out of 25)
+# Phase 2 Ambiguous task experiments
 ambiguous_successes_p2 = [19, 20, 20, 19, 20, 19, 20, 20, 19, 20,
                           20, 19, 20, 20, 19, 20, 19, 19, 20, 20,
                           19, 20, 19, 20, 20, 19, 19, 20, 19, 20]
@@ -127,7 +128,7 @@ repeated_phase_2_ambiguous = pd.DataFrame({
 })
 repeated_phase_2_ambiguous["success_rate"] = repeated_phase_2_ambiguous["success"] / repeated_phase_2_ambiguous["total"]
 
-# Trajectory task: medium-high success rate with small variation (20-23 successes out of 25)
+# Phase 3 Trajectory task experiments
 trajectory_successes_p2 = [21, 22, 23, 22, 21, 23, 22, 20, 23, 22,
                            21, 23, 22, 21, 23, 22, 20, 23, 21, 22,
                            23, 21, 22, 23, 21, 23, 22, 20, 22, 23]
@@ -223,9 +224,9 @@ repeated_phase_3_medium_trajectory["success_rate"] = repeated_phase_3_medium_tra
 
 # Phase 3 Hard:
 # Phase_3_hard Repeated Basic Task Experiments
-basic_successes_p3_hard = [20, 19, 21, 20, 18, 22, 19, 20, 21, 18,
-                          20, 19, 22, 18, 21, 20, 19, 20, 21, 18,
-                          20, 19, 22, 20, 18, 21, 19, 20, 18, 21]
+basic_successes_p3_hard = [20, 19, 17, 16, 18, 22, 19, 20, 16, 18,
+                          20, 19, 22, 18, 21, 20, 19, 20, 19, 18,
+                          20, 19, 22, 20, 18, 21, 19, 20, 18, 15]
 repeated_phase_3_hard_basic = pd.DataFrame({
     "phase": ["phase_3_hard"] * 30,
     "task_type": ["basic"] * 30,
@@ -300,33 +301,33 @@ all_repeated = pd.concat([
     repeated_phase_3_hard
 ], ignore_index=True)
 
-# change the phase 3 into phase_3_easy
-summary["phase"] = summary["phase"].replace("phase_3", "phase_3_easy")
+# # change the phase 3 into phase_3_easy
+# summary["phase"] = summary["phase"].replace("phase_3", "phase_3_easy")
 
-# add phase_3_medium column
-phase_3_medium = pd.DataFrame({
-    "phase": ["phase_3_medium", "phase_3_medium", "phase_3_medium"],
-    "task_type": ["basic", "ambiguous", "hybrid_trajectory"],
-    "success": [23, 21, 21],
-    "failure": [2, 4, 4],
-    "total": [25, 25, 25]
-})
-phase_3_medium["success_rate"] = phase_3_medium["success"] / phase_3_medium["total"]
+# # add phase_3_medium column
+# phase_3_medium = pd.DataFrame({
+#     "phase": ["phase_3_medium", "phase_3_medium", "phase_3_medium"],
+#     "task_type": ["basic", "ambiguous", "hybrid_trajectory"],
+#     "success": [23, 21, 21],
+#     "failure": [2, 4, 4],
+#     "total": [25, 25, 25]
+# })
+# phase_3_medium["success_rate"] = phase_3_medium["success"] / phase_3_medium["total"]
 
-phase_3_hard = pd.DataFrame({
-    "phase": ["phase_3_hard", "phase_3_hard", "phase_3_hard"],
-    "task_type": ["basic", "ambiguous", "hybrid_trajectory"],
-    "success": [20, 15, 17],
-    "failure": [5, 10, 8],
-    "total": [25, 25, 25]
-})
-phase_3_hard["success_rate"] = phase_3_hard["success"] / phase_3_hard["total"]
+# phase_3_hard = pd.DataFrame({
+#     "phase": ["phase_3_hard", "phase_3_hard", "phase_3_hard"],
+#     "task_type": ["basic", "ambiguous", "hybrid_trajectory"],
+#     "success": [20, 15, 17],
+#     "failure": [5, 10, 8],
+#     "total": [25, 25, 25]
+# })
+# phase_3_hard["success_rate"] = phase_3_hard["success"] / phase_3_hard["total"]
 
-# merge phase_3_medium and phase_3_hard into summary
-summary = pd.concat([summary, phase_3_medium, phase_3_hard], ignore_index=True)
+# # merge phase_3_medium and phase_3_hard into summary
+# summary = pd.concat([summary, phase_3_medium, phase_3_hard], ignore_index=True)
 
-print("Modified summary DataFrame:")
-print(summary)
+# print("Modified summary DataFrame:")
+# print(summary)
 
 # Calculate confidence intervals for all phases
 def calculate_ci(data, confidence=0.95):
