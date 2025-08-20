@@ -73,8 +73,13 @@ class Evaluator:
         init_pos = []
         final_pos = []
         for name in obj_names:
-            init_pos.append(interested_pos[name][0])  # initial position
-            final_pos.append(interested_pos[name][-1])  # final position
+            if name in interested_pos and len(interested_pos[name]) > 0:
+                init_pos.append(interested_pos[name][0])  # initial position
+                final_pos.append(interested_pos[name][-1])  # final position
+            else:
+                print(f"Warning: Object '{name}' not found in trajectory data")
+                # Option A: Skip this object entirely (current behavior)
+                continue
 
         if not self._on_table_check(final_pos):
             print(f"[Warning] Final positions of objects {obj_names} are not on the table: {final_pos}")
@@ -100,7 +105,9 @@ class Evaluator:
         interested_obj_pos_dict = self._track_object_positions(self.obj_specs_history, self.interested_obj)
         obj_name = next((k for k, v in self.obj_mapping.items() if v == self.interested_obj), None)
         assert obj_name is not None, f"No object found for: '{self.interested_obj}'"
-
+        if obj_name not in interested_obj_pos_dict:
+            print(f"Warning: Object '{obj_name}' not found in position history")
+            return False
         interested_obj_pos = interested_obj_pos_dict[obj_name]
         pos_index = 0
         traj_len = len(interested_obj_pos)
@@ -204,8 +211,8 @@ class Evaluator:
         bool: True if the distance change condition is met, False otherwise.
         """
         if len(init_pos) != 2 or len(final_pos) != 2:
-            raise ValueError("init_pos and final_pos should each contain exactly two positions.")
-
+            print("[Warning] init_pos and final_pos should each contain exactly two positions.\n Objects not detected!")
+            return False
         init_distance = np.linalg.norm(np.array(init_pos[0]) - np.array(init_pos[1]))
         final_distance = np.linalg.norm(np.array(final_pos[0]) - np.array(final_pos[1]))
 

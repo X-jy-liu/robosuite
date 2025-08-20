@@ -94,7 +94,7 @@ class SimWrapper:
             print(f"Loaded YOLO model from {checkpoint_path}")
 
             # === Run inference on the rendered image ===
-            results = model(str(rendered_img_path))
+            results = model(str(rendered_img_path),conf=0.8)
             detections = results[0].to_json()
             parsed = json.loads(detections)
 
@@ -206,20 +206,14 @@ class SimWrapper:
         print(f"Saved updated env_and_func JSON to {output_path}")
 
     def _match_yolo_to_gt_objects(
-        self,
-        gt_objects: List[Dict],
-        pred_objects: List[Dict]
-    ) -> List[Dict]:
+            self,
+            gt_objects: List[Dict],
+            pred_objects: List[Dict]
+        ) -> List[Dict]:
         """
         Match YOLO-predicted objects to GT objects using greedy nearest-neighbor
         strategy based on shape+color type and spatial distance.
-
-        Args:
-            gt_objects (List[Dict]): Original ground truth object list (with 'name', 'color', 'shape', 'position').
-            pred_objects (List[Dict]): YOLO-inferred object list (with 'color', 'shape', 'position').
-
-        Returns:
-            List[Dict]: Matched object list in same order and naming as GT.
+        Only returns objects that were actually detected.
         """
         matched_objects = []
         used_indices = set()
@@ -244,15 +238,12 @@ class SimWrapper:
                     best_dist = dist
                     best_idx = i
 
-            if best_idx is not None:
+            if best_idx is not None:  # Only add if a match was found
                 used_indices.add(best_idx)
                 matched_obj = pred_objects[best_idx].copy()
-            else:
-                # If no match of same type found, copy GT and optionally set placeholder?
-                matched_obj = gt.copy()  # or raise warning
-
-            matched_obj["name"] = gt["name"]  # Preserve GT order and naming
-            matched_objects.append(matched_obj)
+                matched_obj["name"] = gt["name"]  # Preserve GT naming
+                matched_objects.append(matched_obj)
+            # Remove the else clause - don't add undetected objects
 
         return matched_objects
 

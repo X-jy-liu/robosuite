@@ -1,0 +1,25 @@
+{
+    "task_type": "trajectory",
+    "action": "move_via",
+    "interested_object": "red cylinder",
+    "interested_waypoints_in_order": [
+        "point_2",
+        "original_position"
+    ],
+    "success_criteria": [
+        [
+            -0.196,
+            0.207
+        ],
+        [
+            0.021,
+            -0.093
+        ],
+        [
+            -0.196,
+            0.207
+        ]
+    ],
+    "explanation": "For the trajectory task - move_via action, the red cylinder needs to move to point_2 and then return to its original position. The success criteria are defined by the coordinates of the waypoints in order, starting from the original position of the red cylinder, moving to point_2, and then returning to the original position.",
+    "success_status": "failure"
+}

@@ -1,0 +1,8 @@
+{
+    "task_type": "ambiguous",
+    "action": "move_closer",
+    "interested_object": "red cube, red cube",
+    "success_criteria": "distance between the two red cubes at the final state is less than the distance at the start state",
+    "explanation": "For the ambiguous task - move_closer action, the goal is to reduce the distance between the two specified red cubes compared to their initial positions. The success criteria is based on the comparison of distances between these two objects at the start and end of the task.",
+    "success_status": "success"
+}

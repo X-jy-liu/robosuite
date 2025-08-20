@@ -1,0 +1,8 @@
+{
+    "task_type": "ambiguous",
+    "action": "move_further",
+    "interested_object": "green cylinder, red cube",
+    "success_criteria": "distance between the green cylinder and the red cube at the final state is greater than the distance at the start state",
+    "explanation": "For the ambiguous task - move_further action, we need to ensure the final distance between the green cylinder and the red cube is greater than the initial distance. The success criteria is based on the distance between the two objects.",
+    "success_status": "success"
+}

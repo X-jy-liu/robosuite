@@ -1,0 +1,12 @@
+{
+    "task_type": "basic",
+    "action": "deliver",
+    "interested_object": "blue cube",
+    "success_criteria": [
+        -0.2,
+        0.2,
+        0.825
+    ],
+    "explanation": "For the basic task - deliver action, the blue cube is moved to the specified position in 3D space. The success criteria is a coordinate, 3-element vector with the specified x, y, and z coordinates.",
+    "success_status": "success"
+}
