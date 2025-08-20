@@ -655,8 +655,8 @@ def create_noise_dataset(raw_image_dir, output_base_dir, levels=['easy', 'medium
 # Example usage for your dissertation
 if __name__ == "__main__":
     # Example paths - update these for your setup
-    raw_image_dir = '/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/images'
-    noise_base_dir = '/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/noise_levels'
+    raw_image_dir = '/home/s2644572/robosuite/myCode/my_planning_app/logs/scene_images'
+    noise_base_dir = '/home/s2644572/robosuite/myCode/my_planning_app/logs/scene_images/noise_levels'
     
     # Create datasets for all three noise levels
     create_noise_dataset(

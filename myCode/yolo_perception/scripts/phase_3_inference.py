@@ -112,8 +112,8 @@ def main():
     
     # Example for different noise levels
     noise_levels = ["easy", "medium", "hard"]
-    base_test_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/noise_levels"
-    base_output_dir = "/home/s2644572/robosuite/myCode/yolo_perception/data/tabletop/test/inference_from_mini_train_3_levels_realistic_noise"
+    base_test_dir = "/home/s2644572/robosuite/myCode/my_planning_app/logs/scene_images/noise_levels"
+    base_output_dir = "/home/s2644572/robosuite/myCode/my_planning_app/logs/scene_images/inference_images"
     import os
     os.makedirs(base_output_dir, exist_ok=True)
     for noise_level in noise_levels:
