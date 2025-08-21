@@ -62,7 +62,7 @@ Then open the printed local URL (usually http://127.0.0.1:8000/docs) in your bro
   - `app.py`: FastAPI entry point  
   - `experiment_runner.py`: Automates experiment execution  
   - `ambiguous_experiments_runner.py`: Handles ambiguous command experiments  
-  - **logs/**: Contains experiment logs. Includes one representative set for each phase (1–3). Each experiment logging has the input prompt; the generated symbolic plan with an explanation; the objects' status at the end of each execution. Repeated runs for error bars and Phase 3 easy/medium variants are omitted for brevity.  
+  - **logs/**: Contains experiment logs. Includes one representative set for each phase (1–3). Each experiment logging has the input prompt; the generated symbolic plan with an explanation; the objects' status at the end of each execution. The saved videos are for the phase 3 hard variant which overall has the lowest accuracy. The experiments failed to generate a symbolic plan due to object detection failures don't have correpsonding videos and expeirment logging. Additionally, repeated runs for error bars and Phase 3 easy/medium variants are omitted for brevity.  
   - **evaluation/**: LLM-assisted evaluation module
    **plots/**: natural language command evaluation plots
    **prompt_engine/**: compositional elements of the experiment pipeline serving for app.py
