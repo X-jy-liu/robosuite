@@ -1,7 +1,7 @@
 # tabletop.yaml
 
 # Root dataset path
-path: data/mini_tabletop  # This should contain images/train, images/val, labels/train, labels/val
+path: data/full_tabletop  # This should contain images/train, images/val, labels/train, labels/val
 
 # Subdirectories for images
 train: images/train

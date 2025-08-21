@@ -1,3 +1,87 @@
+# Jingyang Liu Dissertation - Natural Language Instructed Robotic Arm
+
+<figure>
+  <img src="docs/images/dissertation_schematic_diagram.png" alt="Dissertation schematic diagram" width="800">
+  <figcaption>The schematic diagram of the 2-phase working pipeline. (1) The key difference between phase 2 and phase 1 is that the input is changed from a fully-defined prompt to a top-view image. (2) The predefined or CNN recognised objects' specifics are merged in the prompt building with available functions, few-shot examples, and the natural language command. (3) The LLM's capability is used to interpret the command based on the given environment and functions to produce a symbolic plan which is composed of the fundamental robot skills. (4) The generated symbolic plan is parsed and executed by the system's skill execution module. The end effector trajectory of an example task --- \textit{``trajectory move the red cylinder to point 4, then to point 1''}</figcaption>
+</figure>
+
+This software package is built on top of the [Robosuite](https://robosuite.ai) framework.
+
+All personal development code is located in the `myCode/` directory.
+
+---
+
+## Quick Start
+
+### 0) Create a conda env
+```bash
+conda create -n myenv python=3.10 -y
+conda activate myenv
+```
+### 1) Install robosuite (follow the official docs)
+If you have the repo locally:
+```bash
+cd robosuite
+pip install -e .
+```
+Otherwise, the official guide recommends [Robosuite Github Repo](https://github.com/ARISE-Initiative/robosuite)
+```bash
+pip install robosuite # or follow their source install instructions
+```
+### 2) Install my repo’s requirements
+```bash
+pip install -r myCode/requirements.txt
+```
+### 3) Add the local robosuite/ folder to your Python path
+(Only needed if you’re using a local clone rather than the PyPI package.)
+```bash
+# From the repository root (which contains the robosuite/ folder):
+export PYTHONPATH="$PWD:$PYTHONPATH"
+# On Windows PowerShell:
+# $env:PYTHONPATH = "$PWD;$env:PYTHONPATH"
+```
+### 4) Change to the app directory
+```bash
+cd robosuite/myCode/my_planning_app/
+```
+### 5) Launch the demo server with Uvicorn
+```bash
+uvicorn app:app --reload
+```
+Then open the printed local URL (usually http://127.0.0.1:8000/docs) in your browser.
+
+## Repository Structure
+
+- **my_env/**  
+  Modified versions of Robosuite’s Panda Lift environment, adapted to the requirements of this dissertation.  
+  - `lift_without_default_cube.py`  
+  - `multi_object_lift.py`
+
+- **my_planning_app/**  
+  Main experiment pipeline.  
+  - `app.py`: FastAPI entry point  
+  - `experiment_runner.py`: Automates experiment execution  
+  - `ambiguous_experiments_runner.py`: Handles ambiguous command experiments  
+  - **logs/**: Contains experiment logs. Includes one representative set for each phase (1–3). Each experiment logging has the input prompt; the generated symbolic plan with an explanation; the objects' status at the end of each execution. Repeated runs for error bars and Phase 3 easy/medium variants are omitted for brevity.  
+  - **evaluation/**: LLM-assisted evaluation module
+   **plots/**: natural language command evaluation plots
+   **prompt_engine/**: compositional elements of the experiment pipeline serving for app.py
+   **prompts/**: the elementary prompts (shared instructions and few-shot prompt) to build the group-specific prompt
+   **trajectory_planning/**: the traditional algorithms, such as random probabilistic map, Dijkstra's algorithm, used in the hybrid trajectory planning
+
+- **yolo_perception/**  
+  Perception system trained in YOLO format. Includes training, inference, and evaluation utilities.  
+  - `yolo11n.pt`: Pre-trained YOLO checkpoint  
+  - `full_tabletop.yaml`, `mini_tabletop.yaml`: Dataset configs  
+  - `scripts/`: Training-related code  
+  - Results and plots in `plots_2/`, `plots_6_realistic_noise_comparison/`  
+
+- **Other Core Files**  
+  - `config_controller.py`: Experiment configuration manager
+  - `robot_skillset.py`, `skill_executor.py`: Defines and executes robot skills  
+  - ``top_view_randomizer.py`: Top-view camera setup and randomization utilities  
+  - `requirements.txt`: Python dependencies  
+
 # robosuite
 
 ![gallery of_environments](docs/images/gallery.png)
